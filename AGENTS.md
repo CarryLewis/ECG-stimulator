@@ -2,40 +2,42 @@
 
 ## Cursor Cloud specific instructions
 
-### Repository state (important)
+### What this repo is
 
-This repository is currently **documentation-only**. It contains no application
-code, no package manifests, no lockfiles, no build tooling, and no services.
-The only tracked files are:
+An **Interactive Physiology & ECG Learning Simulator** — a single-page web app
+that lets medical students see how the 12-lead ECG and cardiac electrical
+conduction change across physiological and disease states (normal sinus rhythm,
+STEMI, hyper-/hypokalemia, atrial fibrillation, AV block).
 
-- `README.md`
-- `docs/product-requirement-document.md`
+- Frontend-only: **React + TypeScript + Vite**. There is no backend, database, or
+  external API — all ECG waveforms are synthesised in the browser, so the app
+  runs fully offline once dependencies are installed.
+- Entry point: `src/main.tsx` → `src/App.tsx`.
+- ECG math lives in `src/ecg/` (`generator.ts` builds the waveforms,
+  `leads.ts` holds per-lead morphology, `diseases.ts` defines each scenario's
+  cycle plan + educational text). UI is in `src/components/`.
 
-Both are copies of the Product Requirements Document (PRD) for a planned
-**Interactive Physiology & ECG Learning Simulator** (status: v0.1, "Concept
-Development"). The product has not been implemented yet.
+### Running / testing / building
 
-Because of this, there is currently **nothing to install, build, lint, test, or
-run**. There are no dev servers, databases, or background services. Any
-"environment setup" is a no-op until source code and tooling are added.
+Standard scripts are defined in `package.json` — use them rather than ad-hoc
+commands:
 
-The PRD proposes (but does not commit to) the following stack, so a future
-implementation is likely to introduce one or more of these:
+- `npm run dev` — Vite dev server on port **5173** (`host: true`, so reachable
+  on the VM network). This is the main way to run the app.
+- `npm run build` — type-checks (`tsc -b`) and produces a production build.
+- `npm run lint` — ESLint (flat config in `eslint.config.js`).
+- `npm run preview` — serve the production build.
 
-- **Frontend:** React, TypeScript, Three.js / WebGL, D3.js
-- **Backend:** Python, FastAPI
-- **AI layer:** GPT/Claude API or local LLMs
-- **Database:** unspecified
+There is no automated test suite yet; verify changes by running the dev server
+and interacting with the UI.
 
-### For future agents
+### Non-obvious notes
 
-- Do not expect a runnable application until code is added. If you are asked to
-  run/test the app and only the PRD exists, the correct answer is that there is
-  nothing to run yet.
-- When code is introduced, add the real dependency-install step to the Cloud
-  startup **update script** (via the environment setup), and document the
-  service run/lint/test/build commands here, referencing `package.json`
-  scripts / `Makefile` / etc. rather than duplicating them.
-- The update script is intentionally guarded so it becomes a no-op when no
-  manifest is present and only installs dependencies once the corresponding
-  manifest (e.g. `package.json`, `requirements.txt`, `pyproject.toml`) exists.
+- TypeScript is strict with `noUnusedLocals` / `noUnusedParameters`; `npm run
+  build` will fail on unused symbols even if the dev server runs fine. Run
+  `npm run lint` before committing.
+- The conduction diagram animates with `requestAnimationFrame` driven by the
+  current `CyclePlan`; disease behaviour (AV dissociation, AFib flicker, PR
+  delay) is derived entirely from `buildPlan` in `src/ecg/diseases.ts`.
+- To add a new disease/scenario, add a `Disease` entry in `src/ecg/diseases.ts`
+  (params + `buildPlan` + `explain`); the UI and ECG update automatically.
