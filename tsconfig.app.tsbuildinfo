@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/components/ConductionModel.tsx","./src/components/ControlPanel.tsx","./src/components/EcgGrid.tsx","./src/components/EcgLead.tsx","./src/components/ExplanationPanel.tsx","./src/ecg/diseases.ts","./src/ecg/generator.ts","./src/ecg/leads.ts","./src/ecg/types.ts"],"version":"5.9.3"}
