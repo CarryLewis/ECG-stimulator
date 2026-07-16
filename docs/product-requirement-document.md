@@ -591,9 +591,3 @@ Initial Git Commit Message
 Initial PRD: Interactive Physiology and ECG Learning Simulator
 
 ⸻
-
-这个版本可以直接放入 GitHub，让 Agent 读取。下一步建议不要让 AI 直接 coding，而是让它生成：
-
-Based on this PRD, design the software architecture, database schema, and MVP development roadmap.
-
-这样 AI 会先成为你的产品架构师，而不是直接生成一堆不可维护的代码。
