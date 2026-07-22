@@ -1,24 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 
+/** Default playback rate — real cardiac timing is too fast to follow by eye. */
+export const DEFAULT_TIME_SCALE = 0.35
+
 /**
- * Shared wall-clock for the ECG monitor and conduction diagram.
- * Resets when `resetKey` changes (e.g. disease / parameter edits) so both
- * views restart from a common t = 0.
+ * Shared simulation clock for the ECG monitor and conduction diagram.
+ * Wall-clock advances are multiplied by `timeScale` so SA→AV→His→ventricle
+ * is slow enough for human visual tracking, while both views stay locked.
+ * Resets when `resetKey` changes; changing speed does not reset the timeline.
  */
-export function useSimulationClock(resetKey: unknown): number {
+export function useSimulationClock(
+  resetKey: unknown,
+  timeScale: number = DEFAULT_TIME_SCALE,
+): number {
   const [elapsed, setElapsed] = useState(0)
-  const startRef = useRef<number | null>(null)
+  const timeScaleRef = useRef(timeScale)
+  timeScaleRef.current = timeScale
   const rafRef = useRef(0)
 
   useEffect(() => {
-    startRef.current = null
     setElapsed(0)
+    let last = performance.now()
 
     const tick = (now: number) => {
-      if (startRef.current === null) startRef.current = now
-      setElapsed((now - startRef.current) / 1000)
+      const dt = (now - last) / 1000
+      last = now
+      const scale = Math.max(0.05, timeScaleRef.current)
+      setElapsed((e) => e + dt * scale)
       rafRef.current = requestAnimationFrame(tick)
     }
+
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
   }, [resetKey])

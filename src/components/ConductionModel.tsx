@@ -5,6 +5,8 @@ interface ConductionModelProps {
   plan: CyclePlan
   elapsed: number
   afSeed?: number
+  /** Shared playback rate shown in the status line. */
+  timeScale?: number
 }
 
 const IDLE_STROKE = '#3b4a63'
@@ -24,12 +26,17 @@ export default function ConductionModel({
   plan,
   elapsed,
   afSeed = 23,
+  timeScale = 0.35,
 }: ConductionModelProps) {
   const state = conductionAt(plan, elapsed, { afSeed })
 
   return (
     <div className="panel conduction-panel">
       <h2 className="panel-title">Cardiac Electrical Conduction</h2>
+      <p className="panel-hint">
+        Pace ×{timeScale.toFixed(2)} — slowed for visual tracking; locked to the
+        ECG sweep.
+      </p>
       <svg
         className="conduction-svg"
         viewBox="0 0 320 360"

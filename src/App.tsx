@@ -9,7 +9,10 @@ import {
   defaultParams,
   type ParamValues,
 } from './ecg/diseases'
-import { useSimulationClock } from './hooks/useSimulationClock'
+import {
+  DEFAULT_TIME_SCALE,
+  useSimulationClock,
+} from './hooks/useSimulationClock'
 
 /** Shared seed so AF irregular RR matches across ECG + conduction. */
 const AF_SEED = 23
@@ -19,16 +22,15 @@ export default function App() {
   const [paramsById, setParamsById] = useState<Record<string, ParamValues>>(() =>
     Object.fromEntries(DISEASES.map((d) => [d.id, defaultParams(d)])),
   )
+  const [timeScale, setTimeScale] = useState(DEFAULT_TIME_SCALE)
 
   const disease = DISEASE_BY_ID[diseaseId]
   const params = paramsById[diseaseId]
 
   const plan = useMemo(() => disease.buildPlan(params), [disease, params])
 
-  // One shared clock drives both the live 12-lead monitor and the conduction
-  // diagram so P/QRS/T line up with SA → AV → His → ventricle activation.
-  // Reset only when the disease changes; parameter tweaks keep the timeline.
-  const elapsed = useSimulationClock(diseaseId)
+  // Shared slowed clock: ECG sweep and conduction glow stay phase-locked.
+  const elapsed = useSimulationClock(diseaseId, timeScale)
 
   const handleParamChange = (key: string, value: number | string) => {
     setParamsById((prev) => ({
@@ -47,8 +49,8 @@ export default function App() {
           <div>
             <h1>ECG Learning Simulator</h1>
             <p>
-              Real-time cardiac dipole → 12-lead projection, locked to the
-              conduction timeline — from ion channels to the surface ECG.
+              Cardiac dipole → 12-lead projection, locked to a slowed conduction
+              timeline so each activation step is easy to see.
             </p>
           </div>
         </div>
@@ -61,6 +63,8 @@ export default function App() {
             params={params}
             onSelectDisease={setDiseaseId}
             onParamChange={handleParamChange}
+            timeScale={timeScale}
+            onTimeScaleChange={setTimeScale}
           />
         </aside>
 
@@ -69,7 +73,7 @@ export default function App() {
             <div className="ecg-header">
               <h2 className="panel-title">Bedside ECG Monitor</h2>
               <span className="ecg-calibration">
-                Sweep · t = {elapsed.toFixed(1)} s
+                Sweep · t = {elapsed.toFixed(1)} s · ×{timeScale.toFixed(2)}
               </span>
             </div>
             <EcgGrid
@@ -77,6 +81,7 @@ export default function App() {
               elapsed={elapsed}
               afSeed={AF_SEED}
               resetKey={diseaseId}
+              timeScale={timeScale}
             />
           </div>
         </section>
@@ -86,6 +91,7 @@ export default function App() {
             plan={plan}
             elapsed={elapsed}
             afSeed={AF_SEED}
+            timeScale={timeScale}
           />
           <ExplanationPanel disease={disease} params={params} />
         </aside>

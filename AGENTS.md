@@ -51,8 +51,10 @@ phase-locked when changing scenarios.
   build` will fail on unused symbols even if the dev server runs fine. Run
   `npm run lint` before committing.
 - The conduction diagram and live ECG share `elapsed` from `useSimulationClock`
+  (default **0.35×** real-time so SA→AV→His→ventricle is visually trackable)
   and the same `conductionAt` / dipole path. AF irregular RR uses a shared
-  seeded schedule (`afSeed`) so both views stay phase-locked.
+  seeded schedule (`afSeed`) so both views stay phase-locked. Change pace via
+  the Playback controls; speed changes do not reset the timeline.
 - To add a new disease/scenario, add a `Disease` entry in `src/ecg/diseases.ts`
   (params + `buildPlan` + `explain`); the UI and ECG update automatically.
 - Do not add CDN font/script links or cloud-only deploy configs unless the user

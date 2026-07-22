@@ -14,6 +14,8 @@ interface EcgGridProps {
   afSeed?: number
   /** Clears sample buffers (e.g. when switching disease). */
   resetKey?: string | number
+  /** Shared playback rate (wall-clock multiplier). */
+  timeScale?: number
 }
 
 function emptyBuffers(n: number): Record<LeadName, Float32Array> {
@@ -34,6 +36,7 @@ export default function EcgGrid({
   elapsed,
   afSeed = 23,
   resetKey,
+  timeScale = 0.35,
 }: EcgGridProps) {
   const rowN = Math.ceil(FS * ROW_DURATION)
 
@@ -92,7 +95,7 @@ export default function EcgGrid({
         <div className="ecg-monitor-hud-left">
           <span className="ecg-monitor-mode">CASCADE SWEEP</span>
           <span className="ecg-monitor-meta">
-            12 leads · 1 / row · 25 mm/s · 10 mm/mV
+            12 leads · 1 / row · pace ×{timeScale.toFixed(2)} · 25 mm/s sim
           </span>
         </div>
         <div className="ecg-monitor-vitals">
