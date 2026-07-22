@@ -388,7 +388,7 @@ input[type='range']::-moz-range-thumb {
 .ecg-monitor-screen {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   padding: 4px;
   background: #010503;
 }
@@ -401,37 +401,23 @@ input[type='range']::-moz-range-thumb {
   vertical-align: top;
 }
 
-.ecg-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 2px;
+.ecg-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   background: #010503;
 }
 
-.ecg-cell {
+.ecg-row {
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(20, 90, 45, 0.35);
-}
-
-.ecg-strip {
-  position: relative;
   background: #020805;
-  border: 1px solid rgba(20, 90, 45, 0.45);
-  padding: 0;
 }
 
-.ecg-strip-label {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  z-index: 1;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(61, 255, 138, 0.55);
-  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
-  pointer-events: none;
+.ecg-row:nth-child(2) {
+  /* Lead II — slightly emphasized rhythm channel */
+  border-color: rgba(61, 255, 138, 0.35);
 }
 
 .ecg-lead {
@@ -448,10 +434,6 @@ input[type='range']::-moz-range-thumb {
 }
 
 @media (max-width: 620px) {
-  .ecg-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .ecg-vital-value {
     font-size: 22px;
   }
