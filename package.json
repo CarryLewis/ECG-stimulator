@@ -3,12 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Interactive Physiology & ECG Learning Simulator - visualize how the 12-lead ECG changes across physiological and disease states, with an animated cardiac conduction model.",
+  "description": "Interactive Physiology & ECG Learning Simulator - visualize how the 12-lead ECG changes across physiological and disease states, with an animated cardiac conduction model. Runs fully offline on a local machine.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pack:offline": "bash scripts/pack-offline.sh"
   },
   "dependencies": {
     "react": "^18.3.1",
