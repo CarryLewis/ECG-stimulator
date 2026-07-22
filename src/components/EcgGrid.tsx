@@ -5,8 +5,10 @@ import type { CyclePlan, LeadName } from '../ecg/types'
 import EcgLeadLive from './EcgLead'
 
 const FS = 250
+/** Visible sweep window for the 12-lead tiles (seconds). */
 const GRID_DURATION = 2.5
-const STRIP_DURATION = 10
+/** Longer cascade window for the lead-II rhythm channel. */
+const STRIP_DURATION = 8
 
 interface EcgGridProps {
   plan: CyclePlan
@@ -22,25 +24,12 @@ function emptyBuffers(n: number): Record<LeadName, Float32Array> {
   return map
 }
 
-function pushSample(
-  buf: Float32Array,
-  capacity: number,
-  filled: number,
-  value: number,
-): number {
-  if (filled < capacity) {
-    buf[filled] = value
-    return filled + 1
-  }
-  buf.copyWithin(0, 1)
-  buf[capacity - 1] = value
-  return capacity
-}
-
 /**
- * Live 12-lead + lead-II strip. All leads are sampled once per frame from the
- * shared dipole engine so timing (and AF RR) stays identical across the grid
- * and locked to the conduction clock.
+ * Live 12-lead bedside monitor.
+ *
+ * Samples are written into fixed ring buffers and rendered with a cascade
+ * sweep (beam moves L→R, overwriting in place). The waveform does not scroll
+ * like a paper strip or sliding image.
  */
 export default function EcgGrid({
   plan,
@@ -53,17 +42,21 @@ export default function EcgGrid({
 
   const buffersRef = useRef(emptyBuffers(gridN))
   const stripRef = useRef(new Float32Array(stripN))
-  const filledGridRef = useRef(0)
-  const filledStripRef = useRef(0)
-  const lastTRef = useRef(0)
+  const writeGridRef = useRef(0)
+  const writeStripRef = useRef(0)
+  const writtenGridRef = useRef(0)
+  const writtenStripRef = useRef(0)
+  const lastSampleIdxRef = useRef(-1)
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
     buffersRef.current = emptyBuffers(gridN)
     stripRef.current = new Float32Array(stripN)
-    filledGridRef.current = 0
-    filledStripRef.current = 0
-    lastTRef.current = 0
+    writeGridRef.current = 0
+    writeStripRef.current = 0
+    writtenGridRef.current = 0
+    writtenStripRef.current = 0
+    lastSampleIdxRef.current = -1
   }, [gridN, stripN, resetKey])
 
   useEffect(() => {
@@ -71,86 +64,105 @@ export default function EcgGrid({
     const strip = stripRef.current
     const ctx = { afSeed }
 
-    if (elapsed < lastTRef.current - 0.05) {
+    // Absolute sample index from the shared simulation clock.
+    const targetIdx = Math.max(0, Math.floor(elapsed * FS))
+    let idx = lastSampleIdxRef.current + 1
+
+    // Large jump backward (clock reset) → clear rings.
+    if (targetIdx < lastSampleIdxRef.current - 2) {
       for (const name of LEAD_ORDER) buffers[name].fill(0)
       strip.fill(0)
-      filledGridRef.current = 0
-      filledStripRef.current = 0
-      lastTRef.current = 0
+      writeGridRef.current = 0
+      writeStripRef.current = 0
+      writtenGridRef.current = 0
+      writtenStripRef.current = 0
+      idx = 0
     }
 
-    let t = lastTRef.current
-    if (filledGridRef.current === 0 && elapsed > 1 / FS) {
-      const gridStart = Math.max(0, elapsed - GRID_DURATION)
-      const stripStart = Math.max(0, elapsed - STRIP_DURATION)
-      for (let tt = stripStart; tt < gridStart; tt += 1 / FS) {
-        const vII = voltageSample(plan, 'II', tt, 0, ctx)
-        filledStripRef.current = pushSample(
-          strip,
-          stripN,
-          filledStripRef.current,
-          vII,
-        )
-      }
-      t = gridStart
+    // Catch up sample-by-sample without shifting the buffer (no scroll).
+    const maxCatchUp = FS * 2
+    if (targetIdx - idx > maxCatchUp) {
+      idx = targetIdx - maxCatchUp
     }
 
-    for (; t <= elapsed + 1e-9; t += 1 / FS) {
+    for (; idx <= targetIdx; idx++) {
+      const t = idx / FS
       let vII = 0
+      const g = writeGridRef.current
       for (const name of LEAD_ORDER) {
         const v = voltageSample(plan, name, t, 0, ctx)
-        filledGridRef.current = pushSample(
-          buffers[name],
-          gridN,
-          filledGridRef.current,
-          v,
-        )
+        buffers[name][g] = v
         if (name === 'II') vII = v
       }
-      filledStripRef.current = pushSample(
-        strip,
-        stripN,
-        filledStripRef.current,
-        vII,
-      )
+      writeGridRef.current = (g + 1) % gridN
+      writtenGridRef.current = Math.min(writtenGridRef.current + 1, gridN)
+
+      const s = writeStripRef.current
+      strip[s] = vII
+      writeStripRef.current = (s + 1) % stripN
+      writtenStripRef.current = Math.min(writtenStripRef.current + 1, stripN)
     }
-    lastTRef.current = elapsed
+
+    lastSampleIdxRef.current = targetIdx
     setTick((n) => n + 1)
   }, [elapsed, plan, afSeed, gridN, stripN])
 
   const buffers = buffersRef.current
   const strip = stripRef.current
+  const hr = Math.round(plan.ventricularRate)
 
   const cell = (name: LeadName) => (
     <div key={name} className="ecg-cell">
       <EcgLeadLive
         lead={name}
         samples={buffers[name]}
-        filled={Math.min(filledGridRef.current, gridN)}
+        writeIndex={writeGridRef.current}
+        written={writtenGridRef.current}
         duration={GRID_DURATION}
-        height={130}
+        height={118}
         tick={tick}
+        showBeam={name === 'II'}
       />
     </div>
   )
 
   return (
-    <div className="ecg-grid-wrap">
-      <div className="ecg-live-badge" aria-live="polite">
-        Live dipole projection · synced to conduction clock
+    <div className="ecg-monitor">
+      <div className="ecg-monitor-hud" aria-live="polite">
+        <div className="ecg-monitor-hud-left">
+          <span className="ecg-monitor-mode">CASCADE SWEEP</span>
+          <span className="ecg-monitor-meta">25 mm/s · 10 mm/mV · Gain ×1</span>
+        </div>
+        <div className="ecg-monitor-vitals">
+          <div className="ecg-vital">
+            <span className="ecg-vital-label">HR</span>
+            <span className="ecg-vital-value">{hr}</span>
+            <span className="ecg-vital-unit">bpm</span>
+          </div>
+          <div className="ecg-vital ecg-vital--dim">
+            <span className="ecg-vital-label">ECG</span>
+            <span className="ecg-vital-value ecg-vital-value--sm">II</span>
+          </div>
+        </div>
       </div>
-      <div className="ecg-grid">
-        {LEAD_GRID.flatMap((row) => row.map((name) => cell(name)))}
-      </div>
-      <div className="ecg-strip">
-        <EcgLeadLive
-          lead="II"
-          samples={strip}
-          filled={Math.min(filledStripRef.current, stripN)}
-          duration={STRIP_DURATION}
-          height={120}
-          tick={tick}
-        />
+
+      <div className="ecg-monitor-screen">
+        <div className="ecg-grid">
+          {LEAD_GRID.flatMap((row) => row.map((name) => cell(name)))}
+        </div>
+        <div className="ecg-strip">
+          <div className="ecg-strip-label">II · rhythm</div>
+          <EcgLeadLive
+            lead="II"
+            samples={strip}
+            writeIndex={writeStripRef.current}
+            written={writtenStripRef.current}
+            duration={STRIP_DURATION}
+            height={110}
+            tick={tick}
+            showBeam
+          />
+        </div>
       </div>
     </div>
   )

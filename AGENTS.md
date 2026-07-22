@@ -24,7 +24,8 @@ lives or runs.
   - `generator.ts` — samples dipole→lead voltages (batch + live)
   - `diseases.ts` — scenario params, `buildPlan`, educational text
 - UI: `src/components/` (live canvas 12-lead + conduction diagram share one clock
-  via `src/hooks/useSimulationClock.ts`).
+  via `src/hooks/useSimulationClock.ts`). ECG uses **cascade sweep** (fixed grid,
+  beam writes L→R and overwrites in place) — not a scrolling paper strip.
 
 ### Running / testing / building
 

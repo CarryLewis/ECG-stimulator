@@ -67,9 +67,9 @@ export default function App() {
         <section className="app-col app-col--center">
           <div className="panel ecg-panel">
             <div className="ecg-header">
-              <h2 className="panel-title">12-Lead ECG</h2>
+              <h2 className="panel-title">Bedside ECG Monitor</h2>
               <span className="ecg-calibration">
-                Live · 25 mm/s · 10 mm/mV · t = {elapsed.toFixed(1)} s
+                Sweep · t = {elapsed.toFixed(1)} s
               </span>
             </div>
             <EcgGrid

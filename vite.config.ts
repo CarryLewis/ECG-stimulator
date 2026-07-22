@@ -7,14 +7,14 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   server: {
-    // Bind localhost only — this app is meant to run on the developer's machine,
-    // not exposed as a cloud service.
-    host: '127.0.0.1',
+    // host:true so Cursor / cloud port-forwarding can reach the app;
+    // still intended for local offline use, not public cloud hosting.
+    host: true,
     port: 5173,
     strictPort: true,
   },
   preview: {
-    host: '127.0.0.1',
+    host: true,
     port: 4173,
     strictPort: true,
   },
