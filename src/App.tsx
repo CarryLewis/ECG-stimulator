@@ -9,7 +9,10 @@ import {
   defaultParams,
   type ParamValues,
 } from './ecg/diseases'
-import { generateEcg } from './ecg/generator'
+import { useSimulationClock } from './hooks/useSimulationClock'
+
+/** Shared seed so AF irregular RR matches across ECG + conduction. */
+const AF_SEED = 23
 
 export default function App() {
   const [diseaseId, setDiseaseId] = useState<string>(DISEASES[0].id)
@@ -22,14 +25,10 @@ export default function App() {
 
   const plan = useMemo(() => disease.buildPlan(params), [disease, params])
 
-  const gridEcg = useMemo(
-    () => generateEcg(plan, { duration: 2.5, seed: 7 }),
-    [plan],
-  )
-  const stripEcg = useMemo(
-    () => generateEcg(plan, { duration: 10, seed: 23, leads: ['II'] }),
-    [plan],
-  )
+  // One shared clock drives both the live 12-lead monitor and the conduction
+  // diagram so P/QRS/T line up with SA → AV → His → ventricle activation.
+  // Reset only when the disease changes; parameter tweaks keep the timeline.
+  const elapsed = useSimulationClock(diseaseId)
 
   const handleParamChange = (key: string, value: number | string) => {
     setParamsById((prev) => ({
@@ -48,8 +47,8 @@ export default function App() {
           <div>
             <h1>ECG Learning Simulator</h1>
             <p>
-              Interactive physiology &amp; 12-lead ECG for medical students —
-              from ion channels to the surface ECG.
+              Real-time cardiac dipole → 12-lead projection, locked to the
+              conduction timeline — from ion channels to the surface ECG.
             </p>
           </div>
         </div>
@@ -69,21 +68,32 @@ export default function App() {
           <div className="panel ecg-panel">
             <div className="ecg-header">
               <h2 className="panel-title">12-Lead ECG</h2>
-              <span className="ecg-calibration">25 mm/s &middot; 10 mm/mV</span>
+              <span className="ecg-calibration">
+                Live · 25 mm/s · 10 mm/mV · t = {elapsed.toFixed(1)} s
+              </span>
             </div>
-            <EcgGrid ecg={gridEcg} strip={stripEcg} />
+            <EcgGrid
+              plan={plan}
+              elapsed={elapsed}
+              afSeed={AF_SEED}
+              resetKey={diseaseId}
+            />
           </div>
         </section>
 
         <aside className="app-col app-col--right">
-          <ConductionModel plan={plan} />
+          <ConductionModel
+            plan={plan}
+            elapsed={elapsed}
+            afSeed={AF_SEED}
+          />
           <ExplanationPanel disease={disease} params={params} />
         </aside>
       </main>
 
       <footer className="app-footer">
-        Educational simulation only — waveforms are synthesised models and must
-        not be used for clinical diagnosis.
+        Educational simulation only — waveforms are synthesised from a cardiac
+        dipole model and must not be used for clinical diagnosis.
       </footer>
     </div>
   )

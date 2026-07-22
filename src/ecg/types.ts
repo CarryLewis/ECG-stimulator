@@ -19,18 +19,44 @@ export type Territory =
   | 'septal'
   | 'none'
 
-export interface LeadConfig {
+/** Cardiac electrical vector in body coordinates (mV·scale). */
+export interface CardiacVector {
+  /** Left (+) / right (−) */
+  x: number
+  /** Inferior (+) / superior (−) */
+  y: number
+  /** Anterior (+) / posterior (−) */
+  z: number
+}
+
+/** Unit projection axis for a surface lead. */
+export interface LeadAxis {
   name: LeadName
-  /** P wave amplitude multiplier (may be negative to invert) */
-  p: number
-  /** R wave amplitude multiplier */
-  r: number
-  /** S wave amplitude multiplier */
-  s: number
-  /** T wave amplitude multiplier */
-  t: number
-  /** Anatomical territory used for ischemia / ST changes */
+  x: number
+  y: number
+  z: number
   territory: Territory
+}
+
+/** Instantaneous activation of each conduction structure (0–1). */
+export interface ConductionState {
+  sa: number
+  atria: number
+  av: number
+  his: number
+  bundle: number
+  ventricle: number
+  /** False when AV conduction is blocked or absent (AF / complete block). */
+  avConducts: boolean
+  status: string
+  /** Wavefront intensities that feed the cardiac dipole. */
+  atrialDepol: number
+  septalDepol: number
+  apicalDepol: number
+  basalDepol: number
+  repol: number
+  /** Window used to inject injury current onto the ST segment. */
+  stWindow: number
 }
 
 /** A single generated lead trace. */
@@ -46,6 +72,8 @@ export interface EcgResult {
   fs: number
   /** Duration in seconds. */
   duration: number
+  /** Absolute time of the first sample (seconds). */
+  t0: number
   /** R-peak times (seconds) used for the rhythm strip. */
   ventricularBeats: number[]
   /** P-wave activation times (seconds). */

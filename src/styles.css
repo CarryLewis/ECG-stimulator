@@ -275,6 +275,26 @@ input[type='range']::-moz-range-thumb {
   gap: 12px;
 }
 
+.ecg-live-badge {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 999px;
+  padding: 4px 10px;
+  width: fit-content;
+}
+
+.ecg-lead--live {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fff;
+  vertical-align: top;
+}
+
 .ecg-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
