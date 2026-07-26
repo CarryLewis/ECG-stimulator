@@ -5,6 +5,7 @@ import ConductionModel, {
   type HeartVersion,
 } from './components/ConductionModel'
 import ExplanationPanel from './components/ExplanationPanel'
+import LanguageToggle from './components/LanguageToggle'
 import {
   DISEASE_BY_ID,
   DISEASES,
@@ -12,6 +13,7 @@ import {
   type ParamValues,
 } from './ecg/diseases'
 import type { LeadName } from './ecg/types'
+import { useLanguage } from './i18n/useLanguage'
 import {
   DEFAULT_TIME_SCALE,
   useSimulationClock,
@@ -21,6 +23,7 @@ import {
 const AF_SEED = 23
 
 export default function App() {
+  const { t } = useLanguage()
   const [diseaseId, setDiseaseId] = useState<string>(DISEASES[0].id)
   const [paramsById, setParamsById] = useState<Record<string, ParamValues>>(() =>
     Object.fromEntries(DISEASES.map((d) => [d.id, defaultParams(d)])),
@@ -52,13 +55,11 @@ export default function App() {
             {'\u2764'}
           </span>
           <div>
-            <h1>ECG Learning Simulator</h1>
-            <p>
-              12-lead ECG locked to a 3D heart — V1 conduction glow or V2
-              anatomical lead atlas (click a lead ↔ pin).
-            </p>
+            <h1>{t('appTitle')}</h1>
+            <p>{t('appSubtitle')}</p>
           </div>
         </div>
+        <LanguageToggle />
       </header>
 
       <main className="app-layout">
@@ -76,9 +77,10 @@ export default function App() {
         <section className="app-col app-col--center">
           <div className="panel ecg-panel">
             <div className="ecg-header">
-              <h2 className="panel-title">Bedside ECG Monitor</h2>
+              <h2 className="panel-title">{t('bedsideMonitor')}</h2>
               <span className="ecg-calibration">
-                Sweep · t = {elapsed.toFixed(1)} s · ×{timeScale.toFixed(2)}
+                {t('sweepPrefix')} · t = {elapsed.toFixed(1)} s · ×
+                {timeScale.toFixed(2)}
                 {selectedLead ? ` · ${selectedLead}` : ''}
               </span>
             </div>
@@ -109,10 +111,7 @@ export default function App() {
         </aside>
       </main>
 
-      <footer className="app-footer">
-        Educational simulation only — waveforms are synthesised from a cardiac
-        dipole model and must not be used for clinical diagnosis.
-      </footer>
+      <footer className="app-footer">{t('footer')}</footer>
     </div>
   )
 }

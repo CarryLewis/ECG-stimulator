@@ -3,6 +3,13 @@ import {
   type Disease,
   type ParamValues,
 } from '../ecg/diseases'
+import {
+  localizedCategory,
+  localizedDiseaseName,
+  localizedOptionLabel,
+  localizedParamLabel,
+} from '../i18n/diseasesLocale'
+import { useLanguage } from '../i18n/useLanguage'
 
 interface ControlPanelProps {
   disease: Disease
@@ -14,11 +21,11 @@ interface ControlPanelProps {
 }
 
 const SPEED_PRESETS = [
-  { label: 'Slow', value: 0.2 },
-  { label: 'Learn', value: 0.35 },
-  { label: 'Clear', value: 0.5 },
-  { label: 'Real', value: 1 },
-] as const
+  { key: 'paceSlow' as const, value: 0.2 },
+  { key: 'paceLearn' as const, value: 0.35 },
+  { key: 'paceClear' as const, value: 0.5 },
+  { key: 'paceReal' as const, value: 1 },
+]
 
 export default function ControlPanel({
   disease,
@@ -28,15 +35,13 @@ export default function ControlPanel({
   timeScale,
   onTimeScaleChange,
 }: ControlPanelProps) {
+  const { locale, t } = useLanguage()
   const pct = Math.round(timeScale * 100)
 
   return (
     <div className="panel control-panel">
-      <h2 className="panel-title">Scenario</h2>
-      <p className="panel-hint">
-        Pick a physiological state, then adjust parameters. Conduction and ECG
-        share one clock — slowed so SA → AV → His → ventricle is easy to follow.
-      </p>
+      <h2 className="panel-title">{t('scenario')}</h2>
+      <p className="panel-hint">{t('scenarioHint')}</p>
 
       <div className="disease-list">
         {DISEASES.map((d) => (
@@ -48,24 +53,25 @@ export default function ControlPanel({
             }
             onClick={() => onSelectDisease(d.id)}
           >
-            <span className="disease-btn-name">{d.name}</span>
-            <span className="disease-btn-cat">{d.category}</span>
+            <span className="disease-btn-name">
+              {localizedDiseaseName(d.id, d.name, locale)}
+            </span>
+            <span className="disease-btn-cat">
+              {localizedCategory(d.id, d.category, locale)}
+            </span>
           </button>
         ))}
       </div>
 
-      <h2 className="panel-title">Playback pace</h2>
-      <p className="panel-hint">
-        Real cardiac timing flashes by in &lt;1 s. Slow the shared clock so the
-        eye can track each conduction step (ECG stays locked).
-      </p>
+      <h2 className="panel-title">{t('playbackPace')}</h2>
+      <p className="panel-hint">{t('playbackHint')}</p>
       <div className="param-list">
         <label className="param">
           <span className="param-row">
-            <span className="param-label">Time scale</span>
+            <span className="param-label">{t('timeScale')}</span>
             <span className="param-value">
               {pct}
-              <span className="param-unit"> % real-time</span>
+              <span className="param-unit"> {t('realTimePct')}</span>
             </span>
           </span>
           <input
@@ -77,7 +83,7 @@ export default function ControlPanel({
             onChange={(e) => onTimeScaleChange(Number(e.target.value))}
           />
         </label>
-        <div className="speed-presets" role="group" aria-label="Pace presets">
+        <div className="speed-presets" role="group" aria-label={t('pacePresetsAria')}>
           {SPEED_PRESETS.map((p) => (
             <button
               key={p.value}
@@ -90,28 +96,35 @@ export default function ControlPanel({
               }
               onClick={() => onTimeScaleChange(p.value)}
             >
-              {p.label}
+              {t(p.key)}
               <span className="speed-preset-meta">×{p.value}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <h2 className="panel-title">Parameters</h2>
+      <h2 className="panel-title">{t('parameters')}</h2>
       <div className="param-list">
         {disease.params.map((p) => {
           const value = params[p.key]
+          const label = localizedParamLabel(disease.id, p.key, p.label, locale)
           if (p.type === 'select') {
             return (
               <label key={p.key} className="param param--select">
-                <span className="param-label">{p.label}</span>
+                <span className="param-label">{label}</span>
                 <select
                   value={String(value)}
                   onChange={(e) => onParamChange(p.key, e.target.value)}
                 >
                   {p.options?.map((o) => (
                     <option key={o.value} value={o.value}>
-                      {o.label}
+                      {localizedOptionLabel(
+                        disease.id,
+                        p.key,
+                        o.value,
+                        o.label,
+                        locale,
+                      )}
                     </option>
                   ))}
                 </select>
@@ -119,14 +132,14 @@ export default function ControlPanel({
             )
           }
 
-          const num = typeof value === 'number' ? value : Number(value)
+          const n = typeof value === 'number' ? value : Number(value)
           const isFloat = (p.step ?? 1) < 1
           return (
             <label key={p.key} className="param">
               <span className="param-row">
-                <span className="param-label">{p.label}</span>
+                <span className="param-label">{label}</span>
                 <span className="param-value">
-                  {isFloat ? num.toFixed(p.unit === 's' ? 2 : 1) : Math.round(num)}
+                  {isFloat ? n.toFixed(p.unit === 's' ? 2 : 1) : Math.round(n)}
                   <span className="param-unit"> {p.unit}</span>
                 </span>
               </span>
@@ -135,7 +148,7 @@ export default function ControlPanel({
                 min={p.min}
                 max={p.max}
                 step={p.step}
-                value={num}
+                value={n}
                 onChange={(e) => onParamChange(p.key, Number(e.target.value))}
               />
             </label>

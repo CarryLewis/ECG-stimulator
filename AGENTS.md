@@ -29,6 +29,10 @@ lives or runs.
   anatomical lead atlas (`HeartAnatomyV2` + `src/ecg/leadMap.ts`) with wall
   colour patches and 12-lead pins; clicking an ECG row ↔ 3D pin stays in sync.
   Procedural Three.js / R3F only — no CDN assets.
+- **i18n:** `src/i18n/` (`LanguageProvider.tsx`, `useLanguage.ts`, `messages.ts`,
+  `diseasesLocale.ts`). Header toggle switches **中文 / EN**; preference in
+  `localStorage` (`ecg-sim-locale`). Lead faces use `faceZh`/`faceEn` in
+  `leadMap.ts`.
 
 ### Running / testing / building
 

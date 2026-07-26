@@ -1,4 +1,9 @@
 import type { Disease, ParamValues } from '../ecg/diseases'
+import {
+  localizedDiseaseName,
+  localizedExplain,
+} from '../i18n/diseasesLocale'
+import { useLanguage } from '../i18n/useLanguage'
 
 interface ExplanationPanelProps {
   disease: Disease
@@ -9,15 +14,18 @@ export default function ExplanationPanel({
   disease,
   params,
 }: ExplanationPanelProps) {
-  const ex = disease.explain(params)
+  const { locale, t } = useLanguage()
+  const ex = localizedExplain(disease.id, disease.explain, params, locale)
+  const title = localizedDiseaseName(disease.id, disease.name, locale)
+
   return (
     <div className="panel explanation-panel">
-      <h2 className="panel-title">{disease.name}</h2>
+      <h2 className="panel-title">{title}</h2>
       <p className="explanation-summary">{ex.summary}</p>
 
-      <Section title="Why it changes (mechanism)" items={ex.mechanism} step />
-      <Section title="What you see on the ECG" items={ex.ecgFindings} />
-      <Section title="Clinical picture" items={ex.clinical} />
+      <Section title={t('explainMechanism')} items={ex.mechanism} step />
+      <Section title={t('explainEcg')} items={ex.ecgFindings} />
+      <Section title={t('explainClinical')} items={ex.clinical} />
     </div>
   )
 }

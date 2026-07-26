@@ -7,6 +7,7 @@ import {
   TERRITORY_COLOR,
 } from '../ecg/leadMap'
 import type { CyclePlan, LeadName } from '../ecg/types'
+import { useLanguage } from '../i18n/useLanguage'
 import HeartAnatomyV2, { type AnatomyLayer } from './heart/HeartAnatomyV2'
 import HeartConductionV1 from './heart/HeartConductionV1'
 
@@ -99,6 +100,7 @@ export default function ConductionModel({
   selectedLead,
   onSelectLead,
 }: ConductionModelProps) {
+  const { locale, t } = useLanguage()
   const state = conductionAt(plan, elapsed, { afSeed })
   const [layers, setLayers] = useState<Record<AnatomyLayer, boolean>>({
     walls: true,
@@ -106,18 +108,29 @@ export default function ConductionModel({
   })
 
   const landmark = selectedLead ? LEAD_LANDMARK_BY_NAME[selectedLead] : null
+  const scale = timeScale.toFixed(2)
 
   const statusText = useMemo(() => {
-    if (heartVersion === 'v1') return state.status
-    if (!landmark) return '选择一个导联大头针，查看其探测的心壁方位'
-    return `${landmark.lead} · ${landmark.faceZh} — ${landmark.sensesZh}`
-  }, [heartVersion, landmark, state.status])
+    if (heartVersion === 'v1') {
+      if (plan.fibrillatoryBaseline) return t('statusAf')
+      if (plan.dissociated) return t('statusDissoc')
+      return t('statusPr', { ms: Math.round(plan.prInterval * 1000) })
+    }
+    if (!landmark) return t('pickPinHint')
+    const face = locale === 'zh' ? landmark.faceZh : landmark.faceEn
+    const senses = locale === 'zh' ? landmark.sensesZh : landmark.sensesEn
+    return t('leadSenseLine', { lead: landmark.lead, face, senses })
+  }, [heartVersion, landmark, locale, plan, t])
 
   return (
     <div className="panel conduction-panel">
       <div className="conduction-toolbar">
-        <h2 className="panel-title">3D Cardiac Model</h2>
-        <div className="heart-version-toggle" role="group" aria-label="Heart model version">
+        <h2 className="panel-title">{t('heartTitle')}</h2>
+        <div
+          className="heart-version-toggle"
+          role="group"
+          aria-label={t('heartVersionAria')}
+        >
           <button
             type="button"
             className={
@@ -126,7 +139,7 @@ export default function ConductionModel({
             }
             onClick={() => onHeartVersionChange('v1')}
           >
-            V1 传导
+            {t('v1Short')}
           </button>
           <button
             type="button"
@@ -136,22 +149,24 @@ export default function ConductionModel({
             }
             onClick={() => onHeartVersionChange('v2')}
           >
-            V2 解剖导联
+            {t('v2Short')}
           </button>
         </div>
       </div>
 
       <p className="panel-hint">
-        {heartVersion === 'v1'
-          ? `拖动旋转 · 滚轮缩放 · pace ×${timeScale.toFixed(2)} — 与 ECG 同步的传导发光`
-          : `拖动旋转 · 点击大头针 / ECG 导联互相关联 · pace ×${timeScale.toFixed(2)}`}
+        {heartVersion === 'v1' ? t('hintV1', { scale }) : t('hintV2', { scale })}
       </p>
 
       {heartVersion === 'v2' && (
         <div className="anatomy-layer-bar">
           <div className="anatomy-layer-title">
-            <strong>心脏，解剖导联图谱</strong>
-            <span>{landmark ? `已选 ${landmark.lead}` : '选择一个大头针'}</span>
+            <strong>{t('atlasTitle')}</strong>
+            <span>
+              {landmark
+                ? t('selectedLead', { lead: landmark.lead })
+                : t('selectPin')}
+            </span>
           </div>
           <div className="anatomy-layer-toggles">
             <button
@@ -161,7 +176,7 @@ export default function ConductionModel({
               }
               onClick={() => setLayers((l) => ({ ...l, walls: !l.walls }))}
             >
-              壁面分区
+              {t('layerWalls')}
             </button>
             <button
               type="button"
@@ -170,7 +185,7 @@ export default function ConductionModel({
               }
               onClick={() => setLayers((l) => ({ ...l, pins: !l.pins }))}
             >
-              导联探测点
+              {t('layerPins')}
             </button>
           </div>
         </div>
@@ -179,11 +194,7 @@ export default function ConductionModel({
       <div
         className="conduction-3d"
         role="img"
-        aria-label={
-          heartVersion === 'v1'
-            ? 'Interactive 3D cardiac conduction model'
-            : 'Interactive 3D anatomical heart with 12-lead map'
-        }
+        aria-label={heartVersion === 'v1' ? t('ariaV1') : t('ariaV2')}
       >
         <Canvas
           key={heartVersion}
@@ -208,26 +219,26 @@ export default function ConductionModel({
         <div className="territory-legend">
           {(
             [
-              ['anterior', '前壁'],
-              ['septal', '间隔'],
-              ['lateral', '侧壁'],
-              ['inferior', '下壁'],
+              ['anterior', 'wallAnterior'],
+              ['septal', 'wallSeptal'],
+              ['lateral', 'wallLateral'],
+              ['inferior', 'wallInferior'],
             ] as const
-          ).map(([key, label]) => (
+          ).map(([key, msg]) => (
             <span key={key} className="territory-chip">
               <span
                 className="territory-swatch"
                 style={{ background: TERRITORY_COLOR[key] }}
               />
-              {label}
+              {t(msg)}
             </span>
           ))}
         </div>
       ) : (
         <div className="conduction-legend">
-          <span className="legend-dot legend-dot--idle" /> Resting
-          <span className="legend-dot legend-dot--active" /> Depolarising
-          <span className="conduction-drag-hint">Free drag rotate</span>
+          <span className="legend-dot legend-dot--idle" /> {t('resting')}
+          <span className="legend-dot legend-dot--active" /> {t('depolarising')}
+          <span className="conduction-drag-hint">{t('dragHint')}</span>
         </div>
       )}
     </div>

@@ -38,6 +38,10 @@ body {
 
 /* Header */
 .app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   padding: 8px 4px 20px;
 }
 
@@ -45,6 +49,32 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+  min-width: 0;
+}
+
+.lang-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+
+.lang-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+
+.lang-btn--active {
+  background: rgba(52, 211, 153, 0.18);
+  color: var(--accent);
 }
 
 .app-logo {

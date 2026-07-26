@@ -3,6 +3,7 @@ import { voltageSample } from '../ecg/generator'
 import { LEAD_LANDMARK_BY_NAME } from '../ecg/leadMap'
 import { LEAD_ORDER } from '../ecg/leads'
 import type { CyclePlan, LeadName } from '../ecg/types'
+import { useLanguage } from '../i18n/useLanguage'
 import EcgLeadLive from './EcgLead'
 
 const FS = 250
@@ -43,6 +44,7 @@ export default function EcgGrid({
   selectedLead = null,
   onSelectLead,
 }: EcgGridProps) {
+  const { locale, t } = useLanguage()
   const rowN = Math.ceil(FS * ROW_DURATION)
 
   const buffersRef = useRef(emptyBuffers(rowN))
@@ -98,9 +100,9 @@ export default function EcgGrid({
     <div className="ecg-monitor">
       <div className="ecg-monitor-hud" aria-live="polite">
         <div className="ecg-monitor-hud-left">
-          <span className="ecg-monitor-mode">CASCADE SWEEP</span>
+          <span className="ecg-monitor-mode">{t('cascadeSweep')}</span>
           <span className="ecg-monitor-meta">
-            12 leads · 1 / row · pace ×{timeScale.toFixed(2)} · 25 mm/s sim
+            {t('monitorMeta', { scale: timeScale.toFixed(2) })}
           </span>
         </div>
         <div className="ecg-monitor-vitals">
@@ -121,6 +123,8 @@ export default function EcgGrid({
           {LEAD_ORDER.map((name) => {
             const landmark = LEAD_LANDMARK_BY_NAME[name]
             const selected = selectedLead === name
+            const face =
+              locale === 'zh' ? landmark.faceZh : landmark.faceEn
             return (
               <button
                 key={name}
@@ -131,14 +135,14 @@ export default function EcgGrid({
                 role="listitem"
                 style={{ ['--lead-accent' as string]: landmark.color }}
                 aria-pressed={selected}
-                title={`${name} · ${landmark.faceZh} — click to link 3D pin`}
+                title={t('ecgRowTitle', { lead: name, face })}
                 onClick={() =>
                   onSelectLead?.(selected ? null : name)
                 }
               >
                 <span className="ecg-row-meta">
                   <span className="ecg-row-lead">{name}</span>
-                  <span className="ecg-row-face">{landmark.faceZh}</span>
+                  <span className="ecg-row-face">{face}</span>
                 </span>
                 <EcgLeadLive
                   lead={name}
