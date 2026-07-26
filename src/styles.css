@@ -38,6 +38,8 @@ body {
 
 /* Header */
 .app-header {
+  position: relative;
+  z-index: 20;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -53,12 +55,15 @@ body {
 }
 
 .lang-toggle {
+  position: relative;
+  z-index: 30;
   flex-shrink: 0;
   display: inline-flex;
   border: 1px solid var(--border);
   border-radius: 999px;
   overflow: hidden;
   background: var(--bg-2);
+  pointer-events: auto;
 }
 
 .lang-btn {
@@ -70,6 +75,7 @@ body {
   padding: 8px 12px;
   cursor: pointer;
   letter-spacing: 0.04em;
+  pointer-events: auto;
 }
 
 .lang-btn--active {

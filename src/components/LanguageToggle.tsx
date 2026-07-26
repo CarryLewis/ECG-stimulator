@@ -10,6 +10,10 @@ export default function LanguageToggle() {
         type="button"
         className={'lang-btn' + (locale === 'zh' ? ' lang-btn--active' : '')}
         onClick={() => setLocale('zh')}
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          setLocale('zh')
+        }}
         aria-pressed={locale === 'zh'}
       >
         {t('langZh')}
@@ -18,6 +22,10 @@ export default function LanguageToggle() {
         type="button"
         className={'lang-btn' + (locale === 'en' ? ' lang-btn--active' : '')}
         onClick={() => setLocale('en')}
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          setLocale('en')
+        }}
         aria-pressed={locale === 'en'}
       >
         {t('langEn')}
