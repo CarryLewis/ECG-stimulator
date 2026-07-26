@@ -186,6 +186,7 @@ export default function ConductionModel({
         }
       >
         <Canvas
+          key={heartVersion}
           shadows
           dpr={[1, 1.75]}
           camera={{ position: [2.6, 1.4, 3.4], fov: 42, near: 0.1, far: 40 }}

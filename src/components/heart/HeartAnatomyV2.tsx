@@ -202,7 +202,12 @@ function LeadPin({
           opacity={dimmed ? 0.25 : 1}
         />
       </mesh>
-      <Html position={pinPos} center zIndexRange={[20, 0]}>
+      <Html
+        position={pinPos}
+        center
+        zIndexRange={[20, 0]}
+        style={{ pointerEvents: 'none' }}
+      >
         <button
           type="button"
           className={
@@ -210,7 +215,10 @@ function LeadPin({
             (selected ? ' lead-pin--selected' : '') +
             (dimmed ? ' lead-pin--dimmed' : '')
           }
-          style={{ ['--pin-color' as string]: landmark.color }}
+          style={{
+            ['--pin-color' as string]: landmark.color,
+            pointerEvents: 'auto',
+          }}
           onClick={(e) => {
             e.stopPropagation()
             onSelect()
