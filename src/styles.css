@@ -487,21 +487,53 @@ input[type='range']::-moz-range-thumb {
   }
 }
 
-/* Conduction model */
-.conduction-svg {
-  display: block;
+/* 3D conduction model */
+.conduction-3d {
   width: 100%;
-  height: auto;
-  max-height: 340px;
-  background: radial-gradient(circle at 50% 35%, #16233f 0%, #0e1729 70%);
+  height: min(420px, 52vh);
+  min-height: 300px;
   border-radius: 10px;
   border: 1px solid var(--border);
+  overflow: hidden;
+  background: #070d14;
+  touch-action: none;
+  cursor: grab;
 }
 
-.conduction-label text {
-  fill: var(--text-dim);
-  font-size: 11px;
-  font-weight: 500;
+.conduction-3d:active {
+  cursor: grabbing;
+}
+
+.conduction-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.conduction-3d-label {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(7, 13, 20, 0.75);
+  border: 1px solid rgba(61, 255, 138, 0.35);
+  color: #7dffb0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.conduction-3d-label--dim {
+  color: var(--text-dim);
+  border-color: rgba(159, 176, 204, 0.25);
+}
+
+.conduction-3d-label--block {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.55);
 }
 
 .conduction-status {
@@ -519,10 +551,20 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
   font-size: 12px;
   color: var(--text-dim);
+}
+
+.conduction-drag-hint {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: var(--accent-2);
+  font-size: 11px;
 }
 
 .legend-dot {
