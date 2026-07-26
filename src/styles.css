@@ -457,10 +457,54 @@ input[type='range']::-moz-range-thumb {
 }
 
 .ecg-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(20, 90, 45, 0.35);
   background: #020805;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ecg-row:hover {
+  border-color: color-mix(in srgb, var(--lead-accent, #3dff8a) 55%, transparent);
+}
+
+.ecg-row--selected {
+  border-color: var(--lead-accent, #3dff8a);
+  box-shadow: inset 3px 0 0 var(--lead-accent, #3dff8a);
+}
+
+.ecg-row-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-right: 1px solid rgba(20, 90, 45, 0.35);
+  background: #041008;
+}
+
+.ecg-row-lead {
+  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--lead-accent, #3dff8a);
+}
+
+.ecg-row-face {
+  font-size: 10px;
+  color: rgba(160, 220, 180, 0.65);
+  line-height: 1.2;
 }
 
 .ecg-row:nth-child(2) {
@@ -565,6 +609,161 @@ input[type='range']::-moz-range-thumb {
   border: 1px solid rgba(56, 189, 248, 0.35);
   color: var(--accent-2);
   font-size: 11px;
+}
+
+.conduction-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.conduction-toolbar .panel-title {
+  margin: 0;
+}
+
+.heart-version-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+
+.heart-version-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.heart-version-btn--active {
+  background: rgba(52, 211, 153, 0.18);
+  color: var(--accent);
+}
+
+.anatomy-layer-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(159, 176, 204, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.anatomy-layer-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.anatomy-layer-title strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.anatomy-layer-toggles {
+  display: flex;
+  gap: 8px;
+}
+
+.anatomy-layer-btn {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+
+.anatomy-layer-btn--active {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--accent-2);
+}
+
+.territory-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.territory-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.territory-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.lead-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translateY(-50%);
+}
+
+.lead-pin-square {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--pin-color, #3b82f6);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.lead-pin-name {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(7, 13, 20, 0.82);
+  border: 1px solid color-mix(in srgb, var(--pin-color, #3b82f6) 55%, transparent);
+  color: #e8eefc;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
+}
+
+.lead-pin--selected .lead-pin-square {
+  width: 14px;
+  height: 14px;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 10px var(--pin-color, #3b82f6);
+}
+
+.lead-pin--selected .lead-pin-name {
+  border-color: #fff;
+  color: #fff;
+}
+
+.lead-pin--dimmed {
+  opacity: 0.28;
 }
 
 .legend-dot {

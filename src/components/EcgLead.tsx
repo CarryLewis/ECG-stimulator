@@ -20,6 +20,10 @@ interface EcgLeadLiveProps {
   tick: number
   /** Show a brighter sweep beam (used on the lead-II strip). */
   showBeam?: boolean
+  /** Highlight when linked to the 3D lead pin. */
+  selected?: boolean
+  /** Territory accent (hex) for selected / linked state. */
+  accentColor?: string
 }
 
 /**
@@ -38,6 +42,8 @@ export default function EcgLeadLive({
   height = 130,
   tick,
   showBeam = true,
+  selected = false,
+  accentColor = '#3dff8a',
 }: EcgLeadLiveProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -75,13 +81,16 @@ export default function EcgLeadLive({
     const gap = Math.max(4, Math.round(capacity * 0.04))
     const ready = Math.min(written, capacity)
 
+    const trace = selected ? accentColor : '#3dff8a'
     ctx.save()
     ctx.lineJoin = 'round'
     ctx.lineCap = 'round'
-    ctx.shadowColor = 'rgba(52, 255, 140, 0.55)'
-    ctx.shadowBlur = 4
-    ctx.strokeStyle = '#3dff8a'
-    ctx.lineWidth = 1.55
+    ctx.shadowColor = selected
+      ? `${accentColor}99`
+      : 'rgba(52, 255, 140, 0.55)'
+    ctx.shadowBlur = selected ? 7 : 4
+    ctx.strokeStyle = trace
+    ctx.lineWidth = selected ? 1.9 : 1.55
 
     if (ready > 1) {
       if (ready < capacity) {
@@ -122,11 +131,22 @@ export default function EcgLeadLive({
       ctx.shadowBlur = 0
     }
 
-    // Lead label (monitor HUD style)
-    ctx.fillStyle = 'rgba(61, 255, 138, 0.85)'
-    ctx.font = '700 12px "IBM Plex Mono", "SF Mono", ui-monospace, monospace'
-    ctx.fillText(lead, 8, 15)
-  }, [lead, samples, writeIndex, written, duration, height, tick, showBeam])
+    // Compact lead tag (row chrome also shows name + wall face)
+    ctx.fillStyle = selected ? accentColor : 'rgba(61, 255, 138, 0.75)'
+    ctx.font = '700 11px "IBM Plex Mono", "SF Mono", ui-monospace, monospace'
+    ctx.fillText(lead, 6, 13)
+  }, [
+    lead,
+    samples,
+    writeIndex,
+    written,
+    duration,
+    height,
+    tick,
+    showBeam,
+    selected,
+    accentColor,
+  ])
 
   return (
     <canvas

@@ -23,10 +23,12 @@ lives or runs.
   - `leads.ts` — Einthoven / precordial lead projection axes
   - `generator.ts` — samples dipole→lead voltages (batch + live)
   - `diseases.ts` — scenario params, `buildPlan`, educational text
-- UI: `src/components/` (live canvas 12-lead + **draggable 3D** conduction model
-  share one clock via `src/hooks/useSimulationClock.ts`). ECG uses **cascade
-  sweep** (fixed grid, beam writes L→R and overwrites in place). The heart is a
-  procedural Three.js / R3F scene (`OrbitControls` drag-orbit) — no CDN assets.
+- UI: `src/components/` (live canvas 12-lead + **draggable 3D** heart share one
+  clock via `src/hooks/useSimulationClock.ts`). ECG uses **cascade sweep**.
+  Heart models: **V1** conduction schematic (`HeartConductionV1`) and **V2**
+  anatomical lead atlas (`HeartAnatomyV2` + `src/ecg/leadMap.ts`) with wall
+  colour patches and 12-lead pins; clicking an ECG row ↔ 3D pin stays in sync.
+  Procedural Three.js / R3F only — no CDN assets.
 
 ### Running / testing / building
 

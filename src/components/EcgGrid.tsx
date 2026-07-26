@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { voltageSample } from '../ecg/generator'
+import { LEAD_LANDMARK_BY_NAME } from '../ecg/leadMap'
 import { LEAD_ORDER } from '../ecg/leads'
 import type { CyclePlan, LeadName } from '../ecg/types'
 import EcgLeadLive from './EcgLead'
@@ -16,6 +17,8 @@ interface EcgGridProps {
   resetKey?: string | number
   /** Shared playback rate (wall-clock multiplier). */
   timeScale?: number
+  selectedLead?: LeadName | null
+  onSelectLead?: (lead: LeadName | null) => void
 }
 
 function emptyBuffers(n: number): Record<LeadName, Float32Array> {
@@ -37,6 +40,8 @@ export default function EcgGrid({
   afSeed = 23,
   resetKey,
   timeScale = 0.35,
+  selectedLead = null,
+  onSelectLead,
 }: EcgGridProps) {
   const rowN = Math.ceil(FS * ROW_DURATION)
 
@@ -113,20 +118,43 @@ export default function EcgGrid({
 
       <div className="ecg-monitor-screen">
         <div className="ecg-rows" role="list">
-          {LEAD_ORDER.map((name) => (
-            <div key={name} className="ecg-row" role="listitem">
-              <EcgLeadLive
-                lead={name}
-                samples={buffers[name]}
-                writeIndex={writeRef.current}
-                written={writtenRef.current}
-                duration={ROW_DURATION}
-                height={name === 'II' ? 72 : 58}
-                tick={tick}
-                showBeam={name === 'II'}
-              />
-            </div>
-          ))}
+          {LEAD_ORDER.map((name) => {
+            const landmark = LEAD_LANDMARK_BY_NAME[name]
+            const selected = selectedLead === name
+            return (
+              <button
+                key={name}
+                type="button"
+                className={
+                  'ecg-row' + (selected ? ' ecg-row--selected' : '')
+                }
+                role="listitem"
+                style={{ ['--lead-accent' as string]: landmark.color }}
+                aria-pressed={selected}
+                title={`${name} · ${landmark.faceZh} — click to link 3D pin`}
+                onClick={() =>
+                  onSelectLead?.(selected ? null : name)
+                }
+              >
+                <span className="ecg-row-meta">
+                  <span className="ecg-row-lead">{name}</span>
+                  <span className="ecg-row-face">{landmark.faceZh}</span>
+                </span>
+                <EcgLeadLive
+                  lead={name}
+                  samples={buffers[name]}
+                  writeIndex={writeRef.current}
+                  written={writtenRef.current}
+                  duration={ROW_DURATION}
+                  height={name === 'II' ? 64 : 52}
+                  tick={tick}
+                  showBeam={name === 'II' || selected}
+                  selected={selected}
+                  accentColor={landmark.color}
+                />
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>

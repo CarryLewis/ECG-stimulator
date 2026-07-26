@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import ControlPanel from './components/ControlPanel'
 import EcgGrid from './components/EcgGrid'
-import ConductionModel from './components/ConductionModel'
+import ConductionModel, {
+  type HeartVersion,
+} from './components/ConductionModel'
 import ExplanationPanel from './components/ExplanationPanel'
 import {
   DISEASE_BY_ID,
@@ -9,6 +11,7 @@ import {
   defaultParams,
   type ParamValues,
 } from './ecg/diseases'
+import type { LeadName } from './ecg/types'
 import {
   DEFAULT_TIME_SCALE,
   useSimulationClock,
@@ -23,6 +26,8 @@ export default function App() {
     Object.fromEntries(DISEASES.map((d) => [d.id, defaultParams(d)])),
   )
   const [timeScale, setTimeScale] = useState(DEFAULT_TIME_SCALE)
+  const [heartVersion, setHeartVersion] = useState<HeartVersion>('v2')
+  const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
 
   const disease = DISEASE_BY_ID[diseaseId]
   const params = paramsById[diseaseId]
@@ -49,8 +54,8 @@ export default function App() {
           <div>
             <h1>ECG Learning Simulator</h1>
             <p>
-              Cardiac dipole → 12-lead projection, locked to a slowed conduction
-              timeline so each activation step is easy to see.
+              12-lead ECG locked to a 3D heart — V1 conduction glow or V2
+              anatomical lead atlas (click a lead ↔ pin).
             </p>
           </div>
         </div>
@@ -74,6 +79,7 @@ export default function App() {
               <h2 className="panel-title">Bedside ECG Monitor</h2>
               <span className="ecg-calibration">
                 Sweep · t = {elapsed.toFixed(1)} s · ×{timeScale.toFixed(2)}
+                {selectedLead ? ` · ${selectedLead}` : ''}
               </span>
             </div>
             <EcgGrid
@@ -82,6 +88,8 @@ export default function App() {
               afSeed={AF_SEED}
               resetKey={diseaseId}
               timeScale={timeScale}
+              selectedLead={selectedLead}
+              onSelectLead={setSelectedLead}
             />
           </div>
         </section>
@@ -92,6 +100,10 @@ export default function App() {
             elapsed={elapsed}
             afSeed={AF_SEED}
             timeScale={timeScale}
+            heartVersion={heartVersion}
+            onHeartVersionChange={setHeartVersion}
+            selectedLead={selectedLead}
+            onSelectLead={setSelectedLead}
           />
           <ExplanationPanel disease={disease} params={params} />
         </aside>
