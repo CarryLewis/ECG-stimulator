@@ -70,8 +70,6 @@ export default function App() {
             onParamChange={handleParamChange}
             timeScale={timeScale}
             onTimeScaleChange={setTimeScale}
-            heartVersion={heartVersion}
-            onHeartVersionChange={setHeartVersion}
           />
         </aside>
 
