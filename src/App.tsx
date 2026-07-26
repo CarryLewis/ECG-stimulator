@@ -29,7 +29,7 @@ export default function App() {
     Object.fromEntries(DISEASES.map((d) => [d.id, defaultParams(d)])),
   )
   const [timeScale, setTimeScale] = useState(DEFAULT_TIME_SCALE)
-  const [heartVersion, setHeartVersion] = useState<HeartVersion>('v2')
+  const [heartVersion, setHeartVersion] = useState<HeartVersion>('v3')
   const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
 
   const disease = DISEASE_BY_ID[diseaseId]
