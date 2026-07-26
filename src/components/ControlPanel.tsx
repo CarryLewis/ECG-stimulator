@@ -3,6 +3,7 @@ import {
   type Disease,
   type ParamValues,
 } from '../ecg/diseases'
+import type { HeartVersion } from './ConductionModel'
 
 interface ControlPanelProps {
   disease: Disease
@@ -11,6 +12,8 @@ interface ControlPanelProps {
   onParamChange: (key: string, value: number | string) => void
   timeScale: number
   onTimeScaleChange: (scale: number) => void
+  heartVersion: HeartVersion
+  onHeartVersionChange: (v: HeartVersion) => void
 }
 
 const SPEED_PRESETS = [
@@ -27,11 +30,41 @@ export default function ControlPanel({
   onParamChange,
   timeScale,
   onTimeScaleChange,
+  heartVersion,
+  onHeartVersionChange,
 }: ControlPanelProps) {
   const pct = Math.round(timeScale * 100)
 
   return (
     <div className="panel control-panel">
+      <h2 className="panel-title">3D heart version</h2>
+      <p className="panel-hint">
+        V1 = conduction glow schematic · V2 = anatomical walls + 12-lead pins
+        (atlas style).
+      </p>
+      <div className="heart-version-toggle heart-version-toggle--wide" role="group">
+        <button
+          type="button"
+          className={
+            'heart-version-btn' +
+            (heartVersion === 'v1' ? ' heart-version-btn--active' : '')
+          }
+          onClick={() => onHeartVersionChange('v1')}
+        >
+          V1 传导示意
+        </button>
+        <button
+          type="button"
+          className={
+            'heart-version-btn' +
+            (heartVersion === 'v2' ? ' heart-version-btn--active' : '')
+          }
+          onClick={() => onHeartVersionChange('v2')}
+        >
+          V2 解剖导联
+        </button>
+      </div>
+
       <h2 className="panel-title">Scenario</h2>
       <p className="panel-hint">
         Pick a physiological state, then adjust parameters. Conduction and ECG

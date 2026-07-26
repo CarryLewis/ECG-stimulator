@@ -636,6 +636,18 @@ input[type='range']::-moz-range-thumb {
   background: var(--bg-2);
 }
 
+.heart-version-toggle--wide {
+  width: 100%;
+  margin-bottom: 18px;
+  border-radius: 10px;
+}
+
+.heart-version-toggle--wide .heart-version-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 12px;
+}
+
 .heart-version-btn {
   border: 0;
   background: transparent;
