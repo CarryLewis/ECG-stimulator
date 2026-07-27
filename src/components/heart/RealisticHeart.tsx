@@ -1,26 +1,100 @@
-import { useMemo } from 'react'
+import { useGLTF } from '@react-three/drei'
+import {
+  Component,
+  Suspense,
+  useEffect,
+  useMemo,
+  type ErrorInfo,
+  type ReactNode,
+} from 'react'
+import type { Object3D } from 'three'
 import type { ConductionState } from '../../ecg/types'
 import {
+  HEART_GLB_MODE,
   HEART_MEDIASTINUM_POSE,
   REALISTIC_HEART_GLB,
-  USE_REALISTIC_HEART_GLB,
 } from './heartAsset'
 
 /**
- * Anatomical heart for V3 — cutaway myocardium + great vessels with a soft
- * conduction pulse. Procedural stand-in until the Unity package is exported
- * to GLB and wired in (keeps the offline build self-contained).
+ * Anatomical heart for V3.
+ * Drop a GLB at `public/models/heart-animated-realistic.glb` — it loads
+ * automatically. Missing / broken files fall back to the procedural cutaway.
  */
 export default function RealisticHeart({ state }: { state: ConductionState }) {
-  // GLB path reserved for local Unity export — see docs/heart-asset-integration.md
-  void USE_REALISTIC_HEART_GLB
-  void REALISTIC_HEART_GLB
-  return <ProceduralCutawayHeart state={state} />
+  if (HEART_GLB_MODE === 'off') {
+    return <ProceduralCutawayHeart state={state} />
+  }
+
+  return (
+    <GlbErrorBoundary fallback={<ProceduralCutawayHeart state={state} />}>
+      <Suspense fallback={<ProceduralCutawayHeart state={state} />}>
+        <GltfHeartModel state={state} />
+      </Suspense>
+    </GlbErrorBoundary>
+  )
+}
+
+function GltfHeartModel({ state }: { state: ConductionState }) {
+  const { scene } = useGLTF(REALISTIC_HEART_GLB)
+  const cloned = useMemo(() => scene.clone(true), [scene])
+  const beat = useMemo(
+    () => 1 + state.ventricle * 0.045 + state.atria * 0.02,
+    [state.atria, state.ventricle],
+  )
+
+  useEffect(() => {
+    cloned.traverse((obj: Object3D) => {
+      const mesh = obj as Object3D & {
+        isMesh?: boolean
+        castShadow?: boolean
+        receiveShadow?: boolean
+      }
+      if (mesh.isMesh) {
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+      }
+    })
+  }, [cloned])
+
+  return (
+    <primitive
+      object={cloned}
+      position={HEART_MEDIASTINUM_POSE.position}
+      rotation={HEART_MEDIASTINUM_POSE.rotation}
+      scale={HEART_MEDIASTINUM_POSE.scale * beat}
+    />
+  )
+}
+
+/** Catch failed GLB loads / parses and keep the teaching UI alive. */
+class GlbErrorBoundary extends Component<
+  { fallback: ReactNode; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false }
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true }
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.warn(
+      '[RealisticHeart] GLB unavailable; using procedural heart.',
+      REALISTIC_HEART_GLB,
+      error,
+      info,
+    )
+  }
+
+  render() {
+    if (this.state.failed) return this.props.fallback
+    return this.props.children
+  }
 }
 
 /**
- * Procedural stand-in matching the educational atlas look: frontal cutaway,
- * left-of-midline mediastinal seat, aorta (red) + pulmonary trunk (blue).
+ * Procedural stand-in: frontal cutaway, left-of-midline mediastinal seat,
+ * aorta (red) + pulmonary trunk (blue).
  */
 export function ProceduralCutawayHeart({ state }: { state: ConductionState }) {
   const beat = useMemo(

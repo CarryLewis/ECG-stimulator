@@ -31,8 +31,10 @@ lives or runs.
   (`HeartTorsoV3` + `src/ecg/electrodeMap.ts`) with translucent torso,
   mediastinal heart, RA/LA/RL/LL + V1–V6 electrodes, and labelled 12 leads.
   Clicking an ECG row ↔ 3D marker stays in sync. Procedural Three.js / R3F by
-  default (no CDN assets); optional Unity→GLB heart swap documented in
-  `docs/heart-asset-integration.md`.
+  default (no CDN assets). Drop a GLB at
+  `public/models/heart-animated-realistic.glb` — V3 auto-loads it
+  (`HEART_GLB_MODE` in `src/components/heart/heartAsset.ts`). See
+  `docs/heart-asset-integration.md` (Unity not required).
 - **i18n:** `src/i18n/` (`LanguageProvider.tsx`, `useLanguage.ts`, `messages.ts`,
   `diseasesLocale.ts`). Header toggle switches **中文 / EN**; preference in
   `localStorage` (`ecg-sim-locale`). Lead faces use `faceZh`/`faceEn` in
