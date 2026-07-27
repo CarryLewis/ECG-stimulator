@@ -52,13 +52,16 @@ function HeartScene({
   return (
     <>
       <color attach="background" args={[bg]} />
-      <ambientLight intensity={version === 'v3' ? 0.6 : version === 'v2' ? 0.55 : 0.45} />
+      <ambientLight intensity={version === 'v3' ? 0.72 : version === 'v2' ? 0.55 : 0.45} />
       <directionalLight
         position={[3.5, 4.5, 2.5]}
-        intensity={1.35}
+        intensity={version === 'v3' ? 1.55 : 1.35}
         castShadow
       />
-      <directionalLight position={[-3, 1.5, -2]} intensity={0.4} />
+      <directionalLight position={[-3, 1.5, -2]} intensity={version === 'v3' ? 0.55 : 0.4} />
+      {version === 'v3' && (
+        <directionalLight position={[0, 2.5, 4]} intensity={0.45} color="#b8d4f0" />
+      )}
       <pointLight
         position={[0.2, 0.8, 1.5]}
         intensity={0.45 + state.sa * 0.7}
@@ -129,6 +132,7 @@ export default function ConductionModel({
   })
   const [torsoLayers, setTorsoLayers] = useState<Record<TorsoLayer, boolean>>({
     torso: true,
+    ribs: true,
     heart: true,
     electrodes: true,
     leads: true,
@@ -265,6 +269,7 @@ export default function ConductionModel({
             {(
               [
                 ['torso', 'layerTorso'],
+                ['ribs', 'layerRibs'],
                 ['heart', 'layerHeart'],
                 ['electrodes', 'layerElectrodes'],
                 ['leads', 'layerLeadLabels'],
