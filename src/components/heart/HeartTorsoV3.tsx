@@ -1,5 +1,5 @@
 import { Html, Line } from '@react-three/drei'
-import { DoubleSide } from 'three'
+import { useMemo } from 'react'
 import {
   ELECTRODE_SITES,
   LEAD_ELECTRODES,
@@ -8,10 +8,10 @@ import {
 } from '../../ecg/electrodeMap'
 import type { ConductionState, LeadName } from '../../ecg/types'
 import { useLanguage } from '../../i18n/useLanguage'
+import HumanBodyContour from './HumanBodyContour'
 import RealisticHeart from './RealisticHeart'
-import Ribcage from './Ribcage'
 
-export type TorsoLayer = 'torso' | 'ribs' | 'heart' | 'electrodes' | 'leads'
+export type TorsoLayer = 'torso' | 'heart' | 'electrodes' | 'leads'
 
 interface HeartTorsoV3Props {
   state: ConductionState
@@ -22,7 +22,7 @@ interface HeartTorsoV3Props {
 
 /**
  * Version 3 — clinical 12-lead placement schematic:
- * translucent male torso + mediastinal heart (Unity GLB or procedural) +
+ * clear proportional human body contour + mediastinal heart +
  * labelled RA/LA/RL/LL and V1–V6 electrodes with derived lead callouts.
  */
 export default function HeartTorsoV3({
@@ -35,45 +35,13 @@ export default function HeartTorsoV3({
 
   return (
     <group position={[0, 0.05, 0]}>
-      {layers.torso && <TranslucentTorso />}
-
-      {layers.ribs && <Ribcage showLabels />}
+      {layers.torso && <HumanBodyContour />}
 
       {layers.heart && <RealisticHeart state={state} />}
 
-      {/* Sternum / mid-clavicular guide lines for placement teaching */}
-      {layers.torso && (
-        <group>
-          <Line
-            points={[
-              [0, 1.15, 0.72],
-              [0, -0.55, 0.72],
-            ]}
-            color="#cbd5e1"
-            lineWidth={1.5}
-            transparent
-            opacity={0.55}
-            dashed
-            dashSize={0.08}
-            gapSize={0.05}
-          />
-          <Line
-            points={[
-              [0.55, 1.05, 0.55],
-              [0.55, -0.55, 0.72],
-            ]}
-            color="#94a3b8"
-            lineWidth={1.25}
-            transparent
-            opacity={0.45}
-            dashed
-            dashSize={0.07}
-            gapSize={0.05}
-          />
-        </group>
-      )}
+      {/* Midsternal + left mid-clavicular guides for placement teaching */}
+      {layers.torso && <PlacementGuides />}
 
-      {/* Einthoven triangle edges when a limb lead is selected */}
       {selectedLead &&
         (selectedLead === 'I' ||
           selectedLead === 'II' ||
@@ -129,107 +97,44 @@ export default function HeartTorsoV3({
   )
 }
 
-function TranslucentTorso() {
-  const shell = {
-    color: '#5b6b82',
-    emissive: '#243044',
-    opacity: 0.42,
-  } as const
+function PlacementGuides() {
+  const midSternal = useMemo<[number, number, number][]>(
+    () => [
+      [0, 1.2, 0.55],
+      [0, -0.7, 0.55],
+    ],
+    [],
+  )
+  const midClavicular = useMemo<[number, number, number][]>(
+    () => [
+      [0.55, 1.1, 0.42],
+      [0.55, -0.55, 0.55],
+    ],
+    [],
+  )
 
   return (
     <group>
-      {/* Outer rim — brighter edge so the silhouette reads on dark bg */}
-      <mesh position={[0, -0.15, -0.12]} scale={[1.18, 1.38, 0.72]}>
-        <sphereGeometry args={[1.35, 48, 32]} />
-        <meshStandardMaterial
-          color="#8fa3bc"
-          emissive="#3d4f66"
-          emissiveIntensity={0.25}
-          transparent
-          opacity={0.18}
-          roughness={0.9}
-          depthWrite={false}
-          side={DoubleSide}
-        />
-      </mesh>
-      {/* Chest / abdomen shell */}
-      <mesh position={[0, -0.15, -0.15]} scale={[1.15, 1.35, 0.7]}>
-        <sphereGeometry args={[1.35, 48, 32]} />
-        <meshStandardMaterial
-          color={shell.color}
-          emissive={shell.emissive}
-          emissiveIntensity={0.2}
-          transparent
-          opacity={shell.opacity}
-          roughness={0.82}
-          metalness={0.06}
-          depthWrite={false}
-          side={DoubleSide}
-        />
-      </mesh>
-      {/* Shoulders */}
-      <mesh position={[-0.95, 0.95, -0.05]} scale={[0.55, 0.4, 0.45]}>
-        <sphereGeometry args={[0.7, 24, 16]} />
-        <meshStandardMaterial
-          color={shell.color}
-          emissive={shell.emissive}
-          emissiveIntensity={0.18}
-          transparent
-          opacity={0.4}
-          depthWrite={false}
-          side={DoubleSide}
-        />
-      </mesh>
-      <mesh position={[0.95, 0.95, -0.05]} scale={[0.55, 0.4, 0.45]}>
-        <sphereGeometry args={[0.7, 24, 16]} />
-        <meshStandardMaterial
-          color={shell.color}
-          emissive={shell.emissive}
-          emissiveIntensity={0.18}
-          transparent
-          opacity={0.4}
-          depthWrite={false}
-          side={DoubleSide}
-        />
-      </mesh>
-      {/* Neck */}
-      <mesh position={[0, 1.45, -0.1]}>
-        <cylinderGeometry args={[0.28, 0.32, 0.45, 18]} />
-        <meshStandardMaterial
-          color={shell.color}
-          emissive={shell.emissive}
-          emissiveIntensity={0.15}
-          transparent
-          opacity={0.38}
-          depthWrite={false}
-          side={DoubleSide}
-        />
-      </mesh>
-      {/* Soft posterior depth cue */}
-      <mesh position={[0, -0.1, -0.55]} scale={[1.05, 1.25, 0.35]}>
-        <sphereGeometry args={[1.2, 32, 20]} />
-        <meshStandardMaterial
-          color="#3a4658"
-          emissive="#1a222c"
-          emissiveIntensity={0.12}
-          transparent
-          opacity={0.28}
-          depthWrite={false}
-        />
-      </mesh>
-      {/* Waist taper */}
-      <mesh position={[0, -1.35, -0.05]} scale={[0.95, 0.55, 0.55]}>
-        <sphereGeometry args={[0.85, 28, 18]} />
-        <meshStandardMaterial
-          color={shell.color}
-          emissive={shell.emissive}
-          emissiveIntensity={0.12}
-          transparent
-          opacity={0.32}
-          depthWrite={false}
-          side={DoubleSide}
-        />
-      </mesh>
+      <Line
+        points={midSternal}
+        color="#cbd5e1"
+        lineWidth={1.5}
+        transparent
+        opacity={0.5}
+        dashed
+        dashSize={0.08}
+        gapSize={0.05}
+      />
+      <Line
+        points={midClavicular}
+        color="#94a3b8"
+        lineWidth={1.25}
+        transparent
+        opacity={0.4}
+        dashed
+        dashSize={0.07}
+        gapSize={0.05}
+      />
     </group>
   )
 }
@@ -298,7 +203,6 @@ function ElectrodeMarker({
           opacity={!active ? 0.2 : 1}
         />
       </mesh>
-      {/* Soft contact pad */}
       <mesh position={site.position} scale={[1.6, 1.6, 0.35]}>
         <sphereGeometry args={[0.055, 12, 8]} />
         <meshStandardMaterial

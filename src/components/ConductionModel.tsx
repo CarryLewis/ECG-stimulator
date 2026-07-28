@@ -132,7 +132,6 @@ export default function ConductionModel({
   })
   const [torsoLayers, setTorsoLayers] = useState<Record<TorsoLayer, boolean>>({
     torso: true,
-    ribs: true,
     heart: true,
     electrodes: true,
     leads: true,
@@ -269,7 +268,6 @@ export default function ConductionModel({
             {(
               [
                 ['torso', 'layerTorso'],
-                ['ribs', 'layerRibs'],
                 ['heart', 'layerHeart'],
                 ['electrodes', 'layerElectrodes'],
                 ['leads', 'layerLeadLabels'],

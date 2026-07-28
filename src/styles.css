@@ -905,45 +905,6 @@ input[type='range']::-moz-range-thumb {
   opacity: 0.28;
 }
 
-.rib-number {
-  display: inline-block;
-  min-width: 12px;
-  padding: 0 3px;
-  border-radius: 3px;
-  background: rgba(7, 13, 20, 0.75);
-  color: #cbd5e1;
-  font-size: 8px;
-  font-weight: 700;
-  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
-  line-height: 1.3;
-  opacity: 0.85;
-}
-
-.ics-tag {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 3px 7px;
-  border-radius: 6px;
-  border: 1px solid rgba(56, 189, 248, 0.55);
-  background: rgba(7, 13, 20, 0.88);
-  color: #e8eefc;
-  line-height: 1.2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  white-space: nowrap;
-}
-
-.ics-tag strong {
-  font-size: 10px;
-  font-weight: 800;
-  color: #7dd3fc;
-}
-
-.ics-tag span {
-  font-size: 9px;
-  color: var(--text-dim);
-}
-
 .legend-dot {
   width: 11px;
   height: 11px;
