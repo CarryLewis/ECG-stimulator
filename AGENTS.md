@@ -27,9 +27,10 @@ lives or runs.
   clock via `src/hooks/useSimulationClock.ts`). ECG uses **cascade sweep**.
   Heart models: **V1** conduction schematic (`HeartConductionV1`), **V2**
   anatomical lead atlas (`HeartAnatomyV2` + `src/ecg/leadMap.ts`) with wall
-  colour patches and 12-lead pins, and **V3** clinical torso placement
-  (`HeartTorsoV3` + `src/ecg/electrodeMap.ts`) with translucent torso,
-  mediastinal heart, RA/LA/RL/LL + V1–V6 electrodes, and labelled 12 leads.
+  colour patches and 12-lead pins, and **V3** clinical body placement
+  (`HeartTorsoV3` + `HumanBodyContour` + `src/ecg/electrodeMap.ts`) with a
+  clear proportional human silhouette, mediastinal heart, RA/LA/RL/LL + V1–V6
+  electrodes, and labelled 12 leads.
   Clicking an ECG row ↔ 3D marker stays in sync. Procedural Three.js / R3F by
   default (no CDN assets). Drop a GLB at
   `public/models/heart-animated-realistic.glb` — V3 auto-loads it
