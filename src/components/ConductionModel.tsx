@@ -15,6 +15,7 @@ import { useLanguage } from '../i18n/useLanguage'
 import HeartAnatomyV2, { type AnatomyLayer } from './heart/HeartAnatomyV2'
 import HeartConductionV1 from './heart/HeartConductionV1'
 import HeartTorsoV3, { type TorsoLayer } from './heart/HeartTorsoV3'
+import OrientationCube from './OrientationCube'
 
 export type HeartVersion = 'v1' | 'v2' | 'v3'
 
@@ -104,6 +105,8 @@ function HeartScene({
         maxDistance={version === 'v3' ? 10 : 8}
         target={camTarget}
       />
+
+      <OrientationCube />
     </>
   )
 }
