@@ -13,9 +13,9 @@ sites. You do **not** need Unity.
    public/models/heart-animated-realistic.glb
    ```
 3. Restart `npm run dev` (or hard-refresh the browser).  
-   With `HEART_GLB_MODE = 'auto'` (default), the app **loads the GLB**;
-   if the file is missing or invalid it keeps the procedural heart.
-   No code change required.
+   Default `HEART_GLB_MODE = 'off'` uses the procedural heart so a missing
+   file cannot blank the canvas. Set `HEART_GLB_MODE = 'force'` only after
+   the GLB is in place.
 4. If the mesh is tilted / too large, tweak `HEART_MEDIASTINUM_POSE` in
    `src/components/heart/heartAsset.ts`.
 

@@ -48,35 +48,44 @@ function HeartScene({
   const bg =
     version === 'v3' ? '#0a1018' : version === 'v2' ? '#0c121a' : '#070d14'
   const camTarget: [number, number, number] =
-    version === 'v3' ? [0, 0.05, 0] : [0, -0.15, 0]
+    version === 'v3' ? [0, 0.05, 0] : [0, -0.1, 0]
 
   return (
     <>
       <color attach="background" args={[bg]} />
-      <ambientLight intensity={version === 'v3' ? 0.72 : version === 'v2' ? 0.55 : 0.45} />
+      <ambientLight
+        intensity={version === 'v3' ? 0.78 : version === 'v2' ? 0.7 : 0.62}
+      />
       <directionalLight
         position={[3.5, 4.5, 2.5]}
-        intensity={version === 'v3' ? 1.55 : 1.35}
+        intensity={version === 'v3' ? 1.65 : 1.55}
         castShadow
       />
-      <directionalLight position={[-3, 1.5, -2]} intensity={version === 'v3' ? 0.55 : 0.4} />
-      {version === 'v3' && (
-        <directionalLight position={[0, 2.5, 4]} intensity={0.45} color="#b8d4f0" />
-      )}
+      <directionalLight
+        position={[-3, 1.5, -2]}
+        intensity={version === 'v3' ? 0.6 : 0.5}
+      />
+      <directionalLight position={[0, 2, 4]} intensity={0.4} color="#c8dff5" />
       <pointLight
         position={[0.2, 0.8, 1.5]}
-        intensity={0.45 + state.sa * 0.7}
+        intensity={0.5 + state.sa * 0.7}
         color="#7dffb0"
       />
 
-      {version === 'v1' && <HeartConductionV1 state={state} />}
+      {version === 'v1' && (
+        <group scale={1.08} position={[0, 0.05, 0]}>
+          <HeartConductionV1 state={state} />
+        </group>
+      )}
       {version === 'v2' && (
-        <HeartAnatomyV2
-          state={state}
-          selectedLead={selectedLead}
-          onSelectLead={onSelectLead}
-          layers={anatomyLayers}
-        />
+        <group scale={1.05} position={[0, 0.05, 0]}>
+          <HeartAnatomyV2
+            state={state}
+            selectedLead={selectedLead}
+            onSelectLead={onSelectLead}
+            layers={anatomyLayers}
+          />
+        </group>
       )}
       {version === 'v3' && (
         <HeartTorsoV3
@@ -101,7 +110,7 @@ function HeartScene({
         makeDefault
         enableDamping
         dampingFactor={0.08}
-        minDistance={version === 'v3' ? 2.8 : 2.2}
+        minDistance={version === 'v3' ? 2.6 : 2.0}
         maxDistance={version === 'v3' ? 10 : 8}
         target={camTarget}
       />

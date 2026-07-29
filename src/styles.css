@@ -652,12 +652,13 @@ input[type='range']::-moz-range-thumb {
 
 .conduction-toolbar {
   position: relative;
-  z-index: 6;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 4px;
+  pointer-events: auto;
 }
 
 .conduction-toolbar .panel-title {
@@ -670,6 +671,9 @@ input[type='range']::-moz-range-thumb {
   border-radius: 999px;
   overflow: hidden;
   background: var(--bg-2);
+  position: relative;
+  z-index: 41;
+  pointer-events: auto;
 }
 
 .heart-version-btn {
@@ -680,6 +684,7 @@ input[type='range']::-moz-range-thumb {
   font-weight: 600;
   padding: 6px 10px;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .heart-version-btn--active {
@@ -689,7 +694,7 @@ input[type='range']::-moz-range-thumb {
 
 .anatomy-layer-bar {
   position: relative;
-  z-index: 6;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -698,6 +703,7 @@ input[type='range']::-moz-range-thumb {
   border-radius: 10px;
   border: 1px solid rgba(159, 176, 204, 0.2);
   background: rgba(255, 255, 255, 0.03);
+  pointer-events: auto;
 }
 
 .anatomy-layer-title {

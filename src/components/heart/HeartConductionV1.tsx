@@ -110,7 +110,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.45}
           metalness={0.1}
           transparent
-          opacity={0.72}
+          opacity={0.88}
         />
       </mesh>
       <mesh position={[0.55, 0.9, 0.05]} castShadow>
@@ -120,7 +120,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.45}
           metalness={0.1}
           transparent
-          opacity={0.72}
+          opacity={0.88}
         />
       </mesh>
       <mesh position={[-0.45, -0.55, 0.05]} scale={[0.95, 1.35, 0.9]} castShadow>
@@ -130,7 +130,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.4}
           metalness={0.12}
           transparent
-          opacity={0.68}
+          opacity={0.9}
         />
       </mesh>
       <mesh position={[0.4, -0.5, 0.0]} scale={[1.05, 1.45, 1.0]} castShadow>
@@ -140,7 +140,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.4}
           metalness={0.12}
           transparent
-          opacity={0.68}
+          opacity={0.9}
         />
       </mesh>
       <mesh position={[0.05, -1.45, 0.05]} scale={[0.7, 0.55, 0.65]}>
@@ -149,7 +149,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           color={new THREE.Color(...ventCol)}
           roughness={0.45}
           transparent
-          opacity={0.55}
+          opacity={0.82}
         />
       </mesh>
 

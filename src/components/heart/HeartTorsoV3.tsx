@@ -215,7 +215,7 @@ function ElectrodeMarker({
       <Html
         position={labelPos}
         center
-        zIndexRange={[25, 0]}
+        zIndexRange={[12, 0]}
         style={{ pointerEvents: 'none' }}
       >
         <button
@@ -269,7 +269,7 @@ function LeadCallout({
     <Html
       position={position}
       center
-      zIndexRange={[30, 0]}
+      zIndexRange={[14, 0]}
       style={{ pointerEvents: 'none' }}
     >
       <button

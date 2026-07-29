@@ -42,9 +42,9 @@ const TORSO_PROFILE: [number, number][] = [
   [0.7, -1.9],
 ]
 
-const SKIN = '#7d8fa8'
-const SKIN_EMIT = '#2a3a52'
-const EDGE = '#c5d4e8'
+const SKIN = '#9aadc4'
+const SKIN_EMIT = '#3a4f6a'
+const EDGE = '#d7e4f5'
 
 export default function HumanBodyContour() {
   const points = useMemo(
@@ -60,10 +60,10 @@ export default function HumanBodyContour() {
         <meshStandardMaterial
           color={SKIN}
           emissive={SKIN_EMIT}
-          emissiveIntensity={0.28}
+          emissiveIntensity={0.35}
           transparent
-          opacity={0.4}
-          roughness={0.88}
+          opacity={0.5}
+          roughness={0.85}
           metalness={0.04}
           depthWrite={false}
           side={DoubleSide}
@@ -71,14 +71,14 @@ export default function HumanBodyContour() {
       </mesh>
 
       {/* Brighter outer rim so the outline pops on dark backgrounds */}
-      <mesh scale={[1.04, 1.012, 0.62]} position={[0, 0, -0.05]}>
+      <mesh scale={[1.045, 1.015, 0.64]} position={[0, 0, -0.05]}>
         <latheGeometry args={[points, 48]} />
         <meshStandardMaterial
           color={EDGE}
-          emissive="#5b7290"
-          emissiveIntensity={0.4}
+          emissive="#6b84a4"
+          emissiveIntensity={0.5}
           transparent
-          opacity={0.16}
+          opacity={0.22}
           roughness={1}
           depthWrite={false}
           side={DoubleSide}
@@ -91,11 +91,11 @@ export default function HumanBodyContour() {
       <mesh position={[0, 0.15, 0.42]} scale={[0.92, 1.05, 0.22]}>
         <sphereGeometry args={[0.95, 36, 24]} />
         <meshStandardMaterial
-          color="#8fa3bc"
-          emissive="#3d536e"
-          emissiveIntensity={0.2}
+          color="#a8bdd4"
+          emissive="#4a6582"
+          emissiveIntensity={0.25}
           transparent
-          opacity={0.16}
+          opacity={0.2}
           roughness={0.9}
           depthWrite={false}
           side={DoubleSide}
@@ -118,9 +118,9 @@ function UpperArms() {
         <meshStandardMaterial
           color={SKIN}
           emissive={SKIN_EMIT}
-          emissiveIntensity={0.22}
+          emissiveIntensity={0.3}
           transparent
-          opacity={0.42}
+          opacity={0.5}
           roughness={0.85}
           depthWrite={false}
           side={DoubleSide}
@@ -135,9 +135,9 @@ function UpperArms() {
         <meshStandardMaterial
           color={SKIN}
           emissive={SKIN_EMIT}
-          emissiveIntensity={0.22}
+          emissiveIntensity={0.3}
           transparent
-          opacity={0.42}
+          opacity={0.5}
           roughness={0.85}
           depthWrite={false}
           side={DoubleSide}

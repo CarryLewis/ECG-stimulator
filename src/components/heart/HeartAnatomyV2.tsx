@@ -42,7 +42,7 @@ export default function HeartAnatomyV2({
         <meshStandardMaterial
           color="#e8eef5"
           transparent
-          opacity={0.07}
+          opacity={0.14}
           depthWrite={false}
         />
       </mesh>
