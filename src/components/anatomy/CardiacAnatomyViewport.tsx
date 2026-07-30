@@ -1,30 +1,44 @@
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls } from '@react-three/drei'
 import { useMemo } from 'react'
-import { IDLE_CONDUCTION } from '../../anatomy/idleConduction'
 import type { HeartVersion } from '../../anatomy/heartVersions'
-import type { LeadName } from '../../ecg/types'
+import type { ConductionState, LeadName } from '../../ecg/types'
+import type { PhysiologicalEvent } from '../../sim/events'
 import OrientationCube from '../OrientationCube'
 import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
+import ConductionTimeline from './ConductionTimeline'
 
 interface CardiacAnatomyViewportProps {
   heartVersion: HeartVersion
   selectedLead: LeadName | null
   onSelectLead: (lead: LeadName | null) => void
   showLabels: boolean
+  conduction: ConductionState
+  activeEvent: PhysiologicalEvent | null
+  phaseMs: number
+  elapsed: number
+  timeScale: number
+  rateBpm: number
 }
 
 /**
- * Shared 3D viewport for all heart versions (V1 / V2 / V3).
- * OrientationCube (A/P/L/R/H/B) is always mounted and tracks camera rotation.
+ * Shared 3D viewport for V1 / V2 / V3.
+ * Conduction glow is driven exclusively by `conduction` from the EP engine.
+ * OrientationCube (A/P/L/R/H/B) tracks camera on every version.
  */
 export default function CardiacAnatomyViewport({
   heartVersion,
   selectedLead,
   onSelectLead,
   showLabels,
+  conduction,
+  activeEvent,
+  phaseMs,
+  elapsed,
+  timeScale,
+  rateBpm,
 }: CardiacAnatomyViewportProps) {
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
@@ -74,17 +88,22 @@ export default function CardiacAnatomyViewport({
         />
         <directionalLight position={[-3, 1.5, -2]} intensity={0.75} />
         <directionalLight position={[0, 2, 4]} intensity={0.55} color="#ffe8e0" />
+        <pointLight
+          position={[0.2, 0.8, 1.5]}
+          intensity={0.55 + conduction.sa * 0.9}
+          color="#7dffb0"
+        />
         <hemisphereLight args={['#b8c8d8', '#1a1010', 0.3]} />
 
         {heartVersion === 'v1' && (
           <group scale={1.08} position={[0, 0.05, 0]}>
-            <HeartConductionV1 state={IDLE_CONDUCTION} />
+            <HeartConductionV1 state={conduction} showLabels={showLabels} />
           </group>
         )}
         {heartVersion === 'v2' && (
           <group scale={1.05} position={[0, 0.05, 0]}>
             <HeartAnatomyV2
-              state={IDLE_CONDUCTION}
+              state={conduction}
               selectedLead={selectedLead}
               onSelectLead={onSelectLead}
               layers={anatomyLayers}
@@ -93,7 +112,7 @@ export default function CardiacAnatomyViewport({
         )}
         {heartVersion === 'v3' && (
           <HeartTorsoV3
-            state={IDLE_CONDUCTION}
+            state={conduction}
             selectedLead={selectedLead}
             onSelectLead={onSelectLead}
             layers={torsoLayers}
@@ -128,9 +147,17 @@ export default function CardiacAnatomyViewport({
           enablePan={false}
         />
 
-        {/* Present on every heart version — mirrors camera, face click snaps view */}
         <OrientationCube />
       </Canvas>
+
+      <ConductionTimeline
+        phaseMs={phaseMs}
+        active={activeEvent}
+        status={conduction.status}
+        elapsed={elapsed}
+        timeScale={timeScale}
+        rateBpm={rateBpm}
+      />
 
       <div className="orientation-legend" aria-hidden>
         <span title="Anterior">A</span>
@@ -142,7 +169,7 @@ export default function CardiacAnatomyViewport({
       </div>
 
       <div className="anatomy-viewport-hint" aria-hidden>
-        Drag to rotate · Scroll to zoom · Cube faces snap to A/P/L/R/H/B
+        Glow follows physiological events · Cube snaps to A/P/L/R/H/B
       </div>
     </div>
   )

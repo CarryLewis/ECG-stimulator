@@ -692,3 +692,124 @@ input {
     top: 0.65rem;
   }
 }
+
+.conduction-3d-label--live {
+  color: #7dffb0 !important;
+  border-color: rgba(125, 255, 176, 0.55);
+  box-shadow: 0 0 10px rgba(61, 255, 138, 0.35);
+}
+
+.speed-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.speed-preset {
+  padding: 0.35rem 0.25rem;
+  border-radius: 6px;
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.speed-preset--active {
+  color: var(--text);
+  border-color: rgba(61, 184, 168, 0.45);
+  background: var(--accent-soft);
+}
+
+.conduction-timeline {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.85rem;
+  z-index: 3;
+  width: min(320px, calc(100% - 8.5rem));
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--stroke);
+  background: rgba(8, 14, 22, 0.82);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.conduction-timeline-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.55rem;
+}
+
+.conduction-timeline-head strong {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.conduction-timeline-meta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.conduction-pathway {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.conduction-pathway-step {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  gap: 0.35rem 0.55rem;
+  align-items: baseline;
+  padding: 0.22rem 0.35rem;
+  border-radius: 6px;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.conduction-pathway-step--passed {
+  opacity: 0.75;
+}
+
+.conduction-pathway-step--live {
+  opacity: 1;
+  background: rgba(61, 255, 138, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(61, 255, 138, 0.28);
+}
+
+.conduction-pathway-ms {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent);
+}
+
+.conduction-pathway-label {
+  font-size: 0.78rem;
+}
+
+.conduction-pathway-arrow {
+  display: none;
+}
+
+.conduction-timeline-status {
+  margin: 0.55rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 860px) {
+  .conduction-timeline {
+    width: calc(100% - 1.5rem);
+    top: auto;
+    bottom: 3.2rem;
+  }
+}

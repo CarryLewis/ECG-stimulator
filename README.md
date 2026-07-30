@@ -18,12 +18,13 @@ npm run preview
 
 - Three heart versions: **V1** conduction schematic, **V2** lead atlas, **V3** torso electrodes
 - Shared **orientation cube** on every version: **A / P / L / R / H / B**
-  (Anterior, Posterior, Left, Right, Head, Bottom) — tracks camera; click a face to snap
-- Orbit rotate / zoom
-- Anatomical labels toggle (V2 pins / V3 electrodes)
-- Structure reference panel (RA, LA, RV, LV, septum, apex)
+- **Event-driven conduction animation** (no manual keyframes):
+  - 0 ms SA → 40 ms atria → 120 ms AV → 200 ms His / ventricular cascade → 350 ms repolarization
+  - Glow sampled from physiological events on the shared simulation clock
+- Playback pace + heart-rate controls
+- Anatomical labels toggle
 
-Diseases and live ECG are **not** included yet.
+Diseases and live 12-lead ECG sampling are **not** included yet.
 
 ## Layout
 

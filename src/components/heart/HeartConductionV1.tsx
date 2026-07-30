@@ -57,9 +57,27 @@ function TubePath({
   )
 }
 
-/** Version 1 — schematic chambers + glowing conduction tree. */
-export default function HeartConductionV1({ state }: { state: ConductionState }) {
+/** Version 1 — schematic chambers + glowing conduction tree driven by EP events. */
+export default function HeartConductionV1({
+  state,
+  showLabels = true,
+}: {
+  state: ConductionState
+  showLabels?: boolean
+}) {
   const paths = useMemo(() => {
+    const atrialRA = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.15, 1.05, 0.35),
+      new THREE.Vector3(-0.15, 0.95, 0.28),
+      new THREE.Vector3(-0.4, 0.75, 0.18),
+      new THREE.Vector3(0.05, 0.4, 0.08),
+    ])
+    const atrialLA = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.15, 1.05, 0.35),
+      new THREE.Vector3(0.35, 0.95, 0.22),
+      new THREE.Vector3(0.55, 0.75, 0.1),
+      new THREE.Vector3(0.15, 0.42, 0.06),
+    ])
     const his = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0.05, 0.35, 0.05),
       new THREE.Vector3(0.02, 0.05, 0.08),
@@ -87,19 +105,23 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
       new THREE.Vector3(0.8, -1.3, 0.0),
       new THREE.Vector3(0.4, -1.4, -0.18),
     ])
-    return { his, leftBundle, rightBundle, purkinjeL, purkinjeR }
+    return { atrialRA, atrialLA, his, leftBundle, rightBundle, purkinjeL, purkinjeR }
   }, [])
 
   const saPos: [number, number, number] = [0.15, 1.05, 0.35]
   const avPos: [number, number, number] = [0.05, 0.35, 0.05]
 
-  const atriaCol = myoColor(state.atria)
-  const ventCol = myoColor(state.ventricle)
+  // Myocardium follows atrial / ventricular / repolarization events.
+  const atriaAct = Math.max(state.atria, state.sa * 0.35)
+  const ventAct = Math.max(state.ventricle, state.repol * 0.65)
+  const atriaCol = myoColor(atriaAct)
+  const ventCol = myoColor(ventAct)
   const saCol = nodeColor(state.sa)
   const avCol = nodeColor(state.av, !state.avConducts)
   const hisCol = nodeColor(state.his)
   const bundleCol = nodeColor(state.bundle)
   const ventPathCol = nodeColor(state.ventricle)
+  const atrialPathCol = nodeColor(state.atria)
 
   return (
     <group rotation={[0.15, -0.35, 0]} position={[0, 0.15, 0]}>
@@ -110,7 +132,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.35}
           metalness={0.08}
           emissive={new THREE.Color(...atriaCol)}
-          emissiveIntensity={0.25 + state.atria * 0.55}
+          emissiveIntensity={0.25 + atriaAct * 0.55}
           transparent
           opacity={0.95}
         />
@@ -122,7 +144,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.35}
           metalness={0.08}
           emissive={new THREE.Color(...atriaCol)}
-          emissiveIntensity={0.25 + state.atria * 0.55}
+          emissiveIntensity={0.25 + atriaAct * 0.55}
           transparent
           opacity={0.95}
         />
@@ -134,7 +156,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.32}
           metalness={0.1}
           emissive={new THREE.Color(...ventCol)}
-          emissiveIntensity={0.3 + state.ventricle * 0.55}
+          emissiveIntensity={0.3 + ventAct * 0.55}
           transparent
           opacity={0.96}
         />
@@ -146,7 +168,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           roughness={0.32}
           metalness={0.1}
           emissive={new THREE.Color(...ventCol)}
-          emissiveIntensity={0.3 + state.ventricle * 0.55}
+          emissiveIntensity={0.3 + ventAct * 0.55}
           transparent
           opacity={0.96}
         />
@@ -157,7 +179,7 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           color={new THREE.Color(...ventCol)}
           roughness={0.36}
           emissive={new THREE.Color(...ventCol)}
-          emissiveIntensity={0.22 + state.ventricle * 0.4}
+          emissiveIntensity={0.22 + ventAct * 0.4}
           transparent
           opacity={0.9}
         />
@@ -172,7 +194,16 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
         />
       </mesh>
       <Html position={[saPos[0] + 0.25, saPos[1] + 0.12, saPos[2]]} center>
-        <span className="conduction-3d-label">SA</span>
+        {showLabels && (
+          <span
+            className={
+              'conduction-3d-label' +
+              (state.sa > 0.35 ? ' conduction-3d-label--live' : '')
+            }
+          >
+            SA
+          </span>
+        )}
       </Html>
 
       <mesh position={avPos}>
@@ -184,7 +215,16 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
         />
       </mesh>
       <Html position={[avPos[0] + 0.28, avPos[1], avPos[2]]} center>
-        <span className="conduction-3d-label">AV</span>
+        {showLabels && (
+          <span
+            className={
+              'conduction-3d-label' +
+              (state.av > 0.35 ? ' conduction-3d-label--live' : '')
+            }
+          >
+            AV
+          </span>
+        )}
       </Html>
 
       {!state.avConducts && (
@@ -194,6 +234,20 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
           </span>
         </Html>
       )}
+
+      {/* Intra-atrial conduction SA → AV */}
+      <TubePath
+        curve={paths.atrialRA}
+        color={atrialPathCol}
+        radius={0.028}
+        intensity={state.atria}
+      />
+      <TubePath
+        curve={paths.atrialLA}
+        color={atrialPathCol}
+        radius={0.026}
+        intensity={state.atria}
+      />
 
       <TubePath curve={paths.his} color={hisCol} radius={0.045} intensity={state.his} />
       <TubePath
@@ -221,18 +275,62 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
         intensity={state.ventricle}
       />
 
-      <Html position={[-0.95, 0.95, 0]} center>
-        <span className="conduction-3d-label conduction-3d-label--dim">RA</span>
-      </Html>
-      <Html position={[0.95, 1.0, 0]} center>
-        <span className="conduction-3d-label conduction-3d-label--dim">LA</span>
-      </Html>
-      <Html position={[-0.95, -0.7, 0]} center>
-        <span className="conduction-3d-label conduction-3d-label--dim">RV</span>
-      </Html>
-      <Html position={[1.0, -0.65, 0]} center>
-        <span className="conduction-3d-label conduction-3d-label--dim">LV</span>
-      </Html>
+      {showLabels && (
+        <>
+          <Html position={[0.28, -0.05, 0.2]} center>
+            <span
+              className={
+                'conduction-3d-label conduction-3d-label--dim' +
+                (state.his > 0.35 ? ' conduction-3d-label--live' : '')
+              }
+            >
+              His
+            </span>
+          </Html>
+          <Html position={[0.85, -0.75, 0.15]} center>
+            <span
+              className={
+                'conduction-3d-label conduction-3d-label--dim' +
+                (state.bundle > 0.35 ? ' conduction-3d-label--live' : '')
+              }
+            >
+              RBB
+            </span>
+          </Html>
+          <Html position={[-0.85, -0.8, 0.15]} center>
+            <span
+              className={
+                'conduction-3d-label conduction-3d-label--dim' +
+                (state.bundle > 0.35 ? ' conduction-3d-label--live' : '')
+              }
+            >
+              LBB
+            </span>
+          </Html>
+          <Html position={[0.05, -1.55, 0.2]} center>
+            <span
+              className={
+                'conduction-3d-label conduction-3d-label--dim' +
+                (state.ventricle > 0.35 ? ' conduction-3d-label--live' : '')
+              }
+            >
+              Purkinje
+            </span>
+          </Html>
+          <Html position={[-0.95, 0.95, 0]} center>
+            <span className="conduction-3d-label conduction-3d-label--dim">RA</span>
+          </Html>
+          <Html position={[0.95, 1.0, 0]} center>
+            <span className="conduction-3d-label conduction-3d-label--dim">LA</span>
+          </Html>
+          <Html position={[-0.95, -0.7, 0]} center>
+            <span className="conduction-3d-label conduction-3d-label--dim">RV</span>
+          </Html>
+          <Html position={[1.0, -0.65, 0]} center>
+            <span className="conduction-3d-label conduction-3d-label--dim">LV</span>
+          </Html>
+        </>
+      )}
     </group>
   )
 }

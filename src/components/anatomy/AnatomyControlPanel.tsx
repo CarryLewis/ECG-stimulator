@@ -14,7 +14,18 @@ interface AnatomyControlPanelProps {
   onSelect: (id: HeartStructureId | null) => void
   onOpacityChange: (opacity: number) => void
   onToggleLabels: (show: boolean) => void
+  timeScale: number
+  onTimeScaleChange: (scale: number) => void
+  rateBpm: number
+  onRateChange: (bpm: number) => void
 }
+
+const SPEED_PRESETS = [
+  { label: 'Slow', value: 0.2 },
+  { label: 'Learn', value: 0.35 },
+  { label: 'Clear', value: 0.5 },
+  { label: 'Real', value: 1 },
+]
 
 export default function AnatomyControlPanel({
   heartVersion,
@@ -25,6 +36,10 @@ export default function AnatomyControlPanel({
   onSelect,
   onOpacityChange,
   onToggleLabels,
+  timeScale,
+  onTimeScaleChange,
+  rateBpm,
+  onRateChange,
 }: AnatomyControlPanelProps) {
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
@@ -37,10 +52,61 @@ export default function AnatomyControlPanel({
         <p className="anatomy-eyebrow">Source model</p>
         <h1 className="anatomy-title">Cardiac anatomy</h1>
         <p className="anatomy-lede">
-          Three teaching views of the same biological heart. The orientation
-          cube (A/P/L/R/H/B) tracks camera rotation on every version.
+          Conduction glow is driven by physiological events from the simulation
+          clock (SA → atria → AV → His → bundles → Purkinje → repolarization).
         </p>
       </header>
+
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">Playback</h2>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Time scale</span>
+            <span className="anatomy-control-value">
+              ×{timeScale.toFixed(2)}
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0.15}
+            max={1}
+            step={0.05}
+            value={timeScale}
+            onChange={(e) => onTimeScaleChange(Number(e.target.value))}
+          />
+        </label>
+        <div className="speed-presets" role="group" aria-label="Pace presets">
+          {SPEED_PRESETS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              className={
+                'speed-preset' +
+                (Math.abs(timeScale - p.value) < 0.01
+                  ? ' speed-preset--active'
+                  : '')
+              }
+              onClick={() => onTimeScaleChange(p.value)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Heart rate</span>
+            <span className="anatomy-control-value">{rateBpm} bpm</span>
+          </span>
+          <input
+            type="range"
+            min={40}
+            max={140}
+            step={1}
+            value={rateBpm}
+            onChange={(e) => onRateChange(Number(e.target.value))}
+          />
+        </label>
+      </section>
 
       <section className="anatomy-section">
         <h2 className="anatomy-section-title">Heart version</h2>
