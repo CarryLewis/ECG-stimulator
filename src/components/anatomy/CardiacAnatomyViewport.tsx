@@ -5,7 +5,10 @@ import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState, LeadName } from '../../ecg/types'
 import type { PhysiologicalEvent } from '../../sim/events'
-import OrientationCube from '../OrientationCube'
+import OrientationCube, {
+  CameraSync,
+  OrientationLegend,
+} from '../OrientationCube'
 import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
@@ -31,8 +34,8 @@ interface CardiacAnatomyViewportProps {
 /**
  * Shared 3D viewport for source anatomy + V1 / V2 / V3.
  *
- * Shadows stay off for software-WebGL stability. OrientationCube owns the
- * render loop (R3F priority > 0) and re-draws the main scene before its inset.
+ * The orientation cube is a separate overlay Canvas so it cannot disable
+ * R3F’s automatic heart-scene render (priority > 0 useFrame pitfall).
  */
 export default function CardiacAnatomyViewport({
   heartVersion,
@@ -121,7 +124,11 @@ export default function CardiacAnatomyViewport({
         <ambientLight intensity={0.95} />
         <directionalLight position={[3.2, 4.5, 2.8]} intensity={1.8} />
         <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.55} />
-        <directionalLight position={[0.5, 1.5, 3.5]} intensity={0.65} color="#ffe8dc" />
+        <directionalLight
+          position={[0.5, 1.5, 3.5]}
+          intensity={0.65}
+          color="#ffe8dc"
+        />
         <pointLight
           position={[0.2, 0.8, 1.5]}
           intensity={0.45 + conduction.sa * 0.7}
@@ -180,8 +187,11 @@ export default function CardiacAnatomyViewport({
           enablePan={false}
         />
 
-        <OrientationCube />
+        <CameraSync />
       </Canvas>
+
+      <OrientationCube />
+      <OrientationLegend />
 
       <ConductionTimeline
         phaseMs={phaseMs}
@@ -191,15 +201,6 @@ export default function CardiacAnatomyViewport({
         timeScale={timeScale}
         rateBpm={rateBpm}
       />
-
-      <div className="orientation-legend" aria-hidden>
-        <span title="Anterior">A</span>
-        <span title="Posterior">P</span>
-        <span title="Left">L</span>
-        <span title="Right">R</span>
-        <span title="Head">H</span>
-        <span title="Bottom">B</span>
-      </div>
 
       <div className="anatomy-viewport-hint" aria-hidden>
         {isSource
