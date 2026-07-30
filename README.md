@@ -16,13 +16,13 @@ npm run preview
 
 ## This module
 
-- Three heart versions: **V1** conduction schematic, **V2** lead atlas, **V3** torso electrodes
+- Four heart views: **Src** (selectable chambers), **V1** conduction, **V2** lead atlas, **V3** torso electrodes
 - Shared **orientation cube** on every version: **A / P / L / R / H / B**
 - **Event-driven conduction animation** (no manual keyframes):
   - 0 ms SA → 40 ms atria → 120 ms AV → 200 ms His / ventricular cascade → 350 ms repolarization
-  - Glow sampled from physiological events on the shared simulation clock
+  - Glow sampled from physiological events on the shared simulation clock (including Src chambers)
 - Playback pace + heart-rate controls
-- Anatomical labels toggle
+- Anatomical labels toggle; Src supports myocardium opacity + structure pick
 
 Diseases and live 12-lead ECG sampling are **not** included yet.
 

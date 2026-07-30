@@ -13,6 +13,8 @@ interface HeartStructureMeshProps {
   dimmed: boolean
   myocardiumOpacity: number
   showLabel: boolean
+  /** 0–1 activation from the EP event engine (optional). */
+  activation?: number
   onSelect: (id: HeartStructureDef['id']) => void
 }
 
@@ -22,6 +24,7 @@ export default function HeartStructureMesh({
   dimmed,
   myocardiumOpacity,
   showLabel,
+  activation = 0,
   onSelect,
 }: HeartStructureMeshProps) {
   const matRef = useRef<THREE.MeshStandardMaterial>(null)
@@ -35,6 +38,13 @@ export default function HeartStructureMesh({
     if (dimmed) return Math.max(0.08, base * 0.35)
     return base
   }, [def.opacityBias, dimmed, myocardiumOpacity, selected])
+
+  const emissiveIntensity = useMemo(() => {
+    const pulse = 0.22 + activation * 0.85
+    if (selected) return Math.max(0.55, pulse)
+    if (dimmed) return 0.08 + activation * 0.15
+    return pulse
+  }, [activation, dimmed, selected])
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
@@ -70,7 +80,7 @@ export default function HeartStructureMesh({
           ref={matRef}
           color={def.color}
           emissive={def.emissive}
-          emissiveIntensity={selected ? 0.55 : dimmed ? 0.08 : 0.22}
+          emissiveIntensity={emissiveIntensity}
           roughness={0.42}
           metalness={0.06}
           transparent
@@ -93,7 +103,8 @@ export default function HeartStructureMesh({
             className={
               'anatomy-label' +
               (selected ? ' anatomy-label--selected' : '') +
-              (dimmed ? ' anatomy-label--dimmed' : '')
+              (dimmed ? ' anatomy-label--dimmed' : '') +
+              (activation > 0.35 ? ' anatomy-label--live' : '')
             }
             style={{
               ['--label-color' as string]: def.emissive,

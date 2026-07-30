@@ -14,7 +14,7 @@ import { DEFAULT_HEART_RATE_BPM } from './sim/sinusTiming'
 const DEFAULT_OPACITY = 0.72
 
 export default function App() {
-  const [heartVersion, setHeartVersion] = useState<HeartVersion>('v1')
+  const [heartVersion, setHeartVersion] = useState<HeartVersion>('anatomy')
   const [selectedId, setSelectedId] = useState<HeartStructureId | null>(null)
   const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
   const [myocardiumOpacity, setMyocardiumOpacity] = useState(DEFAULT_OPACITY)
@@ -45,8 +45,11 @@ export default function App() {
       <main className="anatomy-stage">
         <CardiacAnatomyViewport
           heartVersion={heartVersion}
+          selectedStructureId={selectedId}
+          onSelectStructure={setSelectedId}
           selectedLead={selectedLead}
           onSelectLead={setSelectedLead}
+          myocardiumOpacity={myocardiumOpacity}
           showLabels={showLabels}
           conduction={frame.state}
           activeEvent={frame.active}

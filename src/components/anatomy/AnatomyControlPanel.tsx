@@ -163,9 +163,8 @@ export default function AnatomyControlPanel({
           <span>Anatomical labels</span>
         </label>
         <p className="anatomy-version-hint">
-          Opacity applies to the chamber source mesh when used; V1–V3 use their
-          own translucent materials. Labels: V1 node tags / V2 pins / V3
-          electrodes.
+          Opacity drives the <strong>Src</strong> chamber model. Labels: Src
+          chamber tags / V1 nodes / V2 pins / V3 electrodes.
         </p>
       </section>
 
@@ -196,6 +195,12 @@ export default function AnatomyControlPanel({
             )
           })}
         </ul>
+        {heartVersion !== 'anatomy' && (
+          <p className="anatomy-version-hint">
+            Switch to <strong>Src</strong> to highlight chambers in 3D. List
+            selection still shows the clinical note below.
+          </p>
+        )}
       </section>
 
       <section className="anatomy-section anatomy-detail">
@@ -209,8 +214,8 @@ export default function AnatomyControlPanel({
           </>
         ) : (
           <p className="anatomy-detail-body anatomy-detail-body--muted">
-            Select a structure for a clinical note, or click a lead pin /
-            electrode in V2–V3. Use the cube faces to snap to anatomical views.
+            On <strong>Src</strong>, click a chamber (or the list). On V2–V3,
+            click lead pins / electrodes. Cube faces snap to A/P/L/R/H/B.
           </p>
         )}
       </section>

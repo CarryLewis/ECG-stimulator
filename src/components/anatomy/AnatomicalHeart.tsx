@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import type { HeartStructureId } from '../../anatomy/types'
+import type { ConductionState } from '../../ecg/types'
 import HeartStructureMesh from './HeartStructureMesh'
 
 interface AnatomicalHeartProps {
@@ -9,6 +10,28 @@ interface AnatomicalHeartProps {
   myocardiumOpacity: number
   showLabels: boolean
   onSelect: (id: HeartStructureId | null) => void
+  /** Optional EP frame — chambers pulse from physiological events. */
+  conduction?: ConductionState
+}
+
+function activationFor(
+  id: HeartStructureId,
+  state: ConductionState | undefined,
+): number {
+  if (!state) return 0
+  switch (id) {
+    case 'right_atrium':
+    case 'left_atrium':
+      return Math.max(state.sa, state.atria)
+    case 'septum':
+      return Math.max(state.his, state.bundle, state.ventricle * 0.45)
+    case 'right_ventricle':
+    case 'left_ventricle':
+    case 'apex':
+      return Math.max(state.ventricle, state.repol * 0.55, state.bundle * 0.35)
+    default:
+      return 0
+  }
 }
 
 /**
@@ -20,6 +43,7 @@ export default function AnatomicalHeart({
   myocardiumOpacity,
   showLabels,
   onSelect,
+  conduction,
 }: AnatomicalHeartProps) {
   const greatVessels = useMemo(() => <GreatVessels />, [])
 
@@ -28,7 +52,6 @@ export default function AnatomicalHeart({
       rotation={[0.22, -0.48, 0.08]}
       position={[0, 0.15, 0]}
       onClick={(e) => {
-        // Click empty heart space clears only if not a structure (structures stopPropagation).
         e.stopPropagation()
       }}
     >
@@ -42,9 +65,8 @@ export default function AnatomicalHeart({
           dimmed={selectedId !== null && selectedId !== def.id}
           myocardiumOpacity={myocardiumOpacity}
           showLabel={showLabels}
-          onSelect={(id) =>
-            onSelect(selectedId === id ? null : id)
-          }
+          activation={activationFor(def.id, conduction)}
+          onSelect={(id) => onSelect(selectedId === id ? null : id)}
         />
       ))}
     </group>
@@ -82,15 +104,12 @@ function GreatVessels() {
 
   return (
     <group>
-      {/* Ascending aorta */}
       <mesh position={[-0.05, 1.05, -0.05]} rotation={[0.28, 0, 0.18]} material={aortaMat}>
         <cylinderGeometry args={[0.11, 0.14, 0.55, 16]} />
       </mesh>
-      {/* Aortic arch cue */}
       <mesh position={[0.22, 1.32, -0.12]} rotation={[0.05, 0.35, 1.15]} material={aortaMat}>
         <torusGeometry args={[0.26, 0.085, 10, 20, Math.PI * 0.85]} />
       </mesh>
-      {/* Pulmonary trunk */}
       <mesh position={[0.14, 0.92, 0.16]} rotation={[-0.35, 0.15, -0.3]} material={paMat}>
         <cylinderGeometry args={[0.09, 0.11, 0.4, 14]} />
       </mesh>

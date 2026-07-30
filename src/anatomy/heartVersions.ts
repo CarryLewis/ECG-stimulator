@@ -1,4 +1,4 @@
-export type HeartVersion = 'v1' | 'v2' | 'v3'
+export type HeartVersion = 'anatomy' | 'v1' | 'v2' | 'v3'
 
 export const HEART_VERSIONS: readonly {
   id: HeartVersion
@@ -6,6 +6,12 @@ export const HEART_VERSIONS: readonly {
   title: string
   hint: string
 }[] = [
+  {
+    id: 'anatomy',
+    short: 'Src',
+    title: 'Source chambers',
+    hint: 'Selectable RA/LA/RV/LV/septum/apex — biological source model',
+  },
   {
     id: 'v1',
     short: 'V1',
