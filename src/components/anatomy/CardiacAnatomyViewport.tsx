@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows, OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import { useMemo } from 'react'
 import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
@@ -30,8 +30,9 @@ interface CardiacAnatomyViewportProps {
 
 /**
  * Shared 3D viewport for source anatomy + V1 / V2 / V3.
- * Conduction glow is driven by the EP event engine.
- * OrientationCube (A/P/L/R/H/B) is present on every version.
+ *
+ * Shadows stay off for software-WebGL stability. OrientationCube owns the
+ * render loop (R3F priority > 0) and re-draws the main scene before its inset.
  */
 export default function CardiacAnatomyViewport({
   heartVersion,
@@ -66,7 +67,7 @@ export default function CardiacAnatomyViewport({
   const isSource = heartVersion === 'anatomy'
   const camera = isV3
     ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
-    : { position: [2.6, 1.4, 3.4] as [number, number, number], fov: 42 }
+    : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
 
   const clearSelection = () => {
     onSelectLead(null)
@@ -81,10 +82,27 @@ export default function CardiacAnatomyViewport({
     >
       <Canvas
         key={heartVersion}
-        shadows
-        dpr={[1, 1.75]}
+        shadows={false}
+        dpr={[1, 1.5]}
         camera={{ ...camera, near: 0.1, far: 40 }}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'default',
+          failIfMajorPerformanceCaveat: false,
+        }}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement
+          const onLost = (e: Event) => {
+            e.preventDefault()
+            console.warn('[ECG] WebGL context lost — will restore')
+          }
+          const onRestored = () => {
+            console.warn('[ECG] WebGL context restored')
+          }
+          canvas.addEventListener('webglcontextlost', onLost, false)
+          canvas.addEventListener('webglcontextrestored', onRestored, false)
+        }}
         onPointerMissed={clearSelection}
       >
         <color
@@ -100,22 +118,15 @@ export default function CardiacAnatomyViewport({
           ]}
         />
 
-        <ambientLight intensity={isV3 ? 0.95 : isSource ? 0.55 : 0.85} />
-        <directionalLight
-          position={[3.5, 4.5, 2.5]}
-          intensity={isV3 ? 2.0 : isSource ? 1.65 : 1.75}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <directionalLight position={[-3, 1.5, -2]} intensity={0.75} />
-        <directionalLight position={[0, 2, 4]} intensity={0.55} color="#ffe8e0" />
+        <ambientLight intensity={0.95} />
+        <directionalLight position={[3.2, 4.5, 2.8]} intensity={1.8} />
+        <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.55} />
+        <directionalLight position={[0.5, 1.5, 3.5]} intensity={0.65} color="#ffe8dc" />
         <pointLight
           position={[0.2, 0.8, 1.5]}
-          intensity={0.55 + conduction.sa * 0.9}
+          intensity={0.45 + conduction.sa * 0.7}
           color="#7dffb0"
         />
-        <hemisphereLight args={['#b8c8d8', '#1a1010', 0.3]} />
 
         {heartVersion === 'anatomy' && (
           <AnatomicalHeart
@@ -150,18 +161,9 @@ export default function CardiacAnatomyViewport({
           />
         )}
 
-        <ContactShadows
-          position={[0, isV3 ? -2.15 : -1.85, 0]}
-          opacity={0.4}
-          scale={isV3 ? 10 : 8}
-          blur={2.5}
-          far={4}
-        />
-
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, isV3 ? -2.16 : -1.86, 0]}
-          receiveShadow
           onClick={clearSelection}
         >
           <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
@@ -174,7 +176,7 @@ export default function CardiacAnatomyViewport({
           dampingFactor={0.08}
           minDistance={isV3 ? 2.6 : 2.0}
           maxDistance={isV3 ? 10 : 8}
-          target={isV3 ? [0, 0.05, 0] : isSource ? [0, -0.15, 0] : [0, -0.1, 0]}
+          target={isV3 ? [0, 0.05, 0] : [0, -0.15, 0]}
           enablePan={false}
         />
 

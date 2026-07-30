@@ -11,24 +11,21 @@ import {
   Scene,
   Vector2,
   Vector3,
+  Vector4,
 } from 'three'
 
 /**
  * Medical-imaging orientation cube — CT/MRI viewer style.
  *
- * Renders via a portalled orthographic scene into the top-right corner of
- * the parent R3F Canvas. Mirrors the main camera orientation; clicking a
- * face smoothly animates the camera to that anatomical view.
- *
- * Reusable — depends only on R3F + three.js.
+ * Important (R3F): any useFrame with priority > 0 disables the automatic
+ * default-scene render. We therefore re-render the main scene ourselves,
+ * then draw this cube into a scissored corner inset (same pattern as drei Hud).
  *
  * Labels (body axes: +x left, +y superior, +z anterior):
  *   A = Anterior (+z)  P = Posterior (−z)
  *   L = Left (+x)      R = Right (−x)
  *   H = Head (+y)      B = Bottom (−y)
  */
-
-// ─── Face definitions ────────────────────────────────────────────────────────
 
 interface CubeFace {
   id: string
@@ -51,16 +48,13 @@ const FACES: CubeFace[] = [
   { id: 'B', label: 'B', normal: new Vector3(0, -1, 0), rotation: [Math.PI / 2, 0, 0],      position: [0, -S, 0], baseColor: '#3d1a1a', hoverColor: '#6a3535' },
 ]
 
-// ─── Shared ──────────────────────────────────────────────────────────────────
-
-const BOX_GEO = new BoxGeometry(1, 1, 1)
 const _q = new Quaternion()
 const _v = new Vector3()
 const _m = new Matrix4()
 const _ray = new Raycaster()
 const _ndc = new Vector2()
-
-// ─── Label texture ───────────────────────────────────────────────────────────
+const _viewport = new Vector4()
+const _scissor = new Vector4()
 
 function makeLabelTex(text: string, bright: boolean): CanvasTexture {
   const c = document.createElement('canvas')
@@ -78,12 +72,16 @@ function makeLabelTex(text: string, bright: boolean): CanvasTexture {
   return tex
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 export default function OrientationCube({ size = 105 }: { size?: number }) {
-  const { camera: mainCamera, gl, size: canvasSize } = useThree()
+  const {
+    camera: mainCamera,
+    gl,
+    size: canvasSize,
+    scene: mainScene,
+  } = useThree()
   const cubeScene = useMemo(() => new Scene(), [])
   const cubeCam = useRef<OrthographicCamera | null>(null)
+  const boxGeo = useMemo(() => new BoxGeometry(1, 1, 1), [])
   const faceMeshes = useRef<Record<string, Mesh>>({})
   const [hovered, setHovered] = useState<string | null>(null)
 
@@ -93,7 +91,6 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     active: false,
   })
 
-  // Ortho camera
   useEffect(() => {
     const cam = new OrthographicCamera(-1.2, 1.2, 1.2, -1.2, 0.1, 20)
     cam.position.set(0, 0, 4)
@@ -101,16 +98,25 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     cubeCam.current = cam
   }, [])
 
-  // Label textures
+  useEffect(
+    () => () => {
+      boxGeo.dispose()
+    },
+    [boxGeo],
+  )
+
   const textures = useMemo(() => {
-    const map: Record<string, { normal: CanvasTexture; bright: CanvasTexture }> = {}
+    const map: Record<string, { normal: CanvasTexture; bright: CanvasTexture }> =
+      {}
     for (const f of FACES) {
-      map[f.id] = { normal: makeLabelTex(f.label, false), bright: makeLabelTex(f.label, true) }
+      map[f.id] = {
+        normal: makeLabelTex(f.label, false),
+        bright: makeLabelTex(f.label, true),
+      }
     }
     return map
   }, [])
 
-  // Pixel viewport (top-right)
   const vp = useMemo(() => {
     const dpr = gl.getPixelRatio()
     const w = Math.round(canvasSize.width * dpr)
@@ -119,7 +125,6 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     return { x: w - s - 4, y: h - s - 4, w: s, h: s }
   }, [canvasSize, gl, size])
 
-  // CSS-px region for pointer hit-testing
   const cssRect = useMemo(
     () => ({
       left: canvasSize.width - size - 4 / gl.getPixelRatio(),
@@ -129,7 +134,6 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     [canvasSize, gl, size],
   )
 
-  // Fly-to on face click
   const flyTo = useCallback(
     (face: CubeFace) => {
       const dist = mainCamera.position.length()
@@ -145,7 +149,6 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     [mainCamera],
   )
 
-  // Pointer interaction: raycast into the cube scene via the ortho cam
   const hitTest = useCallback(
     (cssX: number, cssY: number): CubeFace | null => {
       const cam = cubeCam.current
@@ -164,7 +167,6 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     [cssRect],
   )
 
-  // Attach DOM listeners for hover + click on the canvas element
   useEffect(() => {
     const canvas = gl.domElement
 
@@ -175,9 +177,7 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
       const face = hitTest(x, y)
       setHovered(face ? face.id : null)
       canvas.style.cursor =
-        face && x >= cssRect.left && y <= cssRect.size + 4
-          ? 'pointer'
-          : ''
+        face && x >= cssRect.left && y <= cssRect.size + 4 ? 'pointer' : ''
     }
 
     const onClick = (e: MouseEvent) => {
@@ -199,12 +199,11 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     }
   }, [gl, hitTest, flyTo, cssRect])
 
-  // Per-frame render
+  // Priority > 0 → R3F will NOT auto-render the default scene.
   useFrame(() => {
     const cam = cubeCam.current
     if (!cam) return
 
-    // Fly-to animation
     const anim = animRef.current
     if (anim.active) {
       mainCamera.getWorldQuaternion(_q)
@@ -220,28 +219,38 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
       }
     }
 
-    // Sync cube cam to main cam
     mainCamera.getWorldQuaternion(_q)
     cam.quaternion.copy(_q)
     _v.set(0, 0, 4).applyQuaternion(_q)
     cam.position.copy(_v)
     cam.updateMatrixWorld()
 
-    // Render inset
-    const autoClear = gl.autoClear
+    const prevAutoClear = gl.autoClear
+    gl.getViewport(_viewport)
+    gl.getScissor(_scissor)
+    const prevScissorTest = gl.getScissorTest()
+
+    // 1) Draw the real scene (heart / torso) — required because priority > 0.
+    gl.autoClear = true
+    gl.setScissorTest(false)
+    gl.setViewport(0, 0, canvasSize.width * gl.getPixelRatio(), canvasSize.height * gl.getPixelRatio())
+    gl.render(mainScene, mainCamera)
+
+    // 2) Inset orientation cube (scissored corner).
     gl.autoClear = false
-    gl.clearDepth()
+    gl.setScissorTest(true)
     gl.setViewport(vp.x, vp.y, vp.w, vp.h)
     gl.setScissor(vp.x, vp.y, vp.w, vp.h)
-    gl.setScissorTest(true)
+    gl.clear(true, true, true)
     gl.render(cubeScene, cam)
-    gl.setScissorTest(false)
-    const dpr = gl.getPixelRatio()
-    gl.setViewport(0, 0, canvasSize.width * dpr, canvasSize.height * dpr)
-    gl.autoClear = autoClear
+
+    // Restore GL state for the next frame / other subscribers.
+    gl.setViewport(_viewport.x, _viewport.y, _viewport.z, _viewport.w)
+    gl.setScissor(_scissor.x, _scissor.y, _scissor.z, _scissor.w)
+    gl.setScissorTest(prevScissorTest)
+    gl.autoClear = prevAutoClear
   }, 1)
 
-  // Store mesh refs for raycasting
   const setFaceMeshRef = useCallback(
     (id: string) => (el: Mesh | null) => {
       if (el) {
@@ -261,7 +270,7 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
       <directionalLight position={[-2, -1, -3]} intensity={0.25} />
 
       <lineSegments>
-        <edgesGeometry args={[BOX_GEO]} />
+        <edgesGeometry args={[boxGeo]} />
         <lineBasicMaterial color="#8aa0bb" transparent opacity={0.5} />
       </lineSegments>
 
@@ -271,13 +280,12 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
           <group key={face.id} position={face.position} rotation={face.rotation}>
             <mesh ref={setFaceMeshRef(face.id)}>
               <planeGeometry args={[0.96, 0.96]} />
-              <meshStandardMaterial
+              <meshBasicMaterial
                 color={isHov ? face.hoverColor : face.baseColor}
                 transparent
-                opacity={isHov ? 0.95 : 0.78}
-                roughness={0.55}
-                metalness={0.08}
+                opacity={isHov ? 0.95 : 0.85}
                 depthWrite={false}
+                toneMapped={false}
               />
             </mesh>
             <mesh position={[0, 0, 0.003]}>
@@ -286,6 +294,7 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
                 map={isHov ? textures[face.id].bright : textures[face.id].normal}
                 transparent
                 depthWrite={false}
+                toneMapped={false}
               />
             </mesh>
           </group>
@@ -295,4 +304,3 @@ export default function OrientationCube({ size = 105 }: { size?: number }) {
     cubeScene,
   )
 }
-

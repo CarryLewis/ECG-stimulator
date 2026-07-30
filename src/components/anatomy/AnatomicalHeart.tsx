@@ -1,5 +1,3 @@
-import { useMemo } from 'react'
-import * as THREE from 'three'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState } from '../../ecg/types'
@@ -45,8 +43,6 @@ export default function AnatomicalHeart({
   onSelect,
   conduction,
 }: AnatomicalHeartProps) {
-  const greatVessels = useMemo(() => <GreatVessels />, [])
-
   return (
     <group
       rotation={[0.22, -0.48, 0.08]}
@@ -55,7 +51,7 @@ export default function AnatomicalHeart({
         e.stopPropagation()
       }}
     >
-      {greatVessels}
+      <GreatVessels />
 
       {HEART_STRUCTURES.map((def) => (
         <HeartStructureMesh
@@ -73,45 +69,39 @@ export default function AnatomicalHeart({
   )
 }
 
-/** Minimal aorta / pulmonary trunk cues — context, not interactive yet. */
+/** Minimal aorta / pulmonary trunk cues — declarative materials (no shared mats). */
 function GreatVessels() {
-  const aortaMat = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: '#e85a5a',
-        emissive: '#c03030',
-        emissiveIntensity: 0.35,
-        roughness: 0.35,
-        metalness: 0.12,
-        transparent: true,
-        opacity: 0.85,
-      }),
-    [],
-  )
-  const paMat = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: '#5a8fc8',
-        emissive: '#2a5a90',
-        emissiveIntensity: 0.3,
-        roughness: 0.38,
-        metalness: 0.1,
-        transparent: true,
-        opacity: 0.8,
-      }),
-    [],
-  )
-
   return (
     <group>
-      <mesh position={[-0.05, 1.05, -0.05]} rotation={[0.28, 0, 0.18]} material={aortaMat}>
+      <mesh position={[-0.05, 1.05, -0.05]} rotation={[0.28, 0, 0.18]}>
         <cylinderGeometry args={[0.11, 0.14, 0.55, 16]} />
+        <meshStandardMaterial
+          color="#e85a5a"
+          emissive="#c03030"
+          emissiveIntensity={0.4}
+          roughness={0.35}
+          metalness={0.12}
+        />
       </mesh>
-      <mesh position={[0.22, 1.32, -0.12]} rotation={[0.05, 0.35, 1.15]} material={aortaMat}>
+      <mesh position={[0.22, 1.32, -0.12]} rotation={[0.05, 0.35, 1.15]}>
         <torusGeometry args={[0.26, 0.085, 10, 20, Math.PI * 0.85]} />
+        <meshStandardMaterial
+          color="#e85a5a"
+          emissive="#c03030"
+          emissiveIntensity={0.4}
+          roughness={0.35}
+          metalness={0.12}
+        />
       </mesh>
-      <mesh position={[0.14, 0.92, 0.16]} rotation={[-0.35, 0.15, -0.3]} material={paMat}>
+      <mesh position={[0.14, 0.92, 0.16]} rotation={[-0.35, 0.15, -0.3]}>
         <cylinderGeometry args={[0.09, 0.11, 0.4, 14]} />
+        <meshStandardMaterial
+          color="#5a8fc8"
+          emissive="#2a5a90"
+          emissiveIntensity={0.35}
+          roughness={0.38}
+          metalness={0.1}
+        />
       </mesh>
     </group>
   )

@@ -125,7 +125,7 @@ export default function HeartConductionV1({
 
   return (
     <group rotation={[0.15, -0.35, 0]} position={[0, 0.15, 0]}>
-      <mesh position={[-0.55, 0.85, 0.1]} castShadow>
+      <mesh position={[-0.55, 0.85, 0.1]}>
         <sphereGeometry args={[0.48, 32, 24]} />
         <meshStandardMaterial
           color={new THREE.Color(...atriaCol)}
@@ -137,7 +137,7 @@ export default function HeartConductionV1({
           opacity={0.95}
         />
       </mesh>
-      <mesh position={[0.55, 0.9, 0.05]} castShadow>
+      <mesh position={[0.55, 0.9, 0.05]}>
         <sphereGeometry args={[0.46, 32, 24]} />
         <meshStandardMaterial
           color={new THREE.Color(...atriaCol)}
@@ -149,7 +149,7 @@ export default function HeartConductionV1({
           opacity={0.95}
         />
       </mesh>
-      <mesh position={[-0.45, -0.55, 0.05]} scale={[0.95, 1.35, 0.9]} castShadow>
+      <mesh position={[-0.45, -0.55, 0.05]} scale={[0.95, 1.35, 0.9]}>
         <sphereGeometry args={[0.72, 36, 28]} />
         <meshStandardMaterial
           color={new THREE.Color(...ventCol)}
@@ -161,7 +161,7 @@ export default function HeartConductionV1({
           opacity={0.96}
         />
       </mesh>
-      <mesh position={[0.4, -0.5, 0.0]} scale={[1.05, 1.45, 1.0]} castShadow>
+      <mesh position={[0.4, -0.5, 0.0]} scale={[1.05, 1.45, 1.0]}>
         <sphereGeometry args={[0.78, 36, 28]} />
         <meshStandardMaterial
           color={new THREE.Color(...ventCol)}

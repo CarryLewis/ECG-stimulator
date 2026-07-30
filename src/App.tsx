@@ -11,7 +11,7 @@ import {
 import { useSimulationFrame } from './sim/useSimulationFrame'
 import { DEFAULT_HEART_RATE_BPM } from './sim/sinusTiming'
 
-const DEFAULT_OPACITY = 0.72
+const DEFAULT_OPACITY = 0.92
 
 export default function App() {
   const [heartVersion, setHeartVersion] = useState<HeartVersion>('anatomy')

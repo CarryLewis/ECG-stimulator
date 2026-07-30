@@ -1,11 +1,8 @@
 import { Html } from '@react-three/drei'
 import type { ThreeEvent } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import * as THREE from 'three'
 import type { HeartStructureDef } from '../../anatomy/types'
-
-/** Shared sphere — one geometry for all chamber pieces (performance). */
-const SHARED_SPHERE = new THREE.SphereGeometry(1, 32, 24)
 
 interface HeartStructureMeshProps {
   def: HeartStructureDef
@@ -18,6 +15,11 @@ interface HeartStructureMeshProps {
   onSelect: (id: HeartStructureDef['id']) => void
 }
 
+/**
+ * One chamber / wall piece.
+ * Geometry is per-mesh (JSX) so StrictMode / Canvas remounts cannot dispose a
+ * shared SphereGeometry out from under the scene.
+ */
 export default function HeartStructureMesh({
   def,
   selected,
@@ -27,22 +29,22 @@ export default function HeartStructureMesh({
   activation = 0,
   onSelect,
 }: HeartStructureMeshProps) {
-  const matRef = useRef<THREE.MeshStandardMaterial>(null)
-
   const opacity = useMemo(() => {
     const base = Math.max(
-      0.12,
+      0.45,
       Math.min(1, myocardiumOpacity + (def.opacityBias ?? 0)),
     )
-    if (selected) return Math.min(1, base + 0.18)
-    if (dimmed) return Math.max(0.08, base * 0.35)
+    if (selected) return Math.min(1, Math.max(base, 0.92))
+    if (dimmed) return Math.max(0.28, base * 0.5)
     return base
   }, [def.opacityBias, dimmed, myocardiumOpacity, selected])
 
+  const useTransparency = opacity < 0.98
+
   const emissiveIntensity = useMemo(() => {
-    const pulse = 0.22 + activation * 0.85
-    if (selected) return Math.max(0.55, pulse)
-    if (dimmed) return 0.08 + activation * 0.15
+    const pulse = 0.35 + activation * 0.95
+    if (selected) return Math.max(0.7, pulse)
+    if (dimmed) return 0.12 + activation * 0.2
     return pulse
   }, [activation, dimmed, selected])
 
@@ -57,16 +59,23 @@ export default function HeartStructureMesh({
     def.position[2] + def.labelOffset[2],
   ]
 
+  const meshScale = useMemo(
+    (): [number, number, number] => [
+      def.scale[0] * def.radius,
+      def.scale[1] * def.radius,
+      def.scale[2] * def.radius,
+    ],
+    [def.radius, def.scale],
+  )
+
   return (
     <group>
       <mesh
-        geometry={SHARED_SPHERE}
         position={def.position}
-        scale={def.scale.map((s) => s * def.radius) as [number, number, number]}
+        scale={meshScale}
         rotation={def.rotation}
         renderOrder={def.renderOrder}
-        castShadow
-        receiveShadow
+        frustumCulled={false}
         onClick={handleClick}
         onPointerOver={(e) => {
           e.stopPropagation()
@@ -76,17 +85,17 @@ export default function HeartStructureMesh({
           document.body.style.cursor = 'auto'
         }}
       >
+        <sphereGeometry args={[1, 28, 20]} />
         <meshStandardMaterial
-          ref={matRef}
           color={def.color}
           emissive={def.emissive}
           emissiveIntensity={emissiveIntensity}
-          roughness={0.42}
-          metalness={0.06}
-          transparent
+          roughness={0.45}
+          metalness={0.05}
+          transparent={useTransparency}
           opacity={opacity}
-          depthWrite={opacity > 0.85}
-          side={THREE.DoubleSide}
+          depthWrite={!useTransparency}
+          side={THREE.FrontSide}
         />
       </mesh>
 
