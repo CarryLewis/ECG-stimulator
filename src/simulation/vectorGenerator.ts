@@ -1,13 +1,21 @@
 /**
- * Cardiac electrical vector generator.
+ * Cardiac electrical vector generator (physiological VCG teaching model).
  *
- * Produces a single time-dependent dipole M(t) = [Mx, My, Mz] from the
- * conduction activation sequence. All 12 leads are later obtained by
- * projecting this same vector — never by independent PQRST curves.
+ * One dipole M(t) is composed from sequential activation contributions.
+ * All 12 leads are later projections of this same vector.
+ *
+ * Wave-forming sequence (healthy adult):
+ *   1. Atrial depol — RA then LA  → P wave
+ *   2. Septal depol — right/anterior → early q / r
+ *   3. Free-wall depol — left/inferior/posterior → R
+ *   4. Basal residual — terminal S forces
+ *   5. ST isoelectric (or injury current)
+ *   6. Repolarization — concordant T
  */
 
 import {
-  ATRIAL_ACTIVATION_DIRECTION,
+  ATRIAL_EARLY_DIRECTION,
+  ATRIAL_LATE_DIRECTION,
   BASAL_ACTIVATION_DIRECTION,
   SEPTAL_ACTIVATION_DIRECTION,
   TERRITORY_INJURY_DIRECTION,
@@ -20,6 +28,7 @@ import {
   activationEnvelope,
   buildConductionPlan,
   qrsEnvelope,
+  tWaveEnvelope,
   type ConductionPlan,
 } from './conductionSystem'
 import type {
@@ -37,14 +46,12 @@ function hypertrophyBias(
   const s = params.hypertrophySeverity
   if (s <= 0 || params.hypertrophy === 'none') return freeWall
   if (params.hypertrophy === 'lvh') {
-    // Larger left / posterior forces.
     return addVec(
       freeWall,
-      scaleVec({ x: 0.55, y: 0.1, z: -0.45 }, 0.9 * s),
+      scaleVec({ x: 0.55, y: 0.08, z: -0.5 }, 1.0 * s),
     )
   }
-  // RVH: right / anterior.
-  return addVec(freeWall, scaleVec({ x: -0.55, y: 0.05, z: 0.65 }, 0.9 * s))
+  return addVec(freeWall, scaleVec({ x: -0.6, y: 0.05, z: 0.7 }, 1.0 * s))
 }
 
 function injuryContribution(
@@ -59,7 +66,7 @@ function injuryContribution(
     return null
   }
   const dir = TERRITORY_INJURY_DIRECTION[params.injuryLocation]
-  const mag = 0.35 * params.injurySeverity * stWeight
+  const mag = 0.45 * params.injurySeverity * stWeight
   return {
     kind: 'injury_current',
     weight: stWeight,
@@ -69,7 +76,6 @@ function injuryContribution(
 
 /**
  * Instantaneous cardiac dipole at absolute time t (seconds).
- * Phase is taken modulo RR from the conduction plan.
  */
 export function sampleCardiacVector(
   t: number,
@@ -81,71 +87,101 @@ export function sampleCardiacVector(
   const phase = ((t % cplan.rr_s) + cplan.rr_s) % cplan.rr_s
 
   const axis = p.cardiacAxis_deg
-  const atrialDir = rotateFrontalAxis(ATRIAL_ACTIVATION_DIRECTION, axis)
-  const septalDir = rotateFrontalAxis(SEPTAL_ACTIVATION_DIRECTION, axis)
+
+  // Atrial axis is anatomically ~+50° and does NOT follow ventricular axis.
+  const atrialEarly = ATRIAL_EARLY_DIRECTION
+  const atrialLate = ATRIAL_LATE_DIRECTION
+
+  // Septal forces are mostly anatomical (left→right); do not follow QRS axis.
+  const septalDir = SEPTAL_ACTIVATION_DIRECTION
+
   let freeWallDir = rotateFrontalAxis(VENTRICULAR_ACTIVATION_DIRECTION, axis)
   freeWallDir = hypertrophyBias(p, freeWallDir)
   const basalDir = rotateFrontalAxis(BASAL_ACTIVATION_DIRECTION, axis)
-  // T wave follows QRS direction (concordant) in the healthy model.
-  const tDir = scaleVec(freeWallDir, 0.32)
 
-  const pHalf = Math.max(0.025, (cplan.qrsOnset_s - cplan.pOnset_s) * 0.45)
-  const atrialW = activationEnvelope(phase, cplan.pPeak_s, pHalf)
+  // T: concordant with QRS, slightly more anterior / left (normal adult).
+  const tDir = addVec(
+    scaleVec(freeWallDir, 0.9),
+    scaleVec({ x: 0.08, y: 0.02, z: 0.2 }, 1),
+  )
+
+  // --- Envelopes (non-overlapping P vs QRS; sequenced QRS parts) ---
+  const pWidth = Math.max(0.035, (cplan.pEnd_s - cplan.pOnset_s) * 0.5)
+  const earlyP = activationEnvelope(
+    phase,
+    cplan.pOnset_s + (cplan.pPeak_s - cplan.pOnset_s) * 0.55,
+    pWidth * 0.85,
+  )
+  const lateP = activationEnvelope(
+    phase,
+    cplan.pPeak_s + (cplan.pEnd_s - cplan.pPeak_s) * 0.25,
+    pWidth * 0.9,
+  )
 
   const septalW = qrsEnvelope(
     phase,
-    cplan.qrsOnset_s + cplan.qrs_s * 0.18,
-    cplan.qrs_s * 0.35,
+    cplan.septalPeak_s,
+    cplan.qrs_s * 0.38,
+    2.0,
   )
-  const apicalW = qrsEnvelope(phase, cplan.rPeak_s, cplan.qrs_s * 0.55)
-  const basalW = qrsEnvelope(
-    phase,
-    cplan.qrsEnd_s - cplan.qrs_s * 0.15,
-    cplan.qrs_s * 0.4,
-  )
+  const apicalW = qrsEnvelope(phase, cplan.rPeak_s, cplan.qrs_s * 0.52, 2.2)
+  const basalW = qrsEnvelope(phase, cplan.sPeak_s, cplan.qrs_s * 0.42, 1.8)
 
   const stWeight = (() => {
-    const a = cplan.qrsEnd_s
-    const b = cplan.tPeak_s - 0.02
+    const a = cplan.qrsEnd_s + 0.008
+    const b = cplan.tPeak_s - 0.035
     if (phase <= a || phase >= b) return 0
     const mid = (a + b) / 2
-    const half = (b - a) / 2
+    const half = Math.max(0.02, (b - a) / 2)
     return activationEnvelope(phase, mid, half)
   })()
 
-  const tHalf = Math.max(0.04, (cplan.tEnd_s - cplan.qrsEnd_s) * 0.4)
-  const repolW = activationEnvelope(phase, cplan.tPeak_s, tHalf)
+  const tWidth = Math.max(0.055, cplan.tEnd_s - cplan.qrsEnd_s)
+  const repolW = tWaveEnvelope(phase, cplan.tPeak_s, tWidth)
 
-  // Peak magnitudes chosen so Lead II QRS ≈ 1.0–1.4 mV after projection.
+  /**
+   * Peak scales (body-surface mV after typical Lead II projection):
+   *   P  ≈ 0.20–0.28 mV
+   *   R  ≈ 1.1–1.6 mV
+   *   T  ≈ 0.30–0.45 mV
+   */
+  const atrialVec = addVec(
+    scaleVec(atrialEarly, 0.2 * earlyP),
+    scaleVec(atrialLate, 0.28 * lateP),
+  )
+  const atrialW = Math.max(earlyP, lateP)
+
   const contributions: VectorContribution[] = [
     {
       kind: 'atrial_depol',
       weight: atrialW,
-      vector: scaleVec(atrialDir, 0.22 * atrialW),
+      vector: atrialVec,
     },
     {
       kind: 'septal_depol',
       weight: septalW,
-      vector: scaleVec(septalDir, 0.35 * septalW),
+      // Strong enough for visible q in I/V6 and r in V1.
+      vector: scaleVec(septalDir, 0.55 * septalW),
     },
     {
       kind: 'apical_depol',
       weight: apicalW,
-      vector: scaleVec(freeWallDir, 1.35 * apicalW),
+      vector: scaleVec(freeWallDir, 1.55 * apicalW),
     },
     {
       kind: 'basal_depol',
       weight: basalW,
-      vector: scaleVec(basalDir, 0.28 * basalW),
+      vector: scaleVec(basalDir, 0.45 * basalW),
     },
     {
       kind: 'ventricular_repol',
       weight: repolW,
-      vector: scaleVec(tDir, 1.0 * repolW),
+      // T ~ 25–35% of R after projection.
+      vector: scaleVec(tDir, 0.38 * repolW),
     },
   ]
 
-  const injury = injuryContribution(p, Math.max(stWeight, repolW * 0.35))
+  const injury = injuryContribution(p, Math.max(stWeight, repolW * 0.25))
   if (injury) contributions.push(injury)
 
   let dipole: CardiacVector = { x: 0, y: 0, z: 0 }

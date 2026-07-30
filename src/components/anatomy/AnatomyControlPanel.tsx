@@ -322,7 +322,9 @@ export default function AnatomyControlPanel({
             {validation.ok ? 'Morphology checks passed' : 'Morphology issues'}
           </p>
           <ul className="ecg-validation-metrics">
-            <li>II {validation.metrics.leadII_qrsPolarity.toFixed(2)} mV</li>
+            <li>II P {validation.metrics.leadII_pPeak.toFixed(2)} mV</li>
+            <li>II QRS {validation.metrics.leadII_qrsPolarity.toFixed(2)} mV</li>
+            <li>II T {validation.metrics.leadII_tPeak.toFixed(2)} mV</li>
             <li>aVR {validation.metrics.aVR_qrsPolarity.toFixed(2)} mV</li>
             <li>V1 {validation.metrics.v1_qrsPolarity.toFixed(2)} mV</li>
             <li>V6 {validation.metrics.v6_qrsPolarity.toFixed(2)} mV</li>

@@ -19,12 +19,12 @@ export default function ECGMonitor({
   strip,
   lead = 'II',
   playhead_s,
-  height = 120,
+  height = 140,
   title = 'Rhythm (Lead II)',
 }: ECGMonitorProps) {
   const W = 640
   const samples = strip.leads[lead]
-  const mVPerPixel = 28
+  const mVPerPixel = 36
 
   const path = useMemo(() => {
     const n = samples.length

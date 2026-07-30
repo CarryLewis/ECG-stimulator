@@ -70,6 +70,10 @@ export function validateEcgStrip(strip: EcgStrip): EcgValidationResult {
   const issues: ValidationIssue[] = []
   const rPeak =
     strip.ventricularBeats[0] ?? strip.t0 + strip.rr_s * 0.35
+  const pPeak =
+    strip.atrialBeats[0] != null
+      ? strip.atrialBeats[0] + 0.04
+      : rPeak - strip.intervals.pr_s + 0.04
 
   const leadII = qrsPolarity(strip, 'II', rPeak)
   const aVR = qrsPolarity(strip, 'aVR', rPeak)
@@ -77,9 +81,35 @@ export function validateEcgStrip(strip: EcgStrip): EcgValidationResult {
   const v1 = qrsPolarity(strip, 'V1', rPeak)
   const v6 = qrsPolarity(strip, 'V6', rPeak)
 
+  const pII = peakAround(strip.leads.II, strip.fs, strip.t0, pPeak, 0.05)
+  const pAVR = peakAround(strip.leads.aVR, strip.fs, strip.t0, pPeak, 0.05)
+  const tII = peakAround(
+    strip.leads.II,
+    strip.fs,
+    strip.t0,
+    rPeak + strip.intervals.qrs_s * 0.5 + strip.intervals.qt_s * 0.35,
+    0.06,
+  )
+
   const rProgression = (['V1', 'V2', 'V3', 'V4', 'V5', 'V6'] as const).map(
     (lead) => peakAround(strip.leads[lead], strip.fs, strip.t0, rPeak, 0.05),
   )
+
+  // --- P wave ---
+  if (pII < 0.08) {
+    issues.push({
+      code: 'p_wave_too_small',
+      severity: 'error',
+      message: `Lead II P wave should be visible (≥0.08 mV, got ${pII.toFixed(3)} mV)`,
+    })
+  }
+  if (pAVR > -0.04) {
+    issues.push({
+      code: 'p_avr_not_negative',
+      severity: 'warn',
+      message: `aVR P wave expected inverted (got ${pAVR.toFixed(3)} mV)`,
+    })
+  }
 
   // --- Limb leads ---
   if (leadII <= 0.05) {
@@ -101,6 +131,13 @@ export function validateEcgStrip(strip: EcgStrip): EcgValidationResult {
       code: 'lead_i_not_positive',
       severity: 'warn',
       message: `Lead I QRS expected positive in normal axis (got ${leadI.toFixed(3)} mV)`,
+    })
+  }
+  if (tII < 0.1) {
+    issues.push({
+      code: 't_wave_too_small',
+      severity: 'warn',
+      message: `Lead II T wave should be clearly positive (got ${tII.toFixed(3)} mV)`,
     })
   }
 
@@ -183,6 +220,8 @@ export function validateEcgStrip(strip: EcgStrip): EcgValidationResult {
       leadI_qrsPolarity: leadI,
       v1_qrsPolarity: v1,
       v6_qrsPolarity: v6,
+      leadII_pPeak: pII,
+      leadII_tPeak: tII,
       rProgression: rAmps,
       pr_ms,
       qrs_ms,

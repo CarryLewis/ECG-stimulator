@@ -1,10 +1,15 @@
 /**
- * Cardiac anatomy coordinate model for the electrical dipole.
+ * Cardiac anatomy + reference electrical vectors (teaching VCG).
  *
- * Axes (ECG convention used by the vector engine):
- *   X: left (+) ↔ right (−)
- *   Y: inferior (+) ↔ superior (−)
- *   Z: anterior (+) ↔ posterior (−)
+ * Axes (ECG convention):
+ *   +x patient left · +y inferior · +z anterior
+ *
+ * Directions follow classic vectorcardiography:
+ *   P   ≈ +45–60° frontal, left-inferior (slightly anterior)
+ *   septal QRS early: right + anterior (LV→RV septum)
+ *   free-wall QRS: left + inferior + mildly posterior (mean axis ~+60°)
+ *   late basal: superior / right residual (S-wave termination)
+ *   T: concordant with QRS, slightly more anterior
  */
 
 import type { CardiacVector, Vec3 } from './types'
@@ -12,42 +17,54 @@ import type { CardiacVector, Vec3 } from './types'
 /** Heart electrical centre in body coordinates (scene units). */
 export const HEART_CENTER: Vec3 = { x: 0.08, y: 0.05, z: 0.15 }
 
-/**
- * Nominal mean QRS axis direction at +60° (normal axis, toward Lead II).
- * Rotated in the frontal plane by SimulationParams.cardiacAxis_deg.
- */
+/** Nominal mean QRS axis (toward Lead II). */
 export const NOMINAL_CARDIAC_AXIS_DEG = 60
 
 /**
- * Default ventricular free-wall activation direction.
- * Left + inferior (axis ~60°), mildly posterior — enough for V1 S waves
- * while leftward magnitude still yields R progression toward V5–V6.
+ * Unit-ish activation directions at the nominal +60° QRS axis.
+ * Magnitudes are applied separately in the vector generator.
  */
-export const VENTRICULAR_ACTIVATION_DIRECTION: CardiacVector = {
-  x: 0.55,
-  y: 0.82,
-  z: -0.12,
-}
 
-/** Atrial depolarization: left-inferior, slightly posterior. */
+/** Mean atrial depolarization (~+50°). Independent of ventricular axis. */
 export const ATRIAL_ACTIVATION_DIRECTION: CardiacVector = {
-  x: 0.45,
+  x: 0.64, // cos(50°)
+  y: 0.77, // sin(50°)
+  z: 0.18, // slight anterior — helps P in V3–V6
+}
+
+/** Early right-atrial emphasis (more right/anterior) for V1 biphasic P. */
+export const ATRIAL_EARLY_DIRECTION: CardiacVector = {
+  x: 0.25,
   y: 0.55,
-  z: -0.12,
+  z: 0.45,
 }
 
-/** Early septal: rightward and anterior (left → right septum). */
+/** Late left-atrial emphasis (more left/posterior). */
+export const ATRIAL_LATE_DIRECTION: CardiacVector = {
+  x: 0.75,
+  y: 0.55,
+  z: -0.25,
+}
+
+/** Early septal: left → right, anterior. */
 export const SEPTAL_ACTIVATION_DIRECTION: CardiacVector = {
-  x: -0.45,
-  y: 0.05,
-  z: 0.65,
+  x: -0.55,
+  y: 0.1,
+  z: 0.8,
 }
 
-/** Late basal contribution: slight superior / right residual. */
+/** Main LV free-wall / apical vector at +60°. */
+export const VENTRICULAR_ACTIVATION_DIRECTION: CardiacVector = {
+  x: 0.5,
+  y: 0.866,
+  z: -0.22,
+}
+
+/** Late basal / posterobasal residual (S-wave / terminal forces). */
 export const BASAL_ACTIVATION_DIRECTION: CardiacVector = {
-  x: -0.12,
-  y: -0.2,
-  z: -0.15,
+  x: -0.25,
+  y: -0.35,
+  z: -0.35,
 }
 
 /** Territory outward directions for injury current (STEMI). */

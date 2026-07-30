@@ -188,6 +188,8 @@ export interface EcgValidationResult {
     leadI_qrsPolarity: number
     v1_qrsPolarity: number
     v6_qrsPolarity: number
+    leadII_pPeak: number
+    leadII_tPeak: number
     rProgression: number[]
     pr_ms: number
     qrs_ms: number

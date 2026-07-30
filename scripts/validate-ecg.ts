@@ -19,11 +19,21 @@ console.log('Intervals:', {
   qrs_ms: Math.round(strip.intervals.qrs_s * 1000),
   qt_ms: Math.round(strip.intervals.qt_s * 1000),
 })
+console.log('P/QRS/T (Lead II):', {
+  P: validation.metrics.leadII_pPeak.toFixed(3),
+  QRS: validation.metrics.leadII_qrsPolarity.toFixed(3),
+  T: validation.metrics.leadII_tPeak.toFixed(3),
+})
 console.log('Metrics:', validation.metrics)
 console.log('Issues:', validation.issues)
 
 if (!validation.ok) {
   console.error('FAIL: ECG validation errors')
+  process.exit(1)
+}
+
+if (validation.metrics.leadII_pPeak < 0.08) {
+  console.error('FAIL: Lead II P wave not visible')
   process.exit(1)
 }
 

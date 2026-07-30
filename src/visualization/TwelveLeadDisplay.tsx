@@ -59,9 +59,9 @@ function LeadCell({
   onSelect?: (lead: LeadName) => void
 }) {
   const W = 220
-  const H = 72
-  // 10 mm/mV teaching scale ≈ 28 px/mV in this panel
-  const mVPerPixel = 22
+  const H = 96
+  // Teaching gain: ~0.25 mV P ≈ 7 px; ~1.5 mV R ≈ 42 px (still on-scale).
+  const mVPerPixel = 28
   const path = useMemo(
     () => buildPath(samples, fs, window_s, W, H, mVPerPixel),
     [samples, fs, window_s],
@@ -108,7 +108,7 @@ function LeadCell({
           stroke="rgba(220, 80, 80, 0.2)"
           strokeWidth="0.7"
         />
-        <path d={path} fill="none" stroke="#111827" strokeWidth="1.4" />
+        <path d={path} fill="none" stroke="#111827" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
     </button>
   )
@@ -118,7 +118,7 @@ export default function TwelveLeadDisplay({
   strip,
   selectedLead,
   onSelectLead,
-  window_s = 2.4,
+  window_s = 2.0,
 }: TwelveLeadDisplayProps) {
   return (
     <div className="ecg-twelve" role="region" aria-label="Twelve-lead ECG">
