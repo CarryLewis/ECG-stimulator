@@ -119,7 +119,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [0.72, 0.55, 0.68],
     rotation: [0.2, 0, 0.1],
     radius: 0.48,
-    labelOffset: [0.15, -0.45, 0.35],
+    labelOffset: [0.35, -0.55, 0.55],
     renderOrder: 2,
   },
 ] as const

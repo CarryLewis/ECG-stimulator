@@ -34,6 +34,34 @@ export default function AnatomyControlPanel({
       </header>
 
       <section className="anatomy-section">
+        <h2 className="anatomy-section-title">Display</h2>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Myocardium opacity</span>
+            <span className="anatomy-control-value">
+              {Math.round(myocardiumOpacity * 100)}%
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0.2}
+            max={1}
+            step={0.05}
+            value={myocardiumOpacity}
+            onChange={(e) => onOpacityChange(Number(e.target.value))}
+          />
+        </label>
+        <label className="anatomy-toggle">
+          <input
+            type="checkbox"
+            checked={showLabels}
+            onChange={(e) => onToggleLabels(e.target.checked)}
+          />
+          <span>Anatomical labels</span>
+        </label>
+      </section>
+
+      <section className="anatomy-section">
         <h2 className="anatomy-section-title">Structures</h2>
         <ul className="structure-list" role="listbox" aria-label="Heart structures">
           {HEART_STRUCTURES.map((s) => {
@@ -60,34 +88,6 @@ export default function AnatomyControlPanel({
             )
           })}
         </ul>
-      </section>
-
-      <section className="anatomy-section">
-        <h2 className="anatomy-section-title">Display</h2>
-        <label className="anatomy-control">
-          <span className="anatomy-control-row">
-            <span>Myocardium opacity</span>
-            <span className="anatomy-control-value">
-              {Math.round(myocardiumOpacity * 100)}%
-            </span>
-          </span>
-          <input
-            type="range"
-            min={0.2}
-            max={1}
-            step={0.05}
-            value={myocardiumOpacity}
-            onChange={(e) => onOpacityChange(Number(e.target.value))}
-          />
-        </label>
-        <label className="anatomy-toggle">
-          <input
-            type="checkbox"
-            checked={showLabels}
-            onChange={(e) => onToggleLabels(e.target.checked)}
-          />
-          <span>Anatomical labels</span>
-        </label>
       </section>
 
       <section className="anatomy-section anatomy-detail">

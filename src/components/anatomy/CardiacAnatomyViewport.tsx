@@ -74,8 +74,9 @@ export default function CardiacAnatomyViewport({
           dampingFactor={0.08}
           minDistance={2.2}
           maxDistance={9}
-          target={[0, -0.05, 0]}
+          target={[0, -0.15, 0]}
           enablePan={false}
+          maxPolarAngle={Math.PI * 0.92}
         />
       </Canvas>
 

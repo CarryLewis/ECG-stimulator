@@ -203,13 +203,18 @@ input {
 .anatomy-toggle {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
+  padding: 0.55rem 0.15rem;
   font-size: 0.88rem;
   cursor: pointer;
+  user-select: none;
 }
 
 .anatomy-toggle input {
+  width: 1.05rem;
+  height: 1.05rem;
   accent-color: var(--accent);
+  flex-shrink: 0;
 }
 
 .anatomy-detail {
