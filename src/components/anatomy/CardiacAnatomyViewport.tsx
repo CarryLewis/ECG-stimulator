@@ -1,70 +1,179 @@
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows, OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
+import { useMemo } from 'react'
+import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
+import type { ConductionState, LeadName } from '../../ecg/types'
+import type { PhysiologicalEvent } from '../../sim/events'
+import OrientationCube, {
+  CameraSync,
+  OrientationLegend,
+} from '../OrientationCube'
+import HeartConductionV1 from '../heart/HeartConductionV1'
+import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
+import HeartTorsoV3 from '../heart/HeartTorsoV3'
 import AnatomicalHeart from './AnatomicalHeart'
+import ConductionTimeline from './ConductionTimeline'
 
 interface CardiacAnatomyViewportProps {
-  selectedId: HeartStructureId | null
+  heartVersion: HeartVersion
+  selectedStructureId: HeartStructureId | null
+  onSelectStructure: (id: HeartStructureId | null) => void
+  selectedLead: LeadName | null
+  onSelectLead: (lead: LeadName | null) => void
   myocardiumOpacity: number
   showLabels: boolean
-  onSelect: (id: HeartStructureId | null) => void
+  conduction: ConductionState
+  activeEvent: PhysiologicalEvent | null
+  phaseMs: number
+  elapsed: number
+  timeScale: number
+  rateBpm: number
 }
 
 /**
- * Interactive 3D viewport — rotate / zoom via OrbitControls.
- * The heart is the sole focal object (biological source model).
+ * Shared 3D viewport for source anatomy + V1 / V2 / V3.
+ *
+ * The orientation cube is a separate overlay Canvas so it cannot disable
+ * R3F’s automatic heart-scene render (priority > 0 useFrame pitfall).
  */
 export default function CardiacAnatomyViewport({
-  selectedId,
+  heartVersion,
+  selectedStructureId,
+  onSelectStructure,
+  selectedLead,
+  onSelectLead,
   myocardiumOpacity,
   showLabels,
-  onSelect,
+  conduction,
+  activeEvent,
+  phaseMs,
+  elapsed,
+  timeScale,
+  rateBpm,
 }: CardiacAnatomyViewportProps) {
+  const anatomyLayers = useMemo(
+    () => ({ walls: true as const, pins: showLabels }),
+    [showLabels],
+  )
+  const torsoLayers = useMemo(
+    () => ({
+      torso: true as const,
+      heart: true as const,
+      electrodes: showLabels,
+      leads: showLabels,
+    }),
+    [showLabels],
+  )
+
+  const isV3 = heartVersion === 'v3'
+  const isSource = heartVersion === 'anatomy'
+  const camera = isV3
+    ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
+    : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
+
+  const clearSelection = () => {
+    onSelectLead(null)
+    onSelectStructure(null)
+  }
+
   return (
-    <div className="anatomy-viewport" role="img" aria-label="Interactive 3D cardiac anatomy">
+    <div
+      className="anatomy-viewport"
+      role="img"
+      aria-label={`Interactive 3D cardiac anatomy (${heartVersion})`}
+    >
       <Canvas
-        shadows
-        dpr={[1, 1.75]}
-        camera={{ position: [2.8, 1.2, 3.6], fov: 40, near: 0.1, far: 40 }}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-        onPointerMissed={() => onSelect(null)}
+        key={heartVersion}
+        shadows={false}
+        dpr={[1, 1.5]}
+        camera={{ ...camera, near: 0.1, far: 40 }}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'default',
+          failIfMajorPerformanceCaveat: false,
+        }}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement
+          const onLost = (e: Event) => {
+            e.preventDefault()
+            console.warn('[ECG] WebGL context lost — will restore')
+          }
+          const onRestored = () => {
+            console.warn('[ECG] WebGL context restored')
+          }
+          canvas.addEventListener('webglcontextlost', onLost, false)
+          canvas.addEventListener('webglcontextrestored', onRestored, false)
+        }}
+        onPointerMissed={clearSelection}
       >
-        <color attach="background" args={['#0b1219']} />
+        <color
+          attach="background"
+          args={[
+            isV3
+              ? '#0a1018'
+              : heartVersion === 'v2'
+                ? '#0c121a'
+                : isSource
+                  ? '#0b1219'
+                  : '#070d14',
+          ]}
+        />
 
-        <ambientLight intensity={0.55} />
+        <ambientLight intensity={0.95} />
+        <directionalLight position={[3.2, 4.5, 2.8]} intensity={1.8} />
+        <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.55} />
         <directionalLight
-          position={[3.2, 4.5, 2.8]}
-          intensity={1.65}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+          position={[0.5, 1.5, 3.5]}
+          intensity={0.65}
+          color="#ffe8dc"
         />
-        <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.45} />
-        <directionalLight position={[0.5, 1.5, 3.5]} intensity={0.55} color="#ffe8dc" />
-        <hemisphereLight args={['#b8c8d8', '#1a1010', 0.35]} />
-
-        <AnatomicalHeart
-          selectedId={selectedId}
-          myocardiumOpacity={myocardiumOpacity}
-          showLabels={showLabels}
-          onSelect={onSelect}
+        <pointLight
+          position={[0.2, 0.8, 1.5]}
+          intensity={0.45 + conduction.sa * 0.7}
+          color="#7dffb0"
         />
 
-        <ContactShadows
-          position={[0, -1.85, 0]}
-          opacity={0.45}
-          scale={8}
-          blur={2.5}
-          far={4}
-        />
+        {heartVersion === 'anatomy' && (
+          <AnatomicalHeart
+            selectedId={selectedStructureId}
+            myocardiumOpacity={myocardiumOpacity}
+            showLabels={showLabels}
+            onSelect={onSelectStructure}
+            conduction={conduction}
+          />
+        )}
+        {heartVersion === 'v1' && (
+          <group scale={1.08} position={[0, 0.05, 0]}>
+            <HeartConductionV1 state={conduction} showLabels={showLabels} />
+          </group>
+        )}
+        {heartVersion === 'v2' && (
+          <group scale={1.05} position={[0, 0.05, 0]}>
+            <HeartAnatomyV2
+              state={conduction}
+              selectedLead={selectedLead}
+              onSelectLead={onSelectLead}
+              layers={anatomyLayers}
+            />
+          </group>
+        )}
+        {heartVersion === 'v3' && (
+          <HeartTorsoV3
+            state={conduction}
+            selectedLead={selectedLead}
+            onSelectLead={onSelectLead}
+            layers={torsoLayers}
+          />
+        )}
 
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, -1.86, 0]}
-          receiveShadow
-          onClick={() => onSelect(null)}
+          position={[0, isV3 ? -2.16 : -1.86, 0]}
+          onClick={clearSelection}
         >
-          <circleGeometry args={[3.2, 48]} />
+          <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
           <meshStandardMaterial color="#0a1018" roughness={1} metalness={0} />
         </mesh>
 
@@ -72,16 +181,31 @@ export default function CardiacAnatomyViewport({
           makeDefault
           enableDamping
           dampingFactor={0.08}
-          minDistance={2.2}
-          maxDistance={9}
-          target={[0, -0.15, 0]}
+          minDistance={isV3 ? 2.6 : 2.0}
+          maxDistance={isV3 ? 10 : 8}
+          target={isV3 ? [0, 0.05, 0] : [0, -0.15, 0]}
           enablePan={false}
-          maxPolarAngle={Math.PI * 0.92}
         />
+
+        <CameraSync />
       </Canvas>
 
+      <OrientationCube />
+      <OrientationLegend />
+
+      <ConductionTimeline
+        phaseMs={phaseMs}
+        active={activeEvent}
+        status={conduction.status}
+        elapsed={elapsed}
+        timeScale={timeScale}
+        rateBpm={rateBpm}
+      />
+
       <div className="anatomy-viewport-hint" aria-hidden>
-        Drag to rotate · Scroll to zoom · Click a chamber to select
+        {isSource
+          ? 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B'
+          : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
       </div>
     </div>
   )

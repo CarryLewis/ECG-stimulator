@@ -1,26 +1,50 @@
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
+import {
+  HEART_VERSIONS,
+  type HeartVersion,
+} from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 
 interface AnatomyControlPanelProps {
+  heartVersion: HeartVersion
+  onHeartVersionChange: (v: HeartVersion) => void
   selectedId: HeartStructureId | null
   myocardiumOpacity: number
   showLabels: boolean
   onSelect: (id: HeartStructureId | null) => void
   onOpacityChange: (opacity: number) => void
   onToggleLabels: (show: boolean) => void
+  timeScale: number
+  onTimeScaleChange: (scale: number) => void
+  rateBpm: number
+  onRateChange: (bpm: number) => void
 }
 
+const SPEED_PRESETS = [
+  { label: 'Slow', value: 0.2 },
+  { label: 'Learn', value: 0.35 },
+  { label: 'Clear', value: 0.5 },
+  { label: 'Real', value: 1 },
+]
+
 export default function AnatomyControlPanel({
+  heartVersion,
+  onHeartVersionChange,
   selectedId,
   myocardiumOpacity,
   showLabels,
   onSelect,
   onOpacityChange,
   onToggleLabels,
+  timeScale,
+  onTimeScaleChange,
+  rateBpm,
+  onRateChange,
 }: AnatomyControlPanelProps) {
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
     : null
+  const versionMeta = HEART_VERSIONS.find((v) => v.id === heartVersion)
 
   return (
     <aside className="anatomy-panel">
@@ -28,10 +52,89 @@ export default function AnatomyControlPanel({
         <p className="anatomy-eyebrow">Source model</p>
         <h1 className="anatomy-title">Cardiac anatomy</h1>
         <p className="anatomy-lede">
-          Macroscopic chambers and walls that will drive conduction and ECG
-          generation. Select a structure to inspect it.
+          Conduction glow is driven by physiological events from the simulation
+          clock (SA → atria → AV → His → bundles → Purkinje → repolarization).
         </p>
       </header>
+
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">Playback</h2>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Time scale</span>
+            <span className="anatomy-control-value">
+              ×{timeScale.toFixed(2)}
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0.15}
+            max={1}
+            step={0.05}
+            value={timeScale}
+            onChange={(e) => onTimeScaleChange(Number(e.target.value))}
+          />
+        </label>
+        <div className="speed-presets" role="group" aria-label="Pace presets">
+          {SPEED_PRESETS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              className={
+                'speed-preset' +
+                (Math.abs(timeScale - p.value) < 0.01
+                  ? ' speed-preset--active'
+                  : '')
+              }
+              onClick={() => onTimeScaleChange(p.value)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Heart rate</span>
+            <span className="anatomy-control-value">{rateBpm} bpm</span>
+          </span>
+          <input
+            type="range"
+            min={40}
+            max={140}
+            step={1}
+            value={rateBpm}
+            onChange={(e) => onRateChange(Number(e.target.value))}
+          />
+        </label>
+      </section>
+
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">Heart version</h2>
+        <div
+          className="heart-version-toggle"
+          role="group"
+          aria-label="Heart model version"
+        >
+          {HEART_VERSIONS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className={
+                'heart-version-btn' +
+                (heartVersion === v.id ? ' heart-version-btn--active' : '')
+              }
+              onClick={() => onHeartVersionChange(v.id)}
+            >
+              {v.short}
+            </button>
+          ))}
+        </div>
+        {versionMeta && (
+          <p className="anatomy-version-hint">
+            <strong>{versionMeta.title}</strong> — {versionMeta.hint}
+          </p>
+        )}
+      </section>
 
       <section className="anatomy-section">
         <h2 className="anatomy-section-title">Display</h2>
@@ -59,6 +162,10 @@ export default function AnatomyControlPanel({
           />
           <span>Anatomical labels</span>
         </label>
+        <p className="anatomy-version-hint">
+          Opacity drives the <strong>Src</strong> chamber model. Labels: Src
+          chamber tags / V1 nodes / V2 pins / V3 electrodes.
+        </p>
       </section>
 
       <section className="anatomy-section">
@@ -88,6 +195,12 @@ export default function AnatomyControlPanel({
             )
           })}
         </ul>
+        {heartVersion !== 'anatomy' && (
+          <p className="anatomy-version-hint">
+            Switch to <strong>Src</strong> to highlight chambers in 3D. List
+            selection still shows the clinical note below.
+          </p>
+        )}
       </section>
 
       <section className="anatomy-section anatomy-detail">
@@ -101,8 +214,8 @@ export default function AnatomyControlPanel({
           </>
         ) : (
           <p className="anatomy-detail-body anatomy-detail-body--muted">
-            Click a chamber, the septum, or the apex in the viewport — or use
-            the list above.
+            On <strong>Src</strong>, click a chamber (or the list). On V2–V3,
+            click lead pins / electrodes. Cube faces snap to A/P/L/R/H/B.
           </p>
         )}
       </section>
