@@ -28,7 +28,6 @@ import type { ConductionSystemState } from './conduction'
 import type {
   CardiacDipole,
   InstantaneousElectricalField,
-  LeadName,
   LeadVoltages,
   VectorContribution,
 } from './vector'
