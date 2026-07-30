@@ -4,6 +4,8 @@ import {
   type HeartVersion,
 } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
+import type { PhysiologicalEvent } from '../../sim/events'
+import ConductionTimeline from './ConductionTimeline'
 
 interface AnatomyControlPanelProps {
   heartVersion: HeartVersion
@@ -18,6 +20,10 @@ interface AnatomyControlPanelProps {
   onTimeScaleChange: (scale: number) => void
   rateBpm: number
   onRateChange: (bpm: number) => void
+  phaseMs: number
+  activeEvent: PhysiologicalEvent | null
+  conductionStatus: string
+  elapsed: number
 }
 
 const SPEED_PRESETS = [
@@ -40,6 +46,10 @@ export default function AnatomyControlPanel({
   onTimeScaleChange,
   rateBpm,
   onRateChange,
+  phaseMs,
+  activeEvent,
+  conductionStatus,
+  elapsed,
 }: AnatomyControlPanelProps) {
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
@@ -106,6 +116,18 @@ export default function AnatomyControlPanel({
             onChange={(e) => onRateChange(Number(e.target.value))}
           />
         </label>
+      </section>
+
+      {/* Lives in the sidebar so it never covers Src / V1 / V2 / V3 meshes. */}
+      <section className="anatomy-section anatomy-section--cascade">
+        <ConductionTimeline
+          phaseMs={phaseMs}
+          active={activeEvent}
+          status={conductionStatus}
+          elapsed={elapsed}
+          timeScale={timeScale}
+          rateBpm={rateBpm}
+        />
       </section>
 
       <section className="anatomy-section">

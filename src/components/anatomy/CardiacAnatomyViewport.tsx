@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState, LeadName } from '../../ecg/types'
-import type { PhysiologicalEvent } from '../../sim/events'
 import OrientationCube, {
   CameraSync,
   OrientationLegend,
@@ -13,7 +12,6 @@ import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
 import AnatomicalHeart from './AnatomicalHeart'
-import ConductionTimeline from './ConductionTimeline'
 
 interface CardiacAnatomyViewportProps {
   heartVersion: HeartVersion
@@ -24,18 +22,11 @@ interface CardiacAnatomyViewportProps {
   myocardiumOpacity: number
   showLabels: boolean
   conduction: ConductionState
-  activeEvent: PhysiologicalEvent | null
-  phaseMs: number
-  elapsed: number
-  timeScale: number
-  rateBpm: number
 }
 
 /**
  * Shared 3D viewport for source anatomy + V1 / V2 / V3.
- *
- * The orientation cube is a separate overlay Canvas so it cannot disable
- * R3F’s automatic heart-scene render (priority > 0 useFrame pitfall).
+ * Conduction cascade lives in the left panel so it never covers the model.
  */
 export default function CardiacAnatomyViewport({
   heartVersion,
@@ -46,11 +37,6 @@ export default function CardiacAnatomyViewport({
   myocardiumOpacity,
   showLabels,
   conduction,
-  activeEvent,
-  phaseMs,
-  elapsed,
-  timeScale,
-  rateBpm,
 }: CardiacAnatomyViewportProps) {
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
@@ -68,8 +54,6 @@ export default function CardiacAnatomyViewport({
 
   const isV3 = heartVersion === 'v3'
   const isSource = heartVersion === 'anatomy'
-  // Default = anterior (front) body view so the orientation cube shows A,
-  // matching “正对着心脏看” / clinical frontal reference.
   const camera = isV3
     ? { position: [0, 0.2, 4.5] as [number, number, number], fov: 40 }
     : { position: [0, 0.15, 4.2] as [number, number, number], fov: 40 }
@@ -194,15 +178,6 @@ export default function CardiacAnatomyViewport({
 
       <OrientationCube />
       <OrientationLegend />
-
-      <ConductionTimeline
-        phaseMs={phaseMs}
-        active={activeEvent}
-        status={conduction.status}
-        elapsed={elapsed}
-        timeScale={timeScale}
-        rateBpm={rateBpm}
-      />
 
       <div className="anatomy-viewport-hint" aria-hidden>
         {isSource

@@ -41,6 +41,10 @@ export default function App() {
         onTimeScaleChange={setTimeScale}
         rateBpm={rateBpm}
         onRateChange={setRateBpm}
+        phaseMs={frame.phaseMs}
+        activeEvent={frame.active}
+        conductionStatus={frame.state.status}
+        elapsed={frame.t}
       />
       <main className="anatomy-stage">
         <CardiacAnatomyViewport
@@ -52,11 +56,6 @@ export default function App() {
           myocardiumOpacity={myocardiumOpacity}
           showLabels={showLabels}
           conduction={frame.state}
-          activeEvent={frame.active}
-          phaseMs={frame.phaseMs}
-          elapsed={frame.t}
-          timeScale={timeScale}
-          rateBpm={rateBpm}
         />
       </main>
     </div>
