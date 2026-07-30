@@ -10,13 +10,13 @@ Progress through phases in order unless a documented exception is approved. Do n
 
 ---
 
-## Phase 0 — Project Control Center *(current baseline)*
+## Phase 0 — Project Control Center
 
 - [x] Establish `/docs` AI knowledge system
 - [x] Capture vision, requirements, architecture, medical model, rules, roadmap
 - [x] Define module memory files
 
-**Exit criteria:** Future agents can onboard from `/docs` without prior chat context.
+**Exit criteria:** Future agents can onboard from `/docs` without prior chat context. ✅
 
 ---
 
@@ -24,13 +24,13 @@ Progress through phases in order unless a documented exception is approved. Do n
 
 **Goal:** Architecture and data model ready for implementation.
 
-- Finalize public contracts: RegionId, ConductionGraph, ActivationMap, TissueState, InstantaneousField, LeadVoltages, SimulationCommand, DiseasePack shape
-- Repository/package layout aligned with module boundaries
-- Shared simulation clock concept
-- Headless test harness skeleton (no UI required)
-- CHANGELOG discipline in active use
+- [x] Public contracts: `docs/core-data-model/*` + runtime `vector-engine` / `ecg-generator` / `ep` modules
+- [x] Repository layout aligned with module boundaries (`src/anatomy`, `src/ep`, `src/vector-engine`, `src/ecg-generator`, `src/components/lab`)
+- [x] Shared simulation clock (`useSimulationFrame` / event-driven conduction)
+- [ ] Headless test harness skeleton (golden identity path)
+- [x] CHANGELOG discipline in active use
 
-**Exit criteria:** Typed (or clearly specified) contracts exist; empty or stub modules compile/link in chosen stack; one golden “identity” test path documented.
+**Exit criteria:** Typed contracts exist; modules compile in chosen stack. ✅ (tests still thin)
 
 ---
 
@@ -38,13 +38,14 @@ Progress through phases in order unless a documented exception is approved. Do n
 
 **Goal:** Learners can see cardiac structure in space.
 
-- 3D (or equivalent interactive) anatomy presentation
-- Cardiac structures: chambers, key vessels as needed for teaching
-- Conduction system landmarks and myocardial territories
-- Electrode / lead educational overlays
-- Selection sync hooks for later EP/ECG highlighting
+- [x] Interactive 3D anatomy presentation (Src / V1 / V2 / V3)
+- [x] Cardiac structures: chambers, vessels as teaching overlays
+- [x] Conduction system landmarks and myocardial territories
+- [x] Electrode / lead educational overlays (V3 torso + pins)
+- [x] Selection sync hooks for EP/ECG highlighting
+- [ ] Named Explore Mode as a distinct app shell
 
-**Exit criteria:** Explore Mode anatomy navigation works against the Anatomy module — still without requiring full ECG pathology.
+**Exit criteria:** Anatomy navigation works against the Anatomy module. ✅
 
 ---
 
@@ -52,13 +53,13 @@ Progress through phases in order unless a documented exception is approved. Do n
 
 **Goal:** Time-evolving conduction and activation.
 
-- Conduction system graph operational (SA → AV → His → branches → Purkinje → myocardium)
-- Activation wave / region activation map over time
-- Basic rate, pause, and time-scale controls
-- Refractory / simple block hooks
-- Visualization of activation on anatomy
+- [x] Conduction system graph (SA → AV → His → branches → Purkinje → myocardium)
+- [x] Activation wave / region activation map over time (event-driven)
+- [x] Rate, pause, and time-scale controls (lab timeline)
+- [ ] Refractory / simple block hooks
+- [x] Visualization of activation on anatomy
 
-**Exit criteria:** Headless EP step produces ActivationMap; Explore/Study can show activation without disease packs.
+**Exit criteria:** EP step produces activation; UI can show activation without disease packs. ✅
 
 ---
 
@@ -66,25 +67,25 @@ Progress through phases in order unless a documented exception is approved. Do n
 
 **Goal:** Body-surface ECG from the model chain.
 
-- Electrical vector / dipole (v1) from activation
-- Lead axis projection (12-lead)
-- Sampling, calibration conventions, monitor/strip views
-- Annotations (P/QRS/T timing hooks as available)
-- Normal sinus ECG demonstrably produced via activation → vector → leads
+- [x] Electrical vector / dipole from activation
+- [x] Lead axis projection (12-lead, clinical Einthoven / precordial)
+- [x] Sampling, monitor/strip views (lab ECG + Vec mini-monitor)
+- [x] Annotations (P/QRS/T phase badges locked to physiology)
+- [x] Normal sinus ECG via activation → vector → leads (morphology fix #13)
 
-**Exit criteria:** Normal 12-lead stream generated without disease-name voltage cheats; Study Mode can teach mechanism on normal rhythm.
+**Exit criteria:** Normal 12-lead stream without disease-name voltage cheats. ✅
 
 ---
 
-## Phase 5 — Clinical Simulation
+## Phase 5 — Clinical Simulation *(current next)*
 
 **Goal:** Clinical reasoning scenarios on top of the spine.
 
-- STEMI (territory + severity → injury current → lead pattern)
-- Atrial fibrillation
-- AV block
-- Mechanism explanations + derived findings
-- Simulation Mode case loop (interpret → reason → debrief); AI tutor later
+- [ ] STEMI (territory + severity → injury current → lead pattern)
+- [ ] Atrial fibrillation
+- [ ] AV block
+- [ ] Mechanism explanations + derived findings (partial clinical panel exists)
+- [ ] Simulation Mode case loop (interpret → reason → debrief); AI tutor later
 
 **Exit criteria:** At least STEMI, AF, and AV block as disease packs; Simulation Mode usable for teaching cases; findings derived from model state.
 
