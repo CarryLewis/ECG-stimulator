@@ -4,7 +4,9 @@
 
 **Document type:** Software architecture design  
 **Status:** Design only (not yet implemented)  
-**Related:** [`product-requirement-document.md`](./product-requirement-document.md)
+**Related:**
+- [`product-requirement-document.md`](./product-requirement-document.md)
+- [`core-data-model/`](./core-data-model/) — event-driven TypeScript interfaces (`HeartbeatEvent`, anatomy, EP, vector, ECG, clinical)
 
 ---
 
@@ -456,6 +458,23 @@ Near-term architecture success looks like: **same educational UX**, but STEMI / 
 - **Clinical** = what it means for the learner and how they steer the patient.
 
 Diseases are **modifier packs** on EP/tissue (and sometimes vector contributions), never forks of the monitor. That is the difference between a demo waveform toy and professional medical simulation software.
+
+---
+
+## 9. Core Data Model (Event-Driven)
+
+Typed contracts live in [`core-data-model/`](./core-data-model/). A **heartbeat** is a first-class physiological aggregate (`HeartbeatEvent`) that bundles schedule, SA/atrial/AV/ventricular/repolarization markers, electrical vectors, and ECG output. Discrete `PhysiologicalEvent`s drive real-time animation; continuous EP/ECG frames drive the monitor.
+
+| File | Concern |
+|------|---------|
+| `anatomy.ts` | Chambers, regions, territories, electrodes |
+| `conduction.ts` | Conduction graph, pacemakers, AV block config |
+| `activation.ts` | `ActivationMap`, `TissueState`, EP frames |
+| `vector.ts` | Dipole, contributions, lead axes / voltages |
+| `ecg.ts` | Samples, ring buffers, strips, annotations |
+| `clinical.ts` | Findings, risk flags, disease-pack descriptors |
+| `heartbeat.ts` | `HeartbeatEvent`, event bus messages, scheduler |
+| `index.ts` | Re-exports |
 
 ---
 
