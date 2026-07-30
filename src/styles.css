@@ -244,11 +244,16 @@ input {
   position: relative;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .anatomy-viewport {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  flex: 1 1 42%;
+  min-height: 220px;
 }
 
 .anatomy-viewport > div:first-child {
@@ -888,5 +893,206 @@ input {
     width: calc(100% - 1.5rem);
     top: auto;
     bottom: 3.2rem;
+  }
+}
+
+/* --- ECG dock (consumes simulation output only) --- */
+
+.ecg-dock {
+  flex: 1 1 58%;
+  min-height: 280px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--stroke);
+  background:
+    linear-gradient(180deg, rgba(8, 16, 24, 0.92), rgba(6, 12, 18, 0.98)),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 15px,
+      rgba(220, 80, 80, 0.03) 15px,
+      rgba(220, 80, 80, 0.03) 16px
+    );
+}
+
+.ecg-panel-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ecg-panel-meta {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.ecg-monitor {
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: #071018;
+  padding: 0.55rem 0.7rem 0.35rem;
+}
+
+.ecg-monitor-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.ecg-monitor-lead {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.ecg-monitor-svg {
+  display: block;
+  border-radius: 4px;
+  background: #050a10;
+}
+
+.ecg-twelve {
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: #f4f1ec;
+  color: #111827;
+  padding: 0.65rem 0.75rem 0.5rem;
+}
+
+.ecg-twelve-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.ecg-twelve .ecg-panel-title {
+  color: #111827;
+}
+
+.ecg-twelve .ecg-panel-meta {
+  color: #6b7280;
+}
+
+.ecg-twelve-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ecg-twelve-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.ecg-lead-cell {
+  position: relative;
+  margin: 0;
+  padding: 0.15rem 0.2rem 0.1rem;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 4px;
+  background: #faf8f5;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ecg-lead-cell:hover {
+  border-color: rgba(61, 184, 168, 0.45);
+}
+
+.ecg-lead-cell--selected {
+  border-color: #0f766e;
+  box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.35);
+  background: #f0faf8;
+}
+
+.ecg-lead-label {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.35rem;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.ecg-lead-svg {
+  display: block;
+}
+
+.ecg-twelve-footnote {
+  margin: 0.45rem 0 0;
+  font-size: 0.68rem;
+  color: #6b7280;
+}
+
+.anatomy-select {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+.ecg-validation-badge {
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ecg-validation-badge--ok {
+  background: rgba(61, 184, 168, 0.15);
+  color: #5eead4;
+}
+
+.ecg-validation-badge--fail {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.ecg-validation-metrics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.ecg-validation-issues {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.75rem;
+  color: #fca5a5;
+  line-height: 1.4;
+}
+
+.ecg-validation-issues li[data-severity='warn'] {
+  color: #fcd34d;
+}
+
+@media (max-width: 1100px) {
+  .ecg-twelve-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

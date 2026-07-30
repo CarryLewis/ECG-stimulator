@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState, LeadName } from '../../ecg/types'
+import type { CardiacVector } from '../../simulation/types'
 import type { PhysiologicalEvent } from '../../sim/events'
 import OrientationCube, {
   CameraSync,
@@ -12,7 +13,7 @@ import OrientationCube, {
 import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
-import AnatomicalHeart from './AnatomicalHeart'
+import Heart3D from '../../visualization/Heart3D'
 import ConductionTimeline from './ConductionTimeline'
 
 interface CardiacAnatomyViewportProps {
@@ -29,6 +30,8 @@ interface CardiacAnatomyViewportProps {
   elapsed: number
   timeScale: number
   rateBpm: number
+  /** Instantaneous cardiac dipole from the simulation engine. */
+  dipole?: CardiacVector
 }
 
 /**
@@ -51,6 +54,7 @@ export default function CardiacAnatomyViewport({
   elapsed,
   timeScale,
   rateBpm,
+  dipole,
 }: CardiacAnatomyViewportProps) {
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
@@ -136,12 +140,13 @@ export default function CardiacAnatomyViewport({
         />
 
         {heartVersion === 'anatomy' && (
-          <AnatomicalHeart
-            selectedId={selectedStructureId}
+          <Heart3D
+            dipole={dipole ?? { x: 0, y: 0, z: 0 }}
+            conduction={conduction}
+            selectedStructureId={selectedStructureId}
+            onSelectStructure={onSelectStructure}
             myocardiumOpacity={myocardiumOpacity}
             showLabels={showLabels}
-            onSelect={onSelectStructure}
-            conduction={conduction}
           />
         )}
         {heartVersion === 'v1' && (
