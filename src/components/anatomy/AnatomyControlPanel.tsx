@@ -1,7 +1,13 @@
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
+import {
+  HEART_VERSIONS,
+  type HeartVersion,
+} from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 
 interface AnatomyControlPanelProps {
+  heartVersion: HeartVersion
+  onHeartVersionChange: (v: HeartVersion) => void
   selectedId: HeartStructureId | null
   myocardiumOpacity: number
   showLabels: boolean
@@ -11,6 +17,8 @@ interface AnatomyControlPanelProps {
 }
 
 export default function AnatomyControlPanel({
+  heartVersion,
+  onHeartVersionChange,
   selectedId,
   myocardiumOpacity,
   showLabels,
@@ -21,6 +29,7 @@ export default function AnatomyControlPanel({
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
     : null
+  const versionMeta = HEART_VERSIONS.find((v) => v.id === heartVersion)
 
   return (
     <aside className="anatomy-panel">
@@ -28,10 +37,38 @@ export default function AnatomyControlPanel({
         <p className="anatomy-eyebrow">Source model</p>
         <h1 className="anatomy-title">Cardiac anatomy</h1>
         <p className="anatomy-lede">
-          Macroscopic chambers and walls that will drive conduction and ECG
-          generation. Select a structure to inspect it.
+          Three teaching views of the same biological heart. The orientation
+          cube (A/P/L/R/H/B) tracks camera rotation on every version.
         </p>
       </header>
+
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">Heart version</h2>
+        <div
+          className="heart-version-toggle"
+          role="group"
+          aria-label="Heart model version"
+        >
+          {HEART_VERSIONS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className={
+                'heart-version-btn' +
+                (heartVersion === v.id ? ' heart-version-btn--active' : '')
+              }
+              onClick={() => onHeartVersionChange(v.id)}
+            >
+              {v.short}
+            </button>
+          ))}
+        </div>
+        {versionMeta && (
+          <p className="anatomy-version-hint">
+            <strong>{versionMeta.title}</strong> — {versionMeta.hint}
+          </p>
+        )}
+      </section>
 
       <section className="anatomy-section">
         <h2 className="anatomy-section-title">Display</h2>
@@ -59,6 +96,11 @@ export default function AnatomyControlPanel({
           />
           <span>Anatomical labels</span>
         </label>
+        <p className="anatomy-version-hint">
+          Opacity applies to the chamber source mesh when used; V1–V3 use their
+          own translucent materials. Labels: V1 node tags / V2 pins / V3
+          electrodes.
+        </p>
       </section>
 
       <section className="anatomy-section">
@@ -101,8 +143,8 @@ export default function AnatomyControlPanel({
           </>
         ) : (
           <p className="anatomy-detail-body anatomy-detail-body--muted">
-            Click a chamber, the septum, or the apex in the viewport — or use
-            the list above.
+            Select a structure for a clinical note, or click a lead pin /
+            electrode in V2–V3. Use the cube faces to snap to anatomical views.
           </p>
         )}
       </section>
