@@ -68,9 +68,11 @@ export default function CardiacAnatomyViewport({
 
   const isV3 = heartVersion === 'v3'
   const isSource = heartVersion === 'anatomy'
+  // Default = anterior (front) body view so the orientation cube shows A,
+  // matching “正对着心脏看” / clinical frontal reference.
   const camera = isV3
-    ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
-    : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
+    ? { position: [0, 0.2, 4.5] as [number, number, number], fov: 40 }
+    : { position: [0, 0.15, 4.2] as [number, number, number], fov: 40 }
 
   const clearSelection = () => {
     onSelectLead(null)
@@ -204,8 +206,8 @@ export default function CardiacAnatomyViewport({
 
       <div className="anatomy-viewport-hint" aria-hidden>
         {isSource
-          ? 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B'
-          : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
+          ? '立方体=人体方位：正对=A · 俯视=H · 仰视=B · 点击面可跳转'
+          : 'Glow follows events · 立方体=人体方位 A/P/L/R/H/B'}
       </div>
     </div>
   )
