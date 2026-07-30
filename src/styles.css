@@ -1063,11 +1063,65 @@ input {
 }
 
 .ecg-mini-title {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
+}
+
+.ecg-mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.ecg-mini-phase {
+  flex-shrink: 0;
+  min-width: 2.4rem;
+  text-align: center;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--stroke);
+  color: var(--text-muted);
+  background: rgba(148, 175, 200, 0.08);
+}
+
+.ecg-mini-phase--p_wave {
+  color: #7dffb0;
+  border-color: rgba(125, 255, 176, 0.45);
+  background: rgba(125, 255, 176, 0.1);
+}
+
+.ecg-mini-phase--qrs {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.ecg-mini-phase--t_wave {
+  color: #f472b6;
+  border-color: rgba(244, 114, 182, 0.45);
+  background: rgba(244, 114, 182, 0.1);
+}
+
+.ecg-mini-phase--st_segment {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.ecg-mini-sync {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  line-height: 1.3;
 }
 
 .ecg-mini-grid {

@@ -62,6 +62,7 @@ export default function App() {
           axis={frame.axis}
           activationIntensity={frame.activationIntensity}
           ecg={frame.ecg}
+          ecgPhase={frame.ecgPhase}
         />
       </main>
     </div>

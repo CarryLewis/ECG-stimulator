@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { EcgSample } from '../../ecg-generator'
+import type { EcgPhaseInfo, EcgSample } from '../../ecg-generator'
 import { createEcgStream, pushEcgSample } from '../../ecg-generator'
 import { LEAD_ORDER } from '../../vector-engine'
 import type { LeadName } from '../../ecg/types'
@@ -10,16 +10,22 @@ const CAPACITY = Math.ceil(FS * DURATION)
 const DISPLAY_LEADS: LeadName[] = ['I', 'II', 'aVF', 'V1', 'V5']
 
 interface EcgMiniMonitorProps {
-  /** Latest ECG sample from the generator (vector-projected). */
+  /** Latest ECG sample from the physiological pipeline. */
   sample: EcgSample
   elapsed: number
+  /** P / QRS / T phase locked to cardiac activation. */
+  phase?: EcgPhaseInfo
 }
 
 /**
  * Compact cascade of leads sampled from the ECG Generator.
- * Waveforms are never hardcoded — only ring-buffered vector projections.
+ * Waveforms come from activation → vector → body surface → leads.
  */
-export default function EcgMiniMonitor({ sample, elapsed }: EcgMiniMonitorProps) {
+export default function EcgMiniMonitor({
+  sample,
+  elapsed,
+  phase,
+}: EcgMiniMonitorProps) {
   const streamRef = useRef(createEcgStream(FS, CAPACITY))
   const lastTRef = useRef(0)
   const [tick, setTick] = useState(0)
@@ -40,7 +46,6 @@ export default function EcgMiniMonitor({ sample, elapsed }: EcgMiniMonitorProps)
     const samplePeriod = 1 / FS
     let t = lastTRef.current
     let wrote = false
-    // Advance the ring buffer at ECG sampling rate using the latest vector sample.
     while (t + samplePeriod <= elapsed + 1e-9) {
       t += samplePeriod
       pushEcgSample(stream, { ...sample, t })
@@ -57,13 +62,31 @@ export default function EcgMiniMonitor({ sample, elapsed }: EcgMiniMonitorProps)
     const stream = streamRef.current
     return DISPLAY_LEADS.map((lead) => ({
       lead,
-      d: buildPath(stream.leads[lead].samples, stream.leads[lead].writeIndex, stream.leads[lead].written),
+      d: buildPath(
+        stream.leads[lead].samples,
+        stream.leads[lead].writeIndex,
+        stream.leads[lead].written,
+      ),
     }))
   }, [tick])
 
+  const phaseClass = phase ? `ecg-mini-phase--${phase.phase}` : ''
+
   return (
-    <div className="ecg-mini" aria-label="Live ECG from vector projection">
-      <p className="ecg-mini-title">ECG from cardiac vector</p>
+    <div className="ecg-mini" aria-label="Live ECG from cardiac simulation">
+      <div className="ecg-mini-head">
+        <p className="ecg-mini-title">ECG from cardiac simulation</p>
+        {phase && (
+          <span className={`ecg-mini-phase ${phaseClass}`}>
+            {phaseBadge(phase.phase)}
+          </span>
+        )}
+      </div>
+      {phase && (
+        <p className="ecg-mini-sync" title={phase.label}>
+          {phaseSyncHint(phase)}
+        </p>
+      )}
       <div className="ecg-mini-grid">
         {paths.map(({ lead, d }) => (
           <div key={lead} className="ecg-mini-row">
@@ -84,6 +107,36 @@ export default function EcgMiniMonitor({ sample, elapsed }: EcgMiniMonitorProps)
   )
 }
 
+function phaseBadge(phase: EcgPhaseInfo['phase']): string {
+  switch (phase) {
+    case 'p_wave':
+      return 'P'
+    case 'qrs':
+      return 'QRS'
+    case 't_wave':
+      return 'T'
+    case 'st_segment':
+      return 'ST'
+    default:
+      return '—'
+  }
+}
+
+function phaseSyncHint(phase: EcgPhaseInfo): string {
+  switch (phase.drivenBy) {
+    case 'atrial_activation':
+      return 'Synced: atrial activation → P wave'
+    case 'ventricular_depolarization':
+      return 'Synced: ventricular depol. → QRS'
+    case 'repolarization':
+      return 'Synced: repolarization → T wave'
+    case 'st_window':
+      return 'ST window after QRS'
+    default:
+      return 'Waiting for next activation'
+  }
+}
+
 function buildPath(
   samples: Float32Array,
   writeIndex: number,
@@ -101,7 +154,10 @@ function buildPath(
     const idx = (start + i) % n
     const x = (i / (count - 1)) * (CAPACITY - 1)
     const y = mid - samples[idx]! * scaleY
-    d += i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : ` L ${x.toFixed(1)} ${y.toFixed(1)}`
+    d +=
+      i === 0
+        ? `M ${x.toFixed(1)} ${y.toFixed(1)}`
+        : ` L ${x.toFixed(1)} ${y.toFixed(1)}`
   }
   return d
 }

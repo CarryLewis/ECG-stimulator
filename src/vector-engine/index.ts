@@ -1,19 +1,20 @@
 import { evaluateElectricalField } from './evaluate'
 import { analyzeMeanElectricalAxis } from './meanAxis'
-import { projectFieldToLeads } from './project'
-import type {
-  EvaluateFieldInput,
-} from './evaluate'
+import { computeBodySurfacePotentials } from './bodySurface'
+import { calculateLeadsFromPotentials } from './leadsFromPotentials'
+import type { EvaluateFieldInput } from './evaluate'
 import type { VectorAnalysis } from './types'
 
 /**
- * Full vector-engine tick: EP wavefronts → field → lead voltages → axis.
+ * Full vector-engine tick:
+ *   cardiac wavefronts → electrical field → body-surface potentials → leads
  */
 export function analyzeElectricalVectors(
   input: EvaluateFieldInput,
 ): VectorAnalysis {
   const field = evaluateElectricalField(input)
-  const leads = projectFieldToLeads(field)
+  const surface = computeBodySurfacePotentials(field)
+  const leads = calculateLeadsFromPotentials(surface)
   const axis = analyzeMeanElectricalAxis(field)
 
   let activationIntensity = 0
@@ -29,7 +30,7 @@ export function analyzeElectricalVectors(
     }
   }
 
-  return { field, leads, axis, activationIntensity }
+  return { field, surface, leads, axis, activationIntensity }
 }
 
 export { evaluateElectricalField, ventricularDepolarizationVector } from './evaluate'
@@ -54,5 +55,11 @@ export {
   scaleVector,
   addVectors,
 } from './wavefronts'
+export {
+  computeBodySurfacePotentials,
+  HEART_ORIGIN_SCENE,
+} from './bodySurface'
+export type { BodySurfacePotentials } from './bodySurface'
+export { calculateLeadsFromPotentials } from './leadsFromPotentials'
 export type * from './types'
 export { DEFAULT_TISSUE } from './types'

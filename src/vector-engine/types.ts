@@ -96,6 +96,8 @@ export interface MeanElectricalAxis {
 /** Teaching summary for overlays / HUD. */
 export interface VectorAnalysis {
   field: InstantaneousElectricalField
+  /** Body-surface electrode potentials derived from the dipole. */
+  surface: import('./bodySurface').BodySurfacePotentials
   leads: LeadVoltages
   axis: MeanElectricalAxis
   /** Peak intensity among myocardial contributions (0–1). */

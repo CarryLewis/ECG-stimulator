@@ -25,6 +25,22 @@ npm run preview
 
 Diseases / pathology packs are **not** included yet — tissue modifiers are ready for injury current when packs arrive.
 
+## ECG pipeline
+
+```
+Cardiac activation (physiological events)
+        ↓
+Electrical vector (dipole + contributions)
+        ↓
+Body surface potential (electrode Φ)
+        ↓
+Lead calculation (Einthoven / Goldberger / Wilson)
+        ↓
+ECG waveform (sampled ring buffer)
+```
+
+Synchronization: **P** ← atrial activation · **QRS** ← ventricular depolarization · **T** ← repolarization.
+
 ## Layout
 
 | Path | Role |

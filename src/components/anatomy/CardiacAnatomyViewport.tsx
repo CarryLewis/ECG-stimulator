@@ -10,7 +10,7 @@ import type {
   LeadVoltages,
   MeanElectricalAxis,
 } from '../../vector-engine'
-import type { EcgSample } from '../../ecg-generator'
+import type { EcgPhaseInfo, EcgSample } from '../../ecg-generator'
 import OrientationCube, {
   CameraSync,
   OrientationLegend,
@@ -43,6 +43,7 @@ interface CardiacAnatomyViewportProps {
   axis: MeanElectricalAxis
   activationIntensity: number
   ecg: EcgSample
+  ecgPhase: EcgPhaseInfo
 }
 
 /**
@@ -70,6 +71,7 @@ export default function CardiacAnatomyViewport({
   axis,
   activationIntensity,
   ecg,
+  ecgPhase,
 }: CardiacAnatomyViewportProps) {
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
@@ -235,7 +237,7 @@ export default function CardiacAnatomyViewport({
             activationIntensity={activationIntensity}
             status={conduction.status}
           />
-          <EcgMiniMonitor sample={ecg} elapsed={elapsed} />
+          <EcgMiniMonitor sample={ecg} elapsed={elapsed} phase={ecgPhase} />
         </>
       )}
 

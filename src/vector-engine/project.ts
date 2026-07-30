@@ -6,10 +6,11 @@ import type {
 import type { CardiacVector, LeadName } from './types'
 
 /**
- * Project the instantaneous field onto each lead axis:
+ * Project the instantaneous field onto each lead axis (legacy shortcut):
  *   V_lead = D · a_lead
  *
- * Pure function — the ECG Generator must only sample these voltages.
+ * Prefer `calculateLeadsFromPotentials(computeBodySurfacePotentials(field))`
+ * for the teaching pipeline (activation → vector → surface → leads).
  */
 export function projectFieldToLeads(
   field: InstantaneousElectricalField,

@@ -61,7 +61,7 @@ export default function VectorHud({
           </p>
         </div>
         <div className="vector-hud-card">
-          <p className="vector-hud-label">Lead sample (vector→ECG)</p>
+          <p className="vector-hud-label">Lead sample (surface→ECG)</p>
           <p className="vector-hud-meta vector-hud-leads">
             I {leadI.toFixed(2)} · II {leadII.toFixed(2)} · aVF{' '}
             {leadAVF.toFixed(2)} mV
