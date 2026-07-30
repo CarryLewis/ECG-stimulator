@@ -16,16 +16,16 @@ export const WAVEFRONT_DIRECTION: Readonly<
     CardiacVector
   >
 > = {
-  // Atrial depolarisation — inferior / slightly leftward (P wave in II).
-  atrial_depol: { x: 0.18, y: 0.42, z: 0.05 },
-  // Septal L→R — early QRS toward right / anterior (r in V1, q in I/V6).
-  septal_depol: { x: -0.45, y: 0.05, z: 0.7 },
-  // Apical / free-wall — main QRS (left, inferior, anterior).
-  apical_depol: { x: 1.25, y: 0.95, z: 0.55 },
-  // Late basal — residual right / superior / posterior (S in V1–V2).
-  basal_depol: { x: -0.85, y: -0.2, z: -0.75 },
-  // Repolarisation — same polarity as main QRS (upright T in left leads).
-  ventricular_repol: { x: 0.55, y: 0.4, z: 0.35 },
+  // Atrial depolarisation — inferior / slightly leftward (upright P in II).
+  atrial_depol: { x: 0.15, y: 0.55, z: 0.05 },
+  // Septal L→R — brief early r in V1 (keep modest so it does not dwarf S).
+  septal_depol: { x: -0.4, y: 0.05, z: 0.55 },
+  // Apical / free-wall — main R (left + inferior; mild anterior so V1 stays net −).
+  apical_depol: { x: 1.35, y: 1.05, z: 0.18 },
+  // Late basal — deepens S in V1–V2 (right / superior / posterior).
+  basal_depol: { x: -0.7, y: -0.2, z: -0.75 },
+  // Repolarisation — upright T in II / V5–V6.
+  ventricular_repol: { x: 0.55, y: 0.5, z: 0.15 },
 }
 
 export function scaleVector(v: CardiacVector, s: number): CardiacVector {

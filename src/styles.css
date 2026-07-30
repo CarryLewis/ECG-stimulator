@@ -322,7 +322,7 @@ input {
 .lab-ecg-svg {
   display: block;
   width: 100%;
-  height: 26px;
+  height: 36px;
   color: var(--signal);
   background:
     repeating-linear-gradient(

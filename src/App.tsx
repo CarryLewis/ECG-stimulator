@@ -69,8 +69,8 @@ export default function App() {
 
         <aside className="lab-rail" aria-label="Laboratory panels">
           <EcgMonitorPanel
-            sample={frame.ecg}
             elapsed={frame.t}
+            rateBpm={rateBpm}
             phase={frame.ecgPhase}
             leadI={frame.leads.leads.I}
             leadII={frame.leads.leads.II}

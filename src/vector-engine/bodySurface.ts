@@ -1,67 +1,50 @@
 import type { ElectrodeId } from '../ecg/electrodeMap'
-import { ELECTRODE_SITES } from '../ecg/electrodeMap'
 import type { CardiacVector, InstantaneousElectricalField } from './types'
-import { vectorMagnitude } from './wavefronts'
-
-/** Heart electrical origin in scene body coordinates (matches Vec view). */
-export const HEART_ORIGIN_SCENE = { x: 0.05, y: -0.35, z: 0.05 } as const
+import { LEAD_BY_NAME } from './leads'
 
 /**
  * Instantaneous body-surface potentials at the ten clinical electrodes.
- * Derived from the cardiac dipole (far-field approximation) — not invented
- * millivolt templates.
+ * Derived from the cardiac dipole using clinical lead-axis geometry
+ * (Einthoven / Wilson), not the decorative torso mesh positions.
  */
 export interface BodySurfacePotentials {
   t: number
-  /** Potential at each electrode (arbitrary mV·scale, consistent with leads). */
   electrodes: Readonly<Record<ElectrodeId, number>>
-  /** Wilson central terminal = (RA + LA + LL) / 3. */
   wilsonCT: number
 }
 
-interface ElectrodeGeometry {
-  id: ElectrodeId
-  /** Unit direction heart → electrode in Einthoven electrical coords. */
-  unit: CardiacVector
-  /** Distance used for 1/r² falloff. */
-  distance: number
-}
-
 /**
- * Scene (+y superior) → electrical (+y inferior) for potential math.
+ * Clinical electrode look-directions in Einthoven body coordinates
+ * (+x left, +y inferior, +z anterior). Chosen so that:
+ *   I = Φ_LA − Φ_RA ,  II = Φ_LL − Φ_RA ,  Vn = Φ_Vn − CT
+ * reproduce standard 12-lead axes.
  */
-function sceneToElectrical(v: CardiacVector): CardiacVector {
-  return { x: v.x, y: -v.y, z: v.z }
+const CLINICAL_ELECTRODE_DIR: Readonly<Record<ElectrodeId, CardiacVector>> = {
+  // Limb — Einthoven triangle vertices (unit-ish)
+  RA: { x: -0.866, y: -0.5, z: 0 },
+  LA: { x: 0.866, y: -0.5, z: 0 },
+  LL: { x: 0, y: 1, z: 0 },
+  RL: { x: 0, y: 0, z: 0 },
+  // Precordial — match LEAD_AXES exploring poles (vs Wilson CT)
+  V1: { x: LEAD_BY_NAME.V1.x, y: LEAD_BY_NAME.V1.y, z: LEAD_BY_NAME.V1.z },
+  V2: { x: LEAD_BY_NAME.V2.x, y: LEAD_BY_NAME.V2.y, z: LEAD_BY_NAME.V2.z },
+  V3: { x: LEAD_BY_NAME.V3.x, y: LEAD_BY_NAME.V3.y, z: LEAD_BY_NAME.V3.z },
+  V4: { x: LEAD_BY_NAME.V4.x, y: LEAD_BY_NAME.V4.y, z: LEAD_BY_NAME.V4.z },
+  V5: { x: LEAD_BY_NAME.V5.x, y: LEAD_BY_NAME.V5.y, z: LEAD_BY_NAME.V5.z },
+  V6: { x: LEAD_BY_NAME.V6.x, y: LEAD_BY_NAME.V6.y, z: LEAD_BY_NAME.V6.z },
 }
 
-function buildElectrodeGeometry(): readonly ElectrodeGeometry[] {
-  return ELECTRODE_SITES.map((site) => {
-    const dx = site.position[0] - HEART_ORIGIN_SCENE.x
-    const dy = site.position[1] - HEART_ORIGIN_SCENE.y
-    const dz = site.position[2] - HEART_ORIGIN_SCENE.z
-    const scene = { x: dx, y: dy, z: dz }
-    const elec = sceneToElectrical(scene)
-    const distance = Math.max(0.35, vectorMagnitude(elec))
-    const unit = {
-      x: elec.x / distance,
-      y: elec.y / distance,
-      z: elec.z / distance,
-    }
-    return { id: site.id, unit, distance }
-  })
-}
-
-const ELECTRODE_GEOMETRY = buildElectrodeGeometry()
+/** Heart origin kept for 3D overlays / documentation. */
+export const HEART_ORIGIN_SCENE = { x: 0.05, y: -0.35, z: 0.05 } as const
 
 /**
- * Far-field body-surface potential from the equivalent cardiac dipole:
- *   Φ(r) ≈ (D · r̂) / r²
- *
- * RL is ground / right-leg drive and is held at 0 for teaching.
+ * Far-field potential Φ(electrode) = D · û_electrode.
+ * Equal-distance assumption yields clinically correct lead differences.
  */
 export function computeBodySurfacePotentials(
   field: InstantaneousElectricalField,
 ): BodySurfacePotentials {
+  const D = field.dipole
   const electrodes = {
     RA: 0,
     LA: 0,
@@ -75,19 +58,16 @@ export function computeBodySurfacePotentials(
     V6: 0,
   } as Record<ElectrodeId, number>
 
-  const D = field.dipole
-  for (const g of ELECTRODE_GEOMETRY) {
-    if (g.id === 'RL') {
+  for (const id of Object.keys(CLINICAL_ELECTRODE_DIR) as ElectrodeId[]) {
+    if (id === 'RL') {
       electrodes.RL = 0
       continue
     }
-    const r2 = g.distance * g.distance
-    electrodes[g.id] =
-      (D.x * g.unit.x + D.y * g.unit.y + D.z * g.unit.z) / r2
+    const u = CLINICAL_ELECTRODE_DIR[id]
+    electrodes[id] = D.x * u.x + D.y * u.y + D.z * u.z
   }
 
-  const wilsonCT =
-    (electrodes.RA + electrodes.LA + electrodes.LL) / 3
+  const wilsonCT = (electrodes.RA + electrodes.LA + electrodes.LL) / 3
 
   return { t: field.t, electrodes, wilsonCT }
 }
