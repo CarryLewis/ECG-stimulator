@@ -1,6 +1,6 @@
 # ECG Stimulator — Interactive 3D Cardiac Anatomy
 
-First visualization module: the heart as the **biological source model** for future ECG generation.
+Physiology-first teaching SPA: anatomy and conduction feed an **electrical vector engine**; the **ECG generator** only samples projected lead voltages (no hardcoded waveforms).
 
 ## Run
 
@@ -16,27 +16,30 @@ npm run preview
 
 ## This module
 
-- Four heart views: **Src** (selectable chambers), **V1** conduction, **V2** lead atlas, **V3** torso electrodes
+- Five heart views: **Src** chambers, **V1** conduction, **V2** lead atlas, **V3** torso electrodes, **Vec** electrical vectors
 - Shared **orientation cube** on every version: **A / P / L / R / H / B**
-- **Event-driven conduction animation** (no manual keyframes):
-  - 0 ms SA → 40 ms atria → 120 ms AV → 200 ms His / ventricular cascade → 350 ms repolarization
-  - Glow sampled from physiological events on the shared simulation clock (including Src chambers)
-- Playback pace + heart-rate controls
-- Anatomical labels toggle; Src supports myocardium opacity + structure pick
+- **Event-driven conduction** (SA → atria → AV → His → ventricle → repolarization)
+- **Electrical Vector Engine** (`src/vector-engine/`): myocardial wavefronts → cardiac dipole + contributions → lead projections + mean electrical axis
+- **ECG Generator** (`src/ecg-generator/`): samples vector lead voltages into live strips / ring buffers
+- **Vec view**: 3D arrows for activation contributions, ventricular depolarization, net field, and frontal mean electrical axis; HUD + mini ECG from the generator
 
-Diseases and live 12-lead ECG sampling are **not** included yet.
+Diseases / pathology packs are **not** included yet — tissue modifiers are ready for injury current when packs arrive.
 
 ## Layout
 
 | Path | Role |
 |------|------|
 | `src/anatomy/` | Structure definitions (ids aligned with `docs/core-data-model`) |
-| `src/components/anatomy/` | R3F viewport + heart mesh + control panel |
-| `docs/core-data-model/` | Event-driven type contracts for the full platform |
+| `src/sim/` | Shared clock + sinus event scheduler + EP glow |
+| `src/ep/` | Bridge: conduction state → vector-engine wavefronts |
+| `src/vector-engine/` | Dipole / contributions / lead axes / mean axis |
+| `src/ecg-generator/` | Sampling + ring buffers (no morphology forks) |
+| `src/components/vector/` | 3D arrows + vector HUD + mini ECG |
+| `docs/core-data-model/` | Typed contracts for the full platform |
 | `docs/software-architecture-design.md` | Layered architecture |
 
 ## Design notes
 
-- Procedural meshes (shared sphere geometry) for performance and offline use
-- Body axes: +x patient left, +y superior, +z anterior
-- No CDN runtime dependency once `node_modules` are installed
+- Data flow: **EP → Vector → ECG** (one-way for signals)
+- Body axes: +x patient left, +y superior (scene), +z anterior; lead math uses Einthoven +y inferior
+- Procedural meshes for performance and offline use

@@ -1,4 +1,4 @@
-export type HeartVersion = 'anatomy' | 'v1' | 'v2' | 'v3'
+export type HeartVersion = 'anatomy' | 'v1' | 'v2' | 'v3' | 'vector'
 
 export const HEART_VERSIONS: readonly {
   id: HeartVersion
@@ -29,5 +29,11 @@ export const HEART_VERSIONS: readonly {
     short: 'V3',
     title: 'Torso electrodes',
     hint: 'Body contour and clinical electrode placement',
+  },
+  {
+    id: 'vector',
+    short: 'Vec',
+    title: 'Electrical vectors',
+    hint: 'Myocardial vectors → mean axis → ECG lead voltages',
   },
 ] as const
