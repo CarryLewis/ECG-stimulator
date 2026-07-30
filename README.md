@@ -25,3 +25,7 @@ Cardiac activation → Electrical vector → Body surface potential → Lead cal
 ```
 
 P ← atrial activation · QRS ← ventricular depolarization · T ← repolarization
+
+## Documentation
+
+AI Project Control Center lives under [`docs/`](./docs/): vision, requirements, architecture, medical model, roadmap, and per-module memory. See [`docs/CHANGELOG.md`](./docs/CHANGELOG.md) for consolidation history.

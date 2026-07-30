@@ -67,7 +67,7 @@ export default function CardiacAnatomyViewport({
   const isVector = heartVersion === 'vector'
   const isSource = heartVersion === 'anatomy'
   const camera = isV3
-    ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
+    ? { position: [0, 0.15, 5.4] as [number, number, number], fov: 40 }
     : isVector
       ? { position: [2.2, 0.85, 3.5] as [number, number, number], fov: 40 }
       : { position: [2.6, 1.1, 3.4] as [number, number, number], fov: 40 }
@@ -168,10 +168,10 @@ export default function CardiacAnatomyViewport({
 
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, isV3 ? -2.16 : -1.86, 0]}
+          position={[0, isV3 ? -2.55 : -1.86, 0]}
           onClick={clearSelection}
         >
-          <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
+          <circleGeometry args={[isV3 ? 3.8 : 2.6, 48]} />
           <meshStandardMaterial color="#060a10" roughness={1} metalness={0} />
         </mesh>
 
@@ -179,9 +179,9 @@ export default function CardiacAnatomyViewport({
           makeDefault
           enableDamping
           dampingFactor={0.08}
-          minDistance={isV3 ? 2.6 : 1.9}
-          maxDistance={isV3 ? 10 : 7.5}
-          target={isV3 ? [0, 0.05, 0] : [0, -0.15, 0]}
+          minDistance={isV3 ? 3.2 : 1.9}
+          maxDistance={isV3 ? 12 : 7.5}
+          target={isV3 ? [0, 0.0, 0] : [0, -0.15, 0]}
           enablePan={false}
         />
 
