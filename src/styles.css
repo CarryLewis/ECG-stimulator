@@ -652,12 +652,13 @@ input[type='range']::-moz-range-thumb {
 
 .conduction-toolbar {
   position: relative;
-  z-index: 6;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 4px;
+  pointer-events: auto;
 }
 
 .conduction-toolbar .panel-title {
@@ -670,6 +671,9 @@ input[type='range']::-moz-range-thumb {
   border-radius: 999px;
   overflow: hidden;
   background: var(--bg-2);
+  position: relative;
+  z-index: 41;
+  pointer-events: auto;
 }
 
 .heart-version-btn {
@@ -680,6 +684,7 @@ input[type='range']::-moz-range-thumb {
   font-weight: 600;
   padding: 6px 10px;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .heart-version-btn--active {
@@ -689,7 +694,7 @@ input[type='range']::-moz-range-thumb {
 
 .anatomy-layer-bar {
   position: relative;
-  z-index: 6;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -698,6 +703,7 @@ input[type='range']::-moz-range-thumb {
   border-radius: 10px;
   border: 1px solid rgba(159, 176, 204, 0.2);
   background: rgba(255, 255, 255, 0.03);
+  pointer-events: auto;
 }
 
 .anatomy-layer-title {
@@ -715,11 +721,12 @@ input[type='range']::-moz-range-thumb {
 
 .anatomy-layer-toggles {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .anatomy-layer-btn {
-  flex: 1;
+  flex: 1 1 calc(50% - 8px);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg-2);
@@ -806,6 +813,101 @@ input[type='range']::-moz-range-thumb {
 }
 
 .lead-pin--dimmed {
+  opacity: 0.28;
+}
+
+.electrode-tag {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  max-width: 140px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--electrode-color, #94a3b8) 60%, transparent);
+  background: rgba(7, 13, 20, 0.88);
+  color: #e8eefc;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.electrode-tag-id {
+  font-size: 11px;
+  font-weight: 800;
+  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
+  color: var(--electrode-color, #94a3b8);
+}
+
+.electrode-tag-place {
+  font-size: 9px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 126px;
+}
+
+.electrode-tag--focused {
+  border-color: #fff;
+  box-shadow:
+    0 0 0 1px #fff,
+    0 0 12px color-mix(in srgb, var(--electrode-color, #94a3b8) 55%, transparent);
+}
+
+.electrode-tag--focused .electrode-tag-id {
+  color: #fff;
+}
+
+.electrode-tag--dimmed {
+  opacity: 0.25;
+}
+
+.lead-callout {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lead-callout-name {
+  min-width: 28px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lead-color, #3b82f6) 65%, transparent);
+  background: rgba(7, 13, 20, 0.9);
+  color: #eaf2ff;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--lead-color, #3b82f6) 35%, transparent);
+}
+
+.lead-callout-note {
+  max-width: 150px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(7, 13, 20, 0.85);
+  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.lead-callout--selected .lead-callout-name {
+  border-color: #fff;
+  color: #fff;
+  box-shadow:
+    0 0 0 1px #fff,
+    0 0 10px var(--lead-color, #3b82f6);
+}
+
+.lead-callout--dimmed {
   opacity: 0.28;
 }
 

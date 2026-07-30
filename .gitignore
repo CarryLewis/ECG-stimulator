@@ -15,6 +15,12 @@ dist-ssr
 # Offline pack output (large tarballs with vendored node_modules)
 offline-bundle/
 
+# Local anatomical heart meshes (licence / size — keep out of git by default)
+public/models/*.glb
+public/models/*.gltf
+public/models/*.bin
+!public/models/README.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

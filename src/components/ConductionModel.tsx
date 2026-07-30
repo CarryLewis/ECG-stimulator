@@ -3,6 +3,10 @@ import { OrbitControls } from '@react-three/drei'
 import { useMemo, useState } from 'react'
 import { conductionAt } from '../ecg/conduction'
 import {
+  LEAD_ELECTRODES,
+  LEAD_PLACEMENT_BY_NAME,
+} from '../ecg/electrodeMap'
+import {
   LEAD_LANDMARK_BY_NAME,
   TERRITORY_COLOR,
 } from '../ecg/leadMap'
@@ -10,8 +14,10 @@ import type { CyclePlan, LeadName } from '../ecg/types'
 import { useLanguage } from '../i18n/useLanguage'
 import HeartAnatomyV2, { type AnatomyLayer } from './heart/HeartAnatomyV2'
 import HeartConductionV1 from './heart/HeartConductionV1'
+import HeartTorsoV3, { type TorsoLayer } from './heart/HeartTorsoV3'
+import OrientationCube from './OrientationCube'
 
-export type HeartVersion = 'v1' | 'v2'
+export type HeartVersion = 'v1' | 'v2' | 'v3'
 
 interface ConductionModelProps {
   plan: CyclePlan
@@ -29,49 +35,75 @@ function HeartScene({
   state,
   selectedLead,
   onSelectLead,
-  layers,
+  anatomyLayers,
+  torsoLayers,
 }: {
   version: HeartVersion
   state: ReturnType<typeof conductionAt>
   selectedLead: LeadName | null
   onSelectLead: (lead: LeadName | null) => void
-  layers: Record<AnatomyLayer, boolean>
+  anatomyLayers: Record<AnatomyLayer, boolean>
+  torsoLayers: Record<TorsoLayer, boolean>
 }) {
-  const bg = version === 'v2' ? '#0c121a' : '#070d14'
+  const bg =
+    version === 'v3' ? '#0a1018' : version === 'v2' ? '#0c121a' : '#070d14'
+  const camTarget: [number, number, number] =
+    version === 'v3' ? [0, 0.05, 0] : [0, -0.1, 0]
+
   return (
     <>
       <color attach="background" args={[bg]} />
-      <ambientLight intensity={version === 'v2' ? 0.55 : 0.45} />
+      <ambientLight
+        intensity={version === 'v3' ? 0.95 : version === 'v2' ? 0.9 : 0.85}
+      />
       <directionalLight
         position={[3.5, 4.5, 2.5]}
-        intensity={1.35}
+        intensity={version === 'v3' ? 2.0 : 1.9}
         castShadow
       />
-      <directionalLight position={[-3, 1.5, -2]} intensity={0.4} />
+      <directionalLight
+        position={[-3, 1.5, -2]}
+        intensity={version === 'v3' ? 0.85 : 0.75}
+      />
+      <directionalLight position={[0, 2, 4]} intensity={0.65} color="#ffe8e0" />
       <pointLight
         position={[0.2, 0.8, 1.5]}
-        intensity={0.45 + state.sa * 0.7}
+        intensity={0.75 + state.sa * 0.7}
         color="#7dffb0"
       />
+      <pointLight position={[1.2, 0.2, 1.8]} intensity={0.55} color="#fff0e8" />
 
-      {version === 'v1' ? (
-        <HeartConductionV1 state={state} />
-      ) : (
-        <HeartAnatomyV2
+      {version === 'v1' && (
+        <group scale={1.08} position={[0, 0.05, 0]}>
+          <HeartConductionV1 state={state} />
+        </group>
+      )}
+      {version === 'v2' && (
+        <group scale={1.05} position={[0, 0.05, 0]}>
+          <HeartAnatomyV2
+            state={state}
+            selectedLead={selectedLead}
+            onSelectLead={onSelectLead}
+            layers={anatomyLayers}
+          />
+        </group>
+      )}
+      {version === 'v3' && (
+        <HeartTorsoV3
           state={state}
           selectedLead={selectedLead}
           onSelectLead={onSelectLead}
-          layers={layers}
+          layers={torsoLayers}
         />
       )}
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.85, 0]}
+        position={[0, version === 'v3' ? -2.15 : -1.85, 0]}
         receiveShadow
         onClick={() => onSelectLead(null)}
       >
-        <circleGeometry args={[2.6, 48]} />
+        <circleGeometry args={[version === 'v3' ? 3.2 : 2.6, 48]} />
         <meshStandardMaterial color="#0a121c" roughness={1} metalness={0} />
       </mesh>
 
@@ -79,16 +111,19 @@ function HeartScene({
         makeDefault
         enableDamping
         dampingFactor={0.08}
-        minDistance={2.2}
-        maxDistance={8}
-        target={[0, -0.15, 0]}
+        minDistance={version === 'v3' ? 2.6 : 2.0}
+        maxDistance={version === 'v3' ? 10 : 8}
+        target={camTarget}
       />
+
+      <OrientationCube />
     </>
   )
 }
 
 /**
- * Freely rotatable 3D heart — V1 conduction schematic or V2 lead-atlas anatomy.
+ * Freely rotatable 3D heart — V1 conduction, V2 lead atlas, or V3 torso
+ * electrode-placement schematic.
  */
 export default function ConductionModel({
   plan,
@@ -102,12 +137,21 @@ export default function ConductionModel({
 }: ConductionModelProps) {
   const { locale, t } = useLanguage()
   const state = conductionAt(plan, elapsed, { afSeed })
-  const [layers, setLayers] = useState<Record<AnatomyLayer, boolean>>({
+  const [anatomyLayers, setAnatomyLayers] = useState<
+    Record<AnatomyLayer, boolean>
+  >({
     walls: true,
     pins: true,
   })
+  const [torsoLayers, setTorsoLayers] = useState<Record<TorsoLayer, boolean>>({
+    torso: true,
+    heart: true,
+    electrodes: true,
+    leads: true,
+  })
 
   const landmark = selectedLead ? LEAD_LANDMARK_BY_NAME[selectedLead] : null
+  const placement = selectedLead ? LEAD_PLACEMENT_BY_NAME[selectedLead] : null
   const scale = timeScale.toFixed(2)
 
   const statusText = useMemo(() => {
@@ -116,11 +160,40 @@ export default function ConductionModel({
       if (plan.dissociated) return t('statusDissoc')
       return t('statusPr', { ms: Math.round(plan.prInterval * 1000) })
     }
+    if (heartVersion === 'v3') {
+      if (!placement || !selectedLead) return t('pickElectrodeHint')
+      const note = locale === 'zh' ? placement.noteZh : placement.noteEn
+      const electrodes = LEAD_ELECTRODES[selectedLead].join(' + ')
+      return t('electrodeSenseLine', {
+        lead: selectedLead,
+        electrodes,
+        note,
+      })
+    }
     if (!landmark) return t('pickPinHint')
     const face = locale === 'zh' ? landmark.faceZh : landmark.faceEn
     const senses = locale === 'zh' ? landmark.sensesZh : landmark.sensesEn
     return t('leadSenseLine', { lead: landmark.lead, face, senses })
-  }, [heartVersion, landmark, locale, plan, t])
+  }, [heartVersion, landmark, locale, placement, plan, selectedLead, t])
+
+  const camera =
+    heartVersion === 'v3'
+      ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
+      : { position: [2.6, 1.4, 3.4] as [number, number, number], fov: 42 }
+
+  const aria =
+    heartVersion === 'v1'
+      ? t('ariaV1')
+      : heartVersion === 'v2'
+        ? t('ariaV2')
+        : t('ariaV3')
+
+  const hint =
+    heartVersion === 'v1'
+      ? t('hintV1', { scale })
+      : heartVersion === 'v2'
+        ? t('hintV2', { scale })
+        : t('hintV3', { scale })
 
   return (
     <div className="panel conduction-panel">
@@ -131,32 +204,29 @@ export default function ConductionModel({
           role="group"
           aria-label={t('heartVersionAria')}
         >
-          <button
-            type="button"
-            className={
-              'heart-version-btn' +
-              (heartVersion === 'v1' ? ' heart-version-btn--active' : '')
-            }
-            onClick={() => onHeartVersionChange('v1')}
-          >
-            {t('v1Short')}
-          </button>
-          <button
-            type="button"
-            className={
-              'heart-version-btn' +
-              (heartVersion === 'v2' ? ' heart-version-btn--active' : '')
-            }
-            onClick={() => onHeartVersionChange('v2')}
-          >
-            {t('v2Short')}
-          </button>
+          {(
+            [
+              ['v1', 'v1Short'],
+              ['v2', 'v2Short'],
+              ['v3', 'v3Short'],
+            ] as const
+          ).map(([v, label]) => (
+            <button
+              key={v}
+              type="button"
+              className={
+                'heart-version-btn' +
+                (heartVersion === v ? ' heart-version-btn--active' : '')
+              }
+              onClick={() => onHeartVersionChange(v)}
+            >
+              {t(label)}
+            </button>
+          ))}
         </div>
       </div>
 
-      <p className="panel-hint">
-        {heartVersion === 'v1' ? t('hintV1', { scale }) : t('hintV2', { scale })}
-      </p>
+      <p className="panel-hint">{hint}</p>
 
       {heartVersion === 'v2' && (
         <div className="anatomy-layer-bar">
@@ -172,18 +242,24 @@ export default function ConductionModel({
             <button
               type="button"
               className={
-                'anatomy-layer-btn' + (layers.walls ? ' anatomy-layer-btn--active' : '')
+                'anatomy-layer-btn' +
+                (anatomyLayers.walls ? ' anatomy-layer-btn--active' : '')
               }
-              onClick={() => setLayers((l) => ({ ...l, walls: !l.walls }))}
+              onClick={() =>
+                setAnatomyLayers((l) => ({ ...l, walls: !l.walls }))
+              }
             >
               {t('layerWalls')}
             </button>
             <button
               type="button"
               className={
-                'anatomy-layer-btn' + (layers.pins ? ' anatomy-layer-btn--active' : '')
+                'anatomy-layer-btn' +
+                (anatomyLayers.pins ? ' anatomy-layer-btn--active' : '')
               }
-              onClick={() => setLayers((l) => ({ ...l, pins: !l.pins }))}
+              onClick={() =>
+                setAnatomyLayers((l) => ({ ...l, pins: !l.pins }))
+              }
             >
               {t('layerPins')}
             </button>
@@ -191,16 +267,49 @@ export default function ConductionModel({
         </div>
       )}
 
-      <div
-        className="conduction-3d"
-        role="img"
-        aria-label={heartVersion === 'v1' ? t('ariaV1') : t('ariaV2')}
-      >
+      {heartVersion === 'v3' && (
+        <div className="anatomy-layer-bar">
+          <div className="anatomy-layer-title">
+            <strong>{t('torsoTitle')}</strong>
+            <span>
+              {selectedLead
+                ? t('selectedLead', { lead: selectedLead })
+                : t('selectElectrode')}
+            </span>
+          </div>
+          <div className="anatomy-layer-toggles">
+            {(
+              [
+                ['torso', 'layerTorso'],
+                ['heart', 'layerHeart'],
+                ['electrodes', 'layerElectrodes'],
+                ['leads', 'layerLeadLabels'],
+              ] as const
+            ).map(([key, msg]) => (
+              <button
+                key={key}
+                type="button"
+                className={
+                  'anatomy-layer-btn' +
+                  (torsoLayers[key] ? ' anatomy-layer-btn--active' : '')
+                }
+                onClick={() =>
+                  setTorsoLayers((l) => ({ ...l, [key]: !l[key] }))
+                }
+              >
+                {t(msg)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="conduction-3d" role="img" aria-label={aria}>
         <Canvas
           key={heartVersion}
           shadows
           dpr={[1, 1.75]}
-          camera={{ position: [2.6, 1.4, 3.4], fov: 42, near: 0.1, far: 40 }}
+          camera={{ ...camera, near: 0.1, far: 40 }}
           gl={{ antialias: true, alpha: false }}
         >
           <HeartScene
@@ -208,7 +317,8 @@ export default function ConductionModel({
             state={state}
             selectedLead={selectedLead}
             onSelectLead={onSelectLead}
-            layers={layers}
+            anatomyLayers={anatomyLayers}
+            torsoLayers={torsoLayers}
           />
         </Canvas>
       </div>
@@ -233,6 +343,24 @@ export default function ConductionModel({
               {t(msg)}
             </span>
           ))}
+        </div>
+      ) : heartVersion === 'v3' ? (
+        <div className="territory-legend">
+          <span className="territory-chip">
+            <span
+              className="territory-swatch"
+              style={{ background: '#f87171' }}
+            />
+            {t('legendLimb')}
+          </span>
+          <span className="territory-chip">
+            <span
+              className="territory-swatch"
+              style={{ background: TERRITORY_COLOR.anterior }}
+            />
+            {t('legendPrecordial')}
+          </span>
+          <span className="conduction-drag-hint">{t('dragHint')}</span>
         </div>
       ) : (
         <div className="conduction-legend">

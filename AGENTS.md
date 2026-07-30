@@ -25,10 +25,17 @@ lives or runs.
   - `diseases.ts` — scenario params, `buildPlan`, educational text
 - UI: `src/components/` (live canvas 12-lead + **draggable 3D** heart share one
   clock via `src/hooks/useSimulationClock.ts`). ECG uses **cascade sweep**.
-  Heart models: **V1** conduction schematic (`HeartConductionV1`) and **V2**
+  Heart models: **V1** conduction schematic (`HeartConductionV1`), **V2**
   anatomical lead atlas (`HeartAnatomyV2` + `src/ecg/leadMap.ts`) with wall
-  colour patches and 12-lead pins; clicking an ECG row ↔ 3D pin stays in sync.
-  Procedural Three.js / R3F only — no CDN assets.
+  colour patches and 12-lead pins, and **V3** clinical body placement
+  (`HeartTorsoV3` + `HumanBodyContour` + `src/ecg/electrodeMap.ts`) with a
+  clear proportional human silhouette, mediastinal heart, RA/LA/RL/LL + V1–V6
+  electrodes, and labelled 12 leads.
+  Clicking an ECG row ↔ 3D marker stays in sync. Procedural Three.js / R3F by
+  default (no CDN assets). Drop a GLB at
+  `public/models/heart-animated-realistic.glb` — V3 auto-loads it
+  (`HEART_GLB_MODE` in `src/components/heart/heartAsset.ts`). See
+  `docs/heart-asset-integration.md` (Unity not required).
 - **i18n:** `src/i18n/` (`LanguageProvider.tsx`, `useLanguage.ts`, `messages.ts`,
   `diseasesLocale.ts`). Header toggle switches **中文 / EN**; preference in
   `localStorage` (`ecg-sim-locale`). Lead faces use `faceZh`/`faceEn` in
