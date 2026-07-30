@@ -55,7 +55,7 @@ export default function CardiacAnatomyViewport({
   const isV3 = heartVersion === 'v3'
   const isSource = heartVersion === 'anatomy'
   const camera = isV3
-    ? { position: [0, 0.2, 4.5] as [number, number, number], fov: 40 }
+    ? { position: [0, 0.15, 5.4] as [number, number, number], fov: 40 }
     : { position: [0, 0.15, 4.2] as [number, number, number], fov: 40 }
 
   const clearSelection = () => {
@@ -167,9 +167,9 @@ export default function CardiacAnatomyViewport({
           makeDefault
           enableDamping
           dampingFactor={0.08}
-          minDistance={isV3 ? 2.6 : 2.0}
-          maxDistance={isV3 ? 10 : 8}
-          target={isV3 ? [0, 0.05, 0] : [0, -0.15, 0]}
+          minDistance={isV3 ? 3.2 : 2.0}
+          maxDistance={isV3 ? 12 : 8}
+          target={isV3 ? [0, 0.0, 0] : [0, -0.15, 0]}
           enablePan={false}
         />
 

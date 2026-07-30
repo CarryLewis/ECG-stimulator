@@ -8,7 +8,7 @@ import {
 } from '../../ecg/electrodeMap'
 import type { ConductionState, LeadName } from '../../ecg/types'
 import { useLanguage } from '../../i18n/useLanguage'
-import HumanBodyContour from './HumanBodyContour'
+import HumanBodyContour, { BODY_SCALE } from './HumanBodyContour'
 import RealisticHeart from './RealisticHeart'
 
 export type TorsoLayer = 'torso' | 'heart' | 'electrodes' | 'leads'
@@ -22,8 +22,8 @@ interface HeartTorsoV3Props {
 
 /**
  * Version 3 — clinical 12-lead placement schematic:
- * clear proportional human body contour + mediastinal heart +
- * labelled RA/LA/RL/LL and V1–V6 electrodes with derived lead callouts.
+ * proportional adult body contour + mediastinal heart (heart ~¼–⅓ chest
+ * width) + labelled RA/LA/RL/LL and V1–V6 electrodes.
  */
 export default function HeartTorsoV3({
   state,
@@ -35,64 +35,65 @@ export default function HeartTorsoV3({
 
   return (
     <group position={[0, 0.05, 0]}>
-      {layers.torso && <HumanBodyContour />}
+      {/* Body + surface electrodes share one scale so placement stays aligned. */}
+      <group scale={BODY_SCALE}>
+        {layers.torso && <HumanBodyContour />}
 
+        {layers.torso && <PlacementGuides />}
+
+        {selectedLead &&
+          (selectedLead === 'I' ||
+            selectedLead === 'II' ||
+            selectedLead === 'III') && (
+            <EinthovenHighlight lead={selectedLead} />
+          )}
+
+        {layers.electrodes &&
+          ELECTRODE_SITES.map((site) => {
+            const active =
+              !activeElectrodes || activeElectrodes.includes(site.id)
+            const focused =
+              activeElectrodes !== null && activeElectrodes.includes(site.id)
+            return (
+              <ElectrodeMarker
+                key={site.id}
+                site={site}
+                active={active}
+                focused={focused}
+                onSelect={() => {
+                  const lead = site.leads[0] ?? null
+                  onSelectLead(
+                    selectedLead && site.leads.includes(selectedLead)
+                      ? null
+                      : lead,
+                  )
+                }}
+              />
+            )
+          })}
+
+        {layers.leads &&
+          LEAD_PLACEMENT_LABELS.map((label) => {
+            const selected = selectedLead === label.lead
+            const dimmed = selectedLead !== null && !selected
+            return (
+              <LeadCallout
+                key={label.lead}
+                lead={label.lead}
+                position={label.position}
+                color={label.color}
+                noteZh={label.noteZh}
+                noteEn={label.noteEn}
+                selected={selected}
+                dimmed={dimmed}
+                onSelect={() => onSelectLead(selected ? null : label.lead)}
+              />
+            )
+          })}
+      </group>
+
+      {/* Heart scaled independently — ~⅓ of adult chest width, not body×heart. */}
       {layers.heart && <RealisticHeart state={state} />}
-
-      {/* Midsternal + left mid-clavicular guides for placement teaching */}
-      {layers.torso && <PlacementGuides />}
-
-      {selectedLead &&
-        (selectedLead === 'I' ||
-          selectedLead === 'II' ||
-          selectedLead === 'III') && (
-          <EinthovenHighlight lead={selectedLead} />
-        )}
-
-      {layers.electrodes &&
-        ELECTRODE_SITES.map((site) => {
-          const active =
-            !activeElectrodes || activeElectrodes.includes(site.id)
-          const focused =
-            activeElectrodes !== null && activeElectrodes.includes(site.id)
-          return (
-            <ElectrodeMarker
-              key={site.id}
-              site={site}
-              active={active}
-              focused={focused}
-              onSelect={() => {
-                const lead = site.leads[0] ?? null
-                onSelectLead(
-                  selectedLead && site.leads.includes(selectedLead)
-                    ? null
-                    : lead,
-                )
-              }}
-            />
-          )
-        })}
-
-      {layers.leads &&
-        LEAD_PLACEMENT_LABELS.map((label) => {
-          const selected = selectedLead === label.lead
-          const dimmed = selectedLead !== null && !selected
-          return (
-            <LeadCallout
-              key={label.lead}
-              lead={label.lead}
-              position={label.position}
-              color={label.color}
-              noteZh={label.noteZh}
-              noteEn={label.noteEn}
-              selected={selected}
-              dimmed={dimmed}
-              onSelect={() =>
-                onSelectLead(selected ? null : label.lead)
-              }
-            />
-          )
-        })}
     </group>
   )
 }
