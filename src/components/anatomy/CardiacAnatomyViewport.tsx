@@ -156,10 +156,10 @@ export default function CardiacAnatomyViewport({
 
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, isV3 ? -2.16 : -1.86, 0]}
+          position={[0, isV3 ? -2.55 : -1.86, 0]}
           onClick={clearSelection}
         >
-          <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
+          <circleGeometry args={[isV3 ? 3.8 : 2.6, 48]} />
           <meshStandardMaterial color="#0a1018" roughness={1} metalness={0} />
         </mesh>
 

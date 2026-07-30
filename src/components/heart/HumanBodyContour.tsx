@@ -12,8 +12,8 @@ import { DoubleSide, Vector2 } from 'three'
  * Axes: +x patient left, +y superior, +z anterior.
  */
 
-/** Uniform body scale applied to silhouette + matched electrode layout. */
-export const BODY_SCALE = 1.2
+/** Uniform body scale for silhouette + electrodes/guides/labels in V3. */
+export const BODY_SCALE = 1.28
 
 /**
  * Half-profile [x radius, y] — lathed around +Y.
