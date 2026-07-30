@@ -47,48 +47,79 @@ export default function HeartAnatomyV2({
         />
       </mesh>
 
-      {/* Base myocardium (muted) */}
+      {/* Base myocardium — bright so wall structure reads clearly */}
       <mesh position={[-0.5, 0.85, 0.05]} castShadow>
         <sphereGeometry args={[0.5, 36, 28]} />
-        <meshStandardMaterial color="#6b2a32" roughness={0.55} metalness={0.08} />
+        <meshStandardMaterial
+          color="#c85864"
+          roughness={0.4}
+          metalness={0.06}
+          emissive="#a03040"
+          emissiveIntensity={0.35 + state.atria * 0.35}
+        />
       </mesh>
       <mesh position={[0.52, 0.9, 0.0]} castShadow>
         <sphereGeometry args={[0.48, 36, 28]} />
-        <meshStandardMaterial color="#6b2a32" roughness={0.55} metalness={0.08} />
+        <meshStandardMaterial
+          color="#c85864"
+          roughness={0.4}
+          metalness={0.06}
+          emissive="#a03040"
+          emissiveIntensity={0.35 + state.atria * 0.35}
+        />
       </mesh>
       <mesh position={[-0.42, -0.5, 0.05]} scale={[0.95, 1.35, 0.95]} castShadow>
         <sphereGeometry args={[0.75, 40, 32]} />
         <meshStandardMaterial
-          color="#7a3038"
-          roughness={0.5}
-          metalness={0.1}
+          color="#d0606c"
+          roughness={0.36}
+          metalness={0.08}
+          emissive="#c04050"
+          emissiveIntensity={0.4 + state.ventricle * 0.4}
           transparent
-          opacity={0.92}
+          opacity={0.96}
         />
       </mesh>
       <mesh position={[0.42, -0.45, 0.0]} scale={[1.08, 1.48, 1.05]} castShadow>
         <sphereGeometry args={[0.82, 40, 32]} />
         <meshStandardMaterial
-          color="#8a343e"
-          roughness={0.48}
-          metalness={0.1}
+          color="#e0707c"
+          roughness={0.34}
+          metalness={0.08}
+          emissive="#d05060"
+          emissiveIntensity={0.45 + state.ventricle * 0.4}
           transparent
-          opacity={0.92}
+          opacity={0.96}
         />
       </mesh>
       <mesh position={[0.08, -1.42, 0.05]} scale={[0.75, 0.55, 0.7]}>
         <sphereGeometry args={[0.58, 28, 20]} />
-        <meshStandardMaterial color="#7a3038" roughness={0.55} />
+        <meshStandardMaterial
+          color="#d0606c"
+          roughness={0.4}
+          emissive="#c04050"
+          emissiveIntensity={0.35 + state.ventricle * 0.3}
+        />
       </mesh>
 
       {/* Great vessels cue */}
       <mesh position={[-0.15, 1.35, -0.05]} rotation={[0.2, 0, 0.15]}>
         <cylinderGeometry args={[0.12, 0.14, 0.55, 16]} />
-        <meshStandardMaterial color="#5a2430" roughness={0.5} />
+        <meshStandardMaterial
+          color="#ff5a5a"
+          roughness={0.32}
+          emissive="#ff3030"
+          emissiveIntensity={0.4}
+        />
       </mesh>
       <mesh position={[0.2, 1.4, -0.1]} rotation={[-0.15, 0, -0.2]}>
         <cylinderGeometry args={[0.1, 0.12, 0.5, 16]} />
-        <meshStandardMaterial color="#5a2430" roughness={0.5} />
+        <meshStandardMaterial
+          color="#5b9fdf"
+          roughness={0.32}
+          emissive="#3a7fc0"
+          emissiveIntensity={0.35}
+        />
       </mesh>
 
       {/* Conduction nodes (subtle, still synced) */}

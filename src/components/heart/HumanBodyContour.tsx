@@ -62,7 +62,7 @@ export default function HumanBodyContour() {
           emissive={SKIN_EMIT}
           emissiveIntensity={0.35}
           transparent
-          opacity={0.5}
+          opacity={0.38}
           roughness={0.85}
           metalness={0.04}
           depthWrite={false}
@@ -76,9 +76,9 @@ export default function HumanBodyContour() {
         <meshStandardMaterial
           color={EDGE}
           emissive="#6b84a4"
-          emissiveIntensity={0.5}
+          emissiveIntensity={0.45}
           transparent
-          opacity={0.22}
+          opacity={0.18}
           roughness={1}
           depthWrite={false}
           side={DoubleSide}

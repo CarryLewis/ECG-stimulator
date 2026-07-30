@@ -54,23 +54,24 @@ function HeartScene({
     <>
       <color attach="background" args={[bg]} />
       <ambientLight
-        intensity={version === 'v3' ? 0.78 : version === 'v2' ? 0.7 : 0.62}
+        intensity={version === 'v3' ? 0.95 : version === 'v2' ? 0.9 : 0.85}
       />
       <directionalLight
         position={[3.5, 4.5, 2.5]}
-        intensity={version === 'v3' ? 1.65 : 1.55}
+        intensity={version === 'v3' ? 2.0 : 1.9}
         castShadow
       />
       <directionalLight
         position={[-3, 1.5, -2]}
-        intensity={version === 'v3' ? 0.6 : 0.5}
+        intensity={version === 'v3' ? 0.85 : 0.75}
       />
-      <directionalLight position={[0, 2, 4]} intensity={0.4} color="#c8dff5" />
+      <directionalLight position={[0, 2, 4]} intensity={0.65} color="#ffe8e0" />
       <pointLight
         position={[0.2, 0.8, 1.5]}
-        intensity={0.5 + state.sa * 0.7}
+        intensity={0.75 + state.sa * 0.7}
         color="#7dffb0"
       />
+      <pointLight position={[1.2, 0.2, 1.8]} intensity={0.55} color="#fff0e8" />
 
       {version === 'v1' && (
         <group scale={1.08} position={[0, 0.05, 0]}>

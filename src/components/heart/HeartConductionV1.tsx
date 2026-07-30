@@ -6,7 +6,7 @@ import type { ConductionState } from '../../ecg/types'
 const IDLE: [number, number, number] = [0.14, 0.2, 0.3]
 const ACTIVE: [number, number, number] = [0.2, 0.95, 0.55]
 const BLOCK: [number, number, number] = [0.97, 0.44, 0.44]
-const MYO_BASE: [number, number, number] = [0.55, 0.18, 0.22]
+const MYO_BASE: [number, number, number] = [0.78, 0.28, 0.34]
 
 function mixRgb(
   a: [number, number, number],
@@ -107,49 +107,59 @@ export default function HeartConductionV1({ state }: { state: ConductionState })
         <sphereGeometry args={[0.48, 32, 24]} />
         <meshStandardMaterial
           color={new THREE.Color(...atriaCol)}
-          roughness={0.45}
-          metalness={0.1}
+          roughness={0.35}
+          metalness={0.08}
+          emissive={new THREE.Color(...atriaCol)}
+          emissiveIntensity={0.25 + state.atria * 0.55}
           transparent
-          opacity={0.88}
+          opacity={0.95}
         />
       </mesh>
       <mesh position={[0.55, 0.9, 0.05]} castShadow>
         <sphereGeometry args={[0.46, 32, 24]} />
         <meshStandardMaterial
           color={new THREE.Color(...atriaCol)}
-          roughness={0.45}
-          metalness={0.1}
+          roughness={0.35}
+          metalness={0.08}
+          emissive={new THREE.Color(...atriaCol)}
+          emissiveIntensity={0.25 + state.atria * 0.55}
           transparent
-          opacity={0.88}
+          opacity={0.95}
         />
       </mesh>
       <mesh position={[-0.45, -0.55, 0.05]} scale={[0.95, 1.35, 0.9]} castShadow>
         <sphereGeometry args={[0.72, 36, 28]} />
         <meshStandardMaterial
           color={new THREE.Color(...ventCol)}
-          roughness={0.4}
-          metalness={0.12}
+          roughness={0.32}
+          metalness={0.1}
+          emissive={new THREE.Color(...ventCol)}
+          emissiveIntensity={0.3 + state.ventricle * 0.55}
           transparent
-          opacity={0.9}
+          opacity={0.96}
         />
       </mesh>
       <mesh position={[0.4, -0.5, 0.0]} scale={[1.05, 1.45, 1.0]} castShadow>
         <sphereGeometry args={[0.78, 36, 28]} />
         <meshStandardMaterial
           color={new THREE.Color(...ventCol)}
-          roughness={0.4}
-          metalness={0.12}
+          roughness={0.32}
+          metalness={0.1}
+          emissive={new THREE.Color(...ventCol)}
+          emissiveIntensity={0.3 + state.ventricle * 0.55}
           transparent
-          opacity={0.9}
+          opacity={0.96}
         />
       </mesh>
       <mesh position={[0.05, -1.45, 0.05]} scale={[0.7, 0.55, 0.65]}>
         <sphereGeometry args={[0.55, 24, 16]} />
         <meshStandardMaterial
           color={new THREE.Color(...ventCol)}
-          roughness={0.45}
+          roughness={0.36}
+          emissive={new THREE.Color(...ventCol)}
+          emissiveIntensity={0.22 + state.ventricle * 0.4}
           transparent
-          opacity={0.82}
+          opacity={0.9}
         />
       </mesh>
 
