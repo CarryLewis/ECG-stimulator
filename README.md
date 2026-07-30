@@ -16,11 +16,12 @@ npm run preview
 
 ## This module
 
-- Macroscopic structures: RA, LA, RV, LV, interventricular septum, apex
+- Three heart versions: **V1** conduction schematic, **V2** lead atlas, **V3** torso electrodes
+- Shared **orientation cube** on every version: **A / P / L / R / H / B**
+  (Anterior, Posterior, Left, Right, Head, Bottom) — tracks camera; click a face to snap
 - Orbit rotate / zoom
-- Transparent myocardium (opacity control)
-- Anatomical labels
-- Selectable structures (viewport + list)
+- Anatomical labels toggle (V2 pins / V3 electrodes)
+- Structure reference panel (RA, LA, RV, LV, septum, apex)
 
 Diseases and live ECG are **not** included yet.
 
