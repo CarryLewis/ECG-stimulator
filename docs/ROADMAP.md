@@ -2,7 +2,7 @@
 
 **Document role:** Development stages and sequencing for AI agents  
 **Related:** [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`PRODUCT_REQUIREMENTS.md`](./PRODUCT_REQUIREMENTS.md), [`CHANGELOG.md`](./CHANGELOG.md)  
-**Status:** Phase 0 complete (Control Center docs); Phase 1 next
+**Status:** Phase 0–4 largely delivered on consolidate tip (anatomy + conduction + vector/ECG + EP lab UI); Phase 5 (disease packs) next — see [`CHANGELOG.md`](./CHANGELOG.md)
 
 ---
 

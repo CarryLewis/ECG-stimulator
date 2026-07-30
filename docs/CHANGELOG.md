@@ -6,6 +6,57 @@
 
 ---
 
+## 2026-07-30 — Full cross-chat / PR consolidation
+
+**Completed:**
+
+- Re-consolidated **all chat-window agents and open PRs** into `cursor/consolidate-latest-cb9c` as the single latest application tip
+- Merged realistic ECG morphology fixes from **#13** (staircase resampling, sequential P/QRS/T wavefronts, clinical lead axes → V1 rS / II upright / aVR negative)
+- Retained EP laboratory UI (**#12**), electrical vector → body-surface → lead → ECG pipeline (**#11**), AI Project Control Center docs (**#9**), and V3 adult thorax proportion tuning
+- Documented the chat → PR → disposition map below so future agents do not re-merge superseded branches
+
+### Chat windows → PR disposition
+
+| Chat / agent | Branch / PR | Disposition in this tip |
+|--------------|-------------|-------------------------|
+| Cardiac electrical vectors | #11 vector pipeline · #12 EP lab UI · **#13 morphology** | **Included** (latest tip = #13 + docs + V3 tune) |
+| AI project control center | #9 `/docs` Control Center | **Included** |
+| Ecg stimulator technical audit | #6 architecture · #7 core types · #8 anatomy · #10 conduction+cube | **#6/#8/#10 on main**; #7 types already on main / this tip |
+| 心电图心脏3D模型 | #5 V3 torso / GLB / contour | **Superseded** by #8/#10 + V3 tune here |
+| 线下代码库存储 | #4 offline + early 3D + bilingual | **Superseded** (offline pack / old UI not carried) |
+| Canvas 设计 UI | #3 Desktop live ECG preview | **Superseded** by #11–#13 pipeline |
+| Live / setup ECG drafts | #1 · #2 | **Superseded** |
+| Cardiac model visibility audit | (no PR; read-only) | Findings fixed in **#10** (orientation cube render priority) |
+| Wide 代码库概览 | (no PR) | Advisory only — consolidate-via-pick applied here |
+| Cardiac electrophysiology platform | (no PR) | Vision only; delivered via #11–#13 spine |
+
+### Physiological spine now on this tip
+
+```
+Cardiac activation → Electrical vector → Body surface Φ → Lead calculation → ECG waveform
+```
+
+P ← atrial · QRS ← septal→apical→basal · T ← repolarization (separated wavefronts, clinical axes)
+
+**Modified:**
+
+- Application: `src/vector-engine/*`, `src/ecg-generator/*`, `src/components/lab/*`, `src/components/vector/*`, `src/sim/conductionFromEvents.ts`, V3 torso proportions, lab styles
+- Docs: Control Center root + `docs/modules/*` + this consolidation map
+
+**Current limitations:**
+
+- Disease packs / clinical scenario switching not yet wired into the lab UI
+- Bilingual (zh/en) chrome from #4/#5 not carried into the lab shell
+- Explore / Study / Simulation modes specified in docs but not separate app modes
+- GLB heart asset remains opt-in (`HEART_GLB_MODE = 'off'`)
+- Older open PRs (#1–#5, #7, #9, #11–#13) should be closed after this consolidation merges to `main`
+
+**Next task:**
+
+- Merge this consolidate branch to `main`, then close superseded PRs; wire disease scenarios into the physiological pipeline and clinical panel
+
+---
+
 ## 2026-07-30 — Consolidated latest (EP lab + vector ECG + docs)
 
 **Completed:**
