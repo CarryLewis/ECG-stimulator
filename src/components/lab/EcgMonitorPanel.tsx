@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { EcgPhaseInfo, EcgSample } from '../../ecg-generator'
-import { createEcgStream, pushEcgSample } from '../../ecg-generator'
+import type { EcgPhaseInfo } from '../../ecg-generator'
+import {
+  createEcgStream,
+  generateEcgFromSimulation,
+  pushEcgSample,
+} from '../../ecg-generator'
 import { LEAD_ORDER } from '../../vector-engine'
 import type { LeadName } from '../../ecg/types'
 
@@ -8,10 +12,14 @@ const FS = 250
 const DURATION = 3.2
 const CAPACITY = Math.ceil(FS * DURATION)
 const DISPLAY_LEADS: LeadName[] = ['I', 'II', 'III', 'aVF', 'V1', 'V5']
+/** Vertical scale ≈ 10 mm/mV in an 72-unit strip (midline at 36). */
+const MV_SCALE = 18
+const MID_Y = 36
+const VIEW_H = 72
 
 interface EcgMonitorPanelProps {
-  sample: EcgSample
   elapsed: number
+  rateBpm: number
   phase: EcgPhaseInfo
   leadI: number
   leadII: number
@@ -19,11 +27,13 @@ interface EcgMonitorPanelProps {
 }
 
 /**
- * Laboratory ECG monitor — waveforms from the physiological pipeline only.
+ * Laboratory ECG monitor.
+ * Resamples the full physiological pipeline at every sample instant —
+ * never holds the last frame (which produced staircase artifacts).
  */
 export default function EcgMonitorPanel({
-  sample,
   elapsed,
+  rateBpm,
   phase,
   leadI,
   leadII,
@@ -41,24 +51,27 @@ export default function EcgMonitorPanel({
         stream.leads[name].writeIndex = 0
         stream.leads[name].written = 0
       }
-      lastTRef.current = elapsed
+      lastTRef.current = Math.max(0, elapsed - 1 / FS)
       setTick((n) => n + 1)
       return
     }
 
     const samplePeriod = 1 / FS
     let t = lastTRef.current
-    let wrote = false
-    while (t + samplePeriod <= elapsed + 1e-9) {
+    let wrote = 0
+    // Cap catch-up so a long tab-sleep does not stall the UI.
+    const maxSteps = 40
+    while (t + samplePeriod <= elapsed + 1e-9 && wrote < maxSteps) {
       t += samplePeriod
-      pushEcgSample(stream, { ...sample, t })
-      wrote = true
+      const frame = generateEcgFromSimulation(t, rateBpm)
+      pushEcgSample(stream, frame.sample)
+      wrote += 1
     }
-    if (wrote) {
+    if (wrote > 0) {
       lastTRef.current = t
       setTick((n) => n + 1)
     }
-  }, [elapsed, sample])
+  }, [elapsed, rateBpm])
 
   const paths = useMemo(() => {
     void tick
@@ -79,7 +92,7 @@ export default function EcgMonitorPanel({
         <div>
           <h2 className="lab-panel-title">ECG monitor</h2>
           <p className="lab-panel-sub">
-            Surface leads · 25 mm/s equiv. · from cardiac dipole
+            25 mm/s · 10 mm/mV · activation → vector → leads
           </p>
         </div>
         <span className={`lab-phase-tag lab-phase-tag--${phase.phase}`}>
@@ -95,12 +108,20 @@ export default function EcgMonitorPanel({
             <span className="lab-ecg-lead">{lead}</span>
             <svg
               className="lab-ecg-svg"
-              viewBox={`0 0 ${CAPACITY} 56`}
+              viewBox={`0 0 ${CAPACITY} ${VIEW_H}`}
               preserveAspectRatio="none"
               role="img"
               aria-label={`Lead ${lead}`}
             >
-              <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <line
+                x1={0}
+                y1={MID_Y}
+                x2={CAPACITY}
+                y2={MID_Y}
+                stroke="rgba(78, 196, 176, 0.2)"
+                strokeWidth="1"
+              />
+              <path d={d} fill="none" stroke="currentColor" strokeWidth="1.6" />
             </svg>
           </div>
         ))}
@@ -149,13 +170,11 @@ function buildPath(
   if (count < 2) return ''
 
   const start = written < n ? 0 : writeIndex
-  const scaleY = 14
-  const mid = 28
   let d = ''
   for (let i = 0; i < count; i++) {
     const idx = (start + i) % n
     const x = (i / (count - 1)) * (CAPACITY - 1)
-    const y = mid - samples[idx]! * scaleY
+    const y = MID_Y - samples[idx]! * MV_SCALE
     d +=
       i === 0
         ? `M ${x.toFixed(1)} ${y.toFixed(1)}`

@@ -1,20 +1,24 @@
 import { evaluateElectricalField } from './evaluate'
 import { analyzeMeanElectricalAxis } from './meanAxis'
 import { computeBodySurfacePotentials } from './bodySurface'
-import { calculateLeadsFromPotentials } from './leadsFromPotentials'
+import { projectFieldToLeads } from './project'
 import type { EvaluateFieldInput } from './evaluate'
 import type { VectorAnalysis } from './types'
 
 /**
  * Full vector-engine tick:
  *   cardiac wavefronts → electrical field → body-surface potentials → leads
+ *
+ * Lead voltages use clinical Einthoven / precordial unit axes (D · a_lead)
+ * so morphology matches a real 12-lead strip. Body-surface potentials remain
+ * available for electrode teaching overlays.
  */
 export function analyzeElectricalVectors(
   input: EvaluateFieldInput,
 ): VectorAnalysis {
   const field = evaluateElectricalField(input)
   const surface = computeBodySurfacePotentials(field)
-  const leads = calculateLeadsFromPotentials(surface)
+  const leads = projectFieldToLeads(field)
   const axis = analyzeMeanElectricalAxis(field)
 
   let activationIntensity = 0

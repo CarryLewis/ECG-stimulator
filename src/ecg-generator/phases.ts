@@ -35,21 +35,21 @@ export interface EcgPhaseInfo {
  */
 export function ecgPhaseFromActivation(state: ConductionState): EcgPhaseInfo {
   const qrs = Math.max(state.septalDepol, state.apicalDepol, state.basalDepol)
-  if (qrs > 0.12) {
+  if (qrs > 0.08) {
     return {
       phase: 'qrs',
       label: 'QRS — ventricular depolarization',
       drivenBy: 'ventricular_depolarization',
     }
   }
-  if (state.repol > 0.1) {
+  if (state.repol > 0.06) {
     return {
       phase: 't_wave',
       label: 'T wave — repolarization',
       drivenBy: 'repolarization',
     }
   }
-  if (state.atrialDepol > 0.1) {
+  if (state.atrialDepol > 0.05) {
     return {
       phase: 'p_wave',
       label: 'P wave — atrial activation',
