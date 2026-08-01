@@ -4,30 +4,28 @@ import type { HeartVersion } from './anatomy/heartVersions'
 import type { LeadName } from './ecg/types'
 import AnatomyControlPanel from './components/anatomy/AnatomyControlPanel'
 import CardiacAnatomyViewport from './components/anatomy/CardiacAnatomyViewport'
-import {
-  DEFAULT_TIME_SCALE,
-  useSimulationClock,
-} from './sim/useSimulationClock'
+import EcgMonitor from './components/ecg/EcgMonitor'
+import { useTransportClock } from './recording/useTransportClock'
 import { useSimulationFrame } from './sim/useSimulationFrame'
 import { DEFAULT_HEART_RATE_BPM } from './sim/sinusTiming'
+import { DEFAULT_TIME_SCALE } from './sim/useSimulationClock'
 
 const DEFAULT_OPACITY = 0.95
 
 export default function App() {
   const [heartVersion, setHeartVersion] = useState<HeartVersion>('anatomy')
   const [selectedId, setSelectedId] = useState<HeartStructureId | null>(null)
-  const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
+  const [selectedLead, setSelectedLead] = useState<LeadName | null>('II')
   const [myocardiumOpacity, setMyocardiumOpacity] = useState(DEFAULT_OPACITY)
   const [showLabels, setShowLabels] = useState(true)
-  const [timeScale, setTimeScale] = useState(DEFAULT_TIME_SCALE)
   const [rateBpm, setRateBpm] = useState(DEFAULT_HEART_RATE_BPM)
 
-  // Shared simulation clock — views do not animate on their own.
-  const elapsed = useSimulationClock('sinus', timeScale)
-  const frame = useSimulationFrame(elapsed, rateBpm)
+  // Shared transport clock — anatomy + ECG recorder subscribe; no independent timelines.
+  const clock = useTransportClock('sinus', DEFAULT_TIME_SCALE)
+  const frame = useSimulationFrame(clock.elapsed, rateBpm)
 
   return (
-    <div className="app">
+    <div className="app app--with-ecg">
       <AnatomyControlPanel
         heartVersion={heartVersion}
         onHeartVersionChange={setHeartVersion}
@@ -37,28 +35,36 @@ export default function App() {
         onSelect={setSelectedId}
         onOpacityChange={setMyocardiumOpacity}
         onToggleLabels={setShowLabels}
-        timeScale={timeScale}
-        onTimeScaleChange={setTimeScale}
+        timeScale={clock.timeScale}
+        onTimeScaleChange={clock.setTimeScale}
         rateBpm={rateBpm}
         onRateChange={setRateBpm}
       />
-      <main className="anatomy-stage">
-        <CardiacAnatomyViewport
-          heartVersion={heartVersion}
-          selectedStructureId={selectedId}
-          onSelectStructure={setSelectedId}
-          selectedLead={selectedLead}
-          onSelectLead={setSelectedLead}
-          myocardiumOpacity={myocardiumOpacity}
-          showLabels={showLabels}
-          conduction={frame.state}
-          activeEvent={frame.active}
-          phaseMs={frame.phaseMs}
-          elapsed={frame.t}
-          timeScale={timeScale}
+      <div className="workspace">
+        <main className="anatomy-stage">
+          <CardiacAnatomyViewport
+            heartVersion={heartVersion}
+            selectedStructureId={selectedId}
+            onSelectStructure={setSelectedId}
+            selectedLead={selectedLead}
+            onSelectLead={setSelectedLead}
+            myocardiumOpacity={myocardiumOpacity}
+            showLabels={showLabels}
+            conduction={frame.state}
+            activeEvent={frame.active}
+            phaseMs={frame.phaseMs}
+            elapsed={frame.t}
+            timeScale={clock.timeScale}
+            rateBpm={rateBpm}
+          />
+        </main>
+        <EcgMonitor
+          clock={clock}
           rateBpm={rateBpm}
+          selectedLead={selectedLead}
+          onSelectedLeadChange={setSelectedLead}
         />
-      </main>
+      </div>
     </div>
   )
 }
