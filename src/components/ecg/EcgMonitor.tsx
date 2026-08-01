@@ -156,13 +156,20 @@ export default function EcgMonitor({
         >
           {grid.flatMap((row) =>
             row.map((lead) => (
-              <button
+              <div
                 key={lead}
-                type="button"
+                role="button"
+                tabIndex={0}
                 className={`ecg-lead-cell${
                   selectedLead === lead ? ' ecg-lead-cell--selected' : ''
                 }`}
                 onClick={() => setLead(lead)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setLead(lead)
+                  }
+                }}
                 aria-pressed={selectedLead === lead}
               >
                 <EcgStripCanvas
@@ -180,7 +187,7 @@ export default function EcgMonitor({
                   height={cellHeight}
                   showCursor={!clock.frozen}
                 />
-              </button>
+              </div>
             )),
           )}
         </div>

@@ -115,6 +115,7 @@ export default function EcgRecordingControls({
           <button
             type="button"
             className={`ecg-btn${displayMode === 'monitor' ? ' ecg-btn--active' : ''}`}
+            aria-pressed={displayMode === 'monitor'}
             onClick={() => onDisplayModeChange('monitor')}
           >
             Monitor
@@ -122,6 +123,7 @@ export default function EcgRecordingControls({
           <button
             type="button"
             className={`ecg-btn${displayMode === 'paper' ? ' ecg-btn--active' : ''}`}
+            aria-pressed={displayMode === 'paper'}
             onClick={() => onDisplayModeChange('paper')}
           >
             Paper
