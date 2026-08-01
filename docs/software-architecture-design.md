@@ -478,4 +478,12 @@ Typed contracts live in [`core-data-model/`](./core-data-model/). A **heartbeat*
 
 ---
 
-*Design only — implementation is a separate workstream.*
+## 10. Disease Engine (implemented)
+
+The modular Disease Simulation Engine lives in [`src/disease/`](../src/disease/) with architecture documented in [`disease-architecture.md`](./disease-architecture.md).
+
+Disease packs emit `PhysiologicalEffects` / `EpModifiers` only. They do not hardcode ECG waveforms. The first library covers NSR, STEMI territories, posterior MI, bundle branch blocks, AV blocks, AF/flutter, VT/VF, and K⁺/Ca²⁺ disorders.
+
+---
+
+*Core layered design remains the contract; disease packs are the first implemented plugin surface.*

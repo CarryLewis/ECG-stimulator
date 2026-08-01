@@ -17,6 +17,7 @@ export type Territory =
   | 'inferior'
   | 'lateral'
   | 'septal'
+  | 'posterior'
   | 'none'
 
 /** Cardiac electrical vector in body coordinates (mV·scale). */

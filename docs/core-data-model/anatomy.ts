@@ -55,6 +55,7 @@ export type RegionId =
   | 'lv_anterior'
   | 'lv_lateral'
   | 'lv_inferior'
+  | 'lv_posterior'
   | 'apex'
   /** Escape / pathological foci (future packs). */
   | 'ventricular_escape_focus'

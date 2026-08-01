@@ -119,27 +119,53 @@ export interface ClinicalSnapshot {
  * Disease pack control-plane mapping (types only).
  * Implementations register with a registry in the Clinical Layer.
  */
+/**
+ * Control-plane modifiers emitted by disease packs.
+ * Consumed by EP + Vector engines — never by ECG lead drawing code.
+ * @see ../../src/disease/types.ts PhysiologicalEffects
+ */
 export interface EpModifiers {
   saRate_bpm?: BeatsPerMinute
   meanVentricularRate_bpm?: BeatsPerMinute
   atrialRate_bpm?: BeatsPerMinute
   avDelay_s?: number
   avBlock?: AvBlockDegree
+  avWenckebachIncrement_s?: number
+  avConductionRatio?: string
   atrialMode?: 'sinus' | 'fibrillation' | 'standstill' | 'flutter'
+  ventricularMode?:
+    | 'conducted'
+    | 'escape'
+    | 'tachycardia'
+    | 'fibrillation'
+    | 'irregular'
   ventricularEscapeRate_bpm?: BeatsPerMinute
+  flutterCycle_s?: number
   qrsDurationScale?: number
   pAmplitudeScale?: number
+  conductionVelocityScale?: number
+  actionPotentialDurationScale?: number
+  bundleBranches?: {
+    left: 'normal' | 'blocked' | 'delayed'
+    right: 'normal' | 'blocked' | 'delayed'
+    qrsDurationScale?: number
+    axisShift_deg?: number
+  }
   repolarization?: {
     tAmpScale?: number
     tWidthScale?: number
     uAmp_mV?: number
     stGlobal_mV?: number
+    qtScale?: number
   }
   ischemia?: {
     territory: Exclude<TerritoryId, 'none'>
     severity: number
+    reciprocal?: readonly Exclude<TerritoryId, 'none'>[]
   }
   potassium_mmol_L?: number
+  calcium_mmol_L?: number
+  rhythmSeed?: number
 }
 
 export interface DiseaseParamDef {
