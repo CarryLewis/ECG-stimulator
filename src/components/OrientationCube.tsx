@@ -104,12 +104,12 @@ export function CameraSync() {
 }
 
 const FACE_STYLE: Record<string, CSSProperties> = {
-  A: { transform: `translateZ(52px)` },
-  P: { transform: `rotateY(180deg) translateZ(52px)` },
-  L: { transform: `rotateY(90deg) translateZ(52px)` },
-  R: { transform: `rotateY(-90deg) translateZ(52px)` },
-  H: { transform: `rotateX(90deg) translateZ(52px)` },
-  B: { transform: `rotateX(-90deg) translateZ(52px)` },
+  A: { transform: `translateZ(42px)` },
+  P: { transform: `rotateY(180deg) translateZ(42px)` },
+  L: { transform: `rotateY(90deg) translateZ(42px)` },
+  R: { transform: `rotateY(-90deg) translateZ(42px)` },
+  H: { transform: `rotateX(90deg) translateZ(42px)` },
+  B: { transform: `rotateX(-90deg) translateZ(42px)` },
 }
 
 const FACE_COLOR: Record<string, string> = {

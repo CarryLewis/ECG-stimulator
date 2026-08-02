@@ -103,8 +103,8 @@ export default function HeartStructureMesh({
         <Html
           position={labelPos}
           center
-          distanceFactor={8}
-          zIndexRange={[30, 0]}
+          distanceFactor={10}
+          zIndexRange={[12, 2]}
           style={{ pointerEvents: 'none' }}
         >
           <button
