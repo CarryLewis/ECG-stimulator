@@ -6,7 +6,7 @@
  */
 
 import {
-  isNearVentricularPeak,
+  isNearMorphologyRPeak,
   sampleEcgAt,
 } from '../ecg/signalFromPhysiology'
 import { DEFAULT_HEART_RATE_BPM } from '../sim/sinusTiming'
@@ -66,7 +66,7 @@ export function advanceRecorder(rec: RecorderState, tNow: number): number {
   while (t + dt <= tNow + 1e-12) {
     t += dt
     const sample = sampleEcgAt(t, rec.rateBpm)
-    const near = isNearVentricularPeak(sample.state)
+    const near = isNearMorphologyRPeak(t, rec.rateBpm)
     const rising = near && !rec.wasNearPeak
     appendSample(rec.buffer, t, sample.leads, rising)
     rec.wasNearPeak = near

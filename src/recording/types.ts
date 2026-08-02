@@ -15,7 +15,8 @@ export type DisplayMode = 'monitor' | 'paper'
 
 export type LeadLayoutMode = 'lead_ii' | 'single' | 'six' | 'twelve'
 
-export const DEFAULT_FS_HZ = 250
+/** 500 Hz keeps narrow QRS peaks from becoming single-pixel needles at 25 mm/s. */
+export const DEFAULT_FS_HZ = 500
 export const DEFAULT_GAIN_MM_PER_MV = 10
 export const DEFAULT_SWEEP: SweepSpeedMmPerS = 25
 /** Visible history length on a bedside cascade strip (seconds). */

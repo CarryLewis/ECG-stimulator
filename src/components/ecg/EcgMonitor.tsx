@@ -100,7 +100,7 @@ export default function EcgMonitor({
   void recorder.frame
 
   const cellHeight =
-    layoutMode === 'twelve' ? 78 : layoutMode === 'six' ? 96 : 140
+    layoutMode === 'twelve' ? 92 : layoutMode === 'six' ? 108 : 150
 
   return (
     <section

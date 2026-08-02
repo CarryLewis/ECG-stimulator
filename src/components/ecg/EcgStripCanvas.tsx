@@ -83,7 +83,7 @@ export default function EcgStripCanvas({
     const z = Math.max(0.5, Math.min(3, zoom))
     const visible_s = windowSeconds / z
     const pps = pxPerSecond(calibration) * z
-    const ppmv = pxPerMv(calibration) * Math.min(z, 1.5)
+    let ppmv = pxPerMv(calibration) * Math.min(z, 1.5)
     const width = visible_s * pps
     const mm = calibration.px_per_mm * z
 
@@ -137,7 +137,25 @@ export default function EcgStripCanvas({
       ctx.stroke()
     }
 
-    const baseline = height * 0.55
+    // Slightly above mid so upright R has more headroom than deep S.
+    const baseline = height * 0.58
+
+    const need = Math.ceil(visible_s * buffer.fs) + 2
+    if (!scratchRef.current || scratchRef.current.length < need) {
+      scratchRef.current = new Float32Array(need)
+    }
+    const scratch = scratchRef.current
+    const count = readRecent(buffer, lead, need, scratch)
+
+    // Shared gain for all leads (do NOT normalize per-lead — that destroys
+    // R-wave progression / aVR inversion teaching). Fit once to cell height
+    // for a fixed physiological range (~±1.7 mV including cal pulse).
+    const maxPhys_mV = 1.7
+    const room = Math.min(baseline - 4, height - baseline - 4)
+    if (room > 8) {
+      ppmv = Math.min(ppmv, room / maxPhys_mV)
+    }
+
     ctx.strokeStyle = c.baseline
     ctx.lineWidth = 1
     ctx.beginPath()
@@ -157,17 +175,11 @@ export default function EcgStripCanvas({
     ctx.lineTo(4 + calW, baseline)
     ctx.stroke()
 
-    const need = Math.ceil(visible_s * buffer.fs) + 2
-    if (!scratchRef.current || scratchRef.current.length < need) {
-      scratchRef.current = new Float32Array(need)
-    }
-    const scratch = scratchRef.current
-    const count = readRecent(buffer, lead, need, scratch)
-
     if (count > 1) {
       ctx.beginPath()
       ctx.strokeStyle = c.trace
-      ctx.lineWidth = mode === 'paper' ? 1.35 : 1.6
+      // Slightly heavier stroke so narrow QRS is visible at 25 mm/s.
+      ctx.lineWidth = mode === 'paper' ? 1.7 : 1.85
       ctx.lineJoin = 'round'
       ctx.lineCap = 'round'
 
@@ -175,7 +187,7 @@ export default function EcgStripCanvas({
       for (let i = 0; i < count; i++) {
         const age_s = (count - 1 - i) / buffer.fs
         const x = width - age_s * pps
-        const y = baseline - scratch[i]! * ppmv
+        const y = Math.max(1, Math.min(height - 1, baseline - scratch[i]! * ppmv))
         if (i === 0) ctx.moveTo(x, y)
         else ctx.lineTo(x, y)
       }
