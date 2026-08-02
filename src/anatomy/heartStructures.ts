@@ -28,7 +28,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [1, 0.92, 0.95],
     rotation: [0.05, 0.15, 0],
     radius: 0.42,
-    labelOffset: [-0.55, 0.35, 0.25],
+    labelOffset: [-0.72, 0.48, 0.35],
     renderOrder: 2,
   },
   {
@@ -46,7 +46,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [0.95, 0.88, 0.9],
     rotation: [-0.05, -0.1, 0],
     radius: 0.4,
-    labelOffset: [0.55, 0.38, 0.15],
+    labelOffset: [0.72, 0.5, 0.22],
     renderOrder: 2,
   },
   {
@@ -64,7 +64,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [0.85, 1.15, 0.75],
     rotation: [0.15, 0.25, 0.08],
     radius: 0.58,
-    labelOffset: [-0.7, -0.15, 0.45],
+    labelOffset: [-0.85, -0.05, 0.55],
     renderOrder: 1,
   },
   {
@@ -82,7 +82,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [1.05, 1.35, 1.0],
     rotation: [0.1, -0.12, -0.05],
     radius: 0.62,
-    labelOffset: [0.75, -0.2, 0.2],
+    labelOffset: [0.9, -0.1, 0.28],
     renderOrder: 1,
   },
   {
@@ -100,7 +100,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [0.28, 1.2, 0.85],
     rotation: [0.08, 0.35, 0.05],
     radius: 0.55,
-    labelOffset: [0.05, 0.55, 0.55],
+    labelOffset: [-0.15, 0.72, 0.7],
     renderOrder: 3,
     opacityBias: -0.08,
   },
@@ -119,7 +119,7 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     scale: [0.72, 0.55, 0.68],
     rotation: [0.2, 0, 0.1],
     radius: 0.48,
-    labelOffset: [0.35, -0.55, 0.55],
+    labelOffset: [0.45, -0.72, 0.65],
     renderOrder: 2,
   },
 ] as const

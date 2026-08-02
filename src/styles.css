@@ -261,9 +261,10 @@ input {
   flex: 1 1 40%;
   min-height: 180px;
   min-width: 0;
-  overflow: hidden;
+  overflow: hidden !important;
   /* Isolate overlay stacking from ECG dock */
   isolation: isolate;
+  contain: layout paint;
 }
 
 .anatomy-viewport > div:first-child {
@@ -271,6 +272,12 @@ input {
   inset: 0;
   width: 100% !important;
   height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Keep drei Html labels clipped to the 3D pane (no bleed onto ECG dock). */
+.anatomy-html-wrap {
+  pointer-events: none;
 }
 
 .anatomy-viewport > div:first-child canvas {
@@ -356,54 +363,56 @@ input {
 }
 
 .anatomy-label {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.05rem;
-  padding: 0.22rem 0.42rem;
-  border: 1px solid color-mix(in srgb, var(--label-color, #ff8894) 55%, transparent);
-  border-radius: 6px;
-  background: rgba(8, 14, 22, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0;
+  padding: 1px 5px;
+  min-height: 0;
+  border: 1px solid color-mix(in srgb, var(--label-color, #ff8894) 60%, transparent);
+  border-radius: 3px;
+  background: rgba(6, 12, 18, 0.78);
   color: var(--text);
   cursor: pointer;
   white-space: nowrap;
-  transform: translateZ(0);
-  max-width: 9.5rem;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  /* Fixed screen size — do not let 3D distance inflate chips */
+  font-size: 10px;
+  transform: scale(1);
 }
 
 .anatomy-label-abbr {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.03em;
   color: var(--label-color, #ff8894);
+  line-height: 1.15;
 }
 
+/* Full English names live in the side panel only — never in the 3D overlay. */
 .anatomy-label-name {
-  display: none; /* dense 3D view: abbr by default; full name in side panel */
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 8.5rem;
-}
-
-/* Only expand the selected / actively conducting chamber */
-.anatomy-label--selected .anatomy-label-name,
-.anatomy-label--live .anatomy-label-name {
-  display: block;
+  display: none !important;
 }
 
 .anatomy-label--selected {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(61, 184, 168, 0.35);
+  box-shadow: 0 0 0 1px rgba(61, 184, 168, 0.45);
+  background: rgba(8, 28, 26, 0.92);
 }
 
 .anatomy-label--live {
-  box-shadow: 0 0 0 1px rgba(61, 255, 138, 0.45);
+  box-shadow: 0 0 0 1px rgba(61, 255, 138, 0.5);
 }
 
 .anatomy-label--live .anatomy-label-abbr {
   color: #7dffb0;
+}
+
+.anatomy-label--dimmed {
+  opacity: 0.45;
 }
 
 /* Medium desktop: narrower side panel so stage keeps room for HUD */
@@ -418,18 +427,19 @@ input {
 }
 .conduction-3d-label {
   display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(7, 13, 20, 0.75);
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(7, 13, 20, 0.78);
   border: 1px solid rgba(61, 255, 138, 0.35);
   color: #7dffb0;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   font-family: "IBM Plex Mono", "SF Mono", ui-monospace, monospace;
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+  line-height: 1.15;
 }
 
 .conduction-3d-label--dim {
@@ -1106,12 +1116,6 @@ input {
   .conduction-timeline {
     width: min(240px, calc(100% - 7rem));
   }
-
-  /* Never expand full names when the stage is already tight */
-  .anatomy-label--selected .anatomy-label-name,
-  .anatomy-label--live .anatomy-label-name {
-    display: none;
-  }
 }
 
 /* Short viewports: compact HUD, give ECG dock room */
@@ -1222,16 +1226,11 @@ input {
   }
 
   .anatomy-label {
-    padding: 0.12rem 0.3rem;
+    padding: 0.08rem 0.26rem;
   }
 
   .anatomy-label-abbr {
-    font-size: 0.68rem;
-  }
-
-  .anatomy-label--selected .anatomy-label-name,
-  .anatomy-label--live .anatomy-label-name {
-    display: none;
+    font-size: 0.58rem;
   }
 }
 

@@ -103,8 +103,8 @@ export default function HeartStructureMesh({
         <Html
           position={labelPos}
           center
-          distanceFactor={10}
           zIndexRange={[12, 2]}
+          wrapperClass="anatomy-html-wrap"
           style={{ pointerEvents: 'none' }}
         >
           <button
@@ -119,13 +119,14 @@ export default function HeartStructureMesh({
               ['--label-color' as string]: def.emissive,
               pointerEvents: 'auto',
             }}
+            title={def.label.en}
+            aria-label={def.label.en}
             onClick={(e) => {
               e.stopPropagation()
               onSelect(def.id)
             }}
           >
             <span className="anatomy-label-abbr">{def.abbr}</span>
-            <span className="anatomy-label-name">{def.label.en}</span>
           </button>
         </Html>
       )}
