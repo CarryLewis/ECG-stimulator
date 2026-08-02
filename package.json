@@ -1,14 +1,15 @@
 {
   "name": "ecg-learning-simulator",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
-  "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy as the biological source model for ECG generation.",
+  "description": "Interactive Physiology & ECG Learning Simulator — cardiac dipole projected onto a real 12-lead measurement model.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "validate:ecg": "tsx scripts/validate-ecg.ts"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -27,6 +28,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^5.4.11"

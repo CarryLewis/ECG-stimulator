@@ -1,6 +1,6 @@
-# ECG Stimulator — Interactive 3D Cardiac Anatomy
+# ECG Stimulator — Physiological Vector Core
 
-First visualization module: the heart as the **biological source model** for future ECG generation.
+Interactive teaching simulator: **one cardiac electrical vector** projected onto the standard 12-lead measurement system.
 
 ## Run
 
@@ -12,31 +12,46 @@ npm run dev      # http://127.0.0.1:5173
 ```bash
 npm run build
 npm run preview
+npx tsx scripts/validate-ecg.ts   # morphology + Einthoven checks
 ```
 
-## This module
+## Physiology pipeline
 
-- Four heart views: **Src** (selectable chambers), **V1** conduction, **V2** lead atlas, **V3** torso electrodes
-- Shared **orientation cube** on every version: **A / P / L / R / H / B**
-- **Event-driven conduction animation** (no manual keyframes):
-  - 0 ms SA → 40 ms atria → 120 ms AV → 200 ms His / ventricular cascade → 350 ms repolarization
-  - Glow sampled from physiological events on the shared simulation clock (including Src chambers)
-- Playback pace + heart-rate controls
-- Anatomical labels toggle; Src supports myocardium opacity + structure pick
+```
+Conduction sequence
+  → Cardiac dipole M(t) = [Mx, My, Mz]
+  → Lead-vector projection  V_lead = M · a_lead
+  → 12-lead ECG + validation
+  → Visualization (monitor / paper / 3D)
+```
 
-Diseases and live 12-lead ECG sampling are **not** included yet.
+Leads are **never** independent PQRST curves. Changing axis, conduction velocity, injury, or hypertrophy alters `M(t)` once; all leads update together.
 
 ## Layout
 
 | Path | Role |
 |------|------|
-| `src/anatomy/` | Structure definitions (ids aligned with `docs/core-data-model`) |
-| `src/components/anatomy/` | R3F viewport + heart mesh + control panel |
-| `docs/core-data-model/` | Event-driven type contracts for the full platform |
-| `docs/software-architecture-design.md` | Layered architecture |
+| `src/simulation/` | Cardiac model, conduction, vector, lead axes, ECG generator, validation |
+| `src/visualization/` | `ECGMonitor`, `TwelveLeadDisplay`, `Heart3D` (consume signals only) |
+| `src/sim/` | Shared clock + conduction glow for 3D animation |
+| `src/anatomy/` / `src/components/` | Existing anatomy / torso teaching views |
+| `docs/core-data-model/` | Typed contracts for the full platform |
+
+## Coordinates (ECG engine)
+
+- **+x** patient left · **+y** inferior · **+z** anterior
+- Limb leads: Einthoven / Goldberger angles (I=0°, II=+60°, III=+120°, …)
+- Precordial: `normalize(electrode − heart_center)`
+
+## Controls
+
+- Heart rate, conduction velocity, cardiac axis, PR / QRS scales
+- Myocardial injury territory + severity (ST shift via injury current)
+- LVH / RVH magnitude bias on the free-wall vector
+- Playback time scale for conduction animation
 
 ## Design notes
 
-- Procedural meshes (shared sphere geometry) for performance and offline use
-- Body axes: +x patient left, +y superior, +z anterior
-- No CDN runtime dependency once `node_modules` are installed
+- Visualization never recomputes physiology
+- Validation asserts Lead II (+), aVR (−), V1 (−), V6 (+), R progression, PR/QRS/QT ranges
+- 3D Src view overlays the instantaneous dipole **M(t)**

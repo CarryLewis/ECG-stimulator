@@ -4,6 +4,12 @@ import {
   type HeartVersion,
 } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
+import type {
+  EcgValidationResult,
+  HypertrophyKind,
+  InjuryLocation,
+  SimulationParams,
+} from '../../simulation/types'
 
 interface AnatomyControlPanelProps {
   heartVersion: HeartVersion
@@ -18,6 +24,9 @@ interface AnatomyControlPanelProps {
   onTimeScaleChange: (scale: number) => void
   rateBpm: number
   onRateChange: (bpm: number) => void
+  simParams: SimulationParams
+  onSimParamsChange: (patch: Partial<SimulationParams>) => void
+  validation: EcgValidationResult | null
 }
 
 const SPEED_PRESETS = [
@@ -25,6 +34,20 @@ const SPEED_PRESETS = [
   { label: 'Learn', value: 0.35 },
   { label: 'Clear', value: 0.5 },
   { label: 'Real', value: 1 },
+]
+
+const INJURY_OPTIONS: { value: InjuryLocation; label: string }[] = [
+  { value: 'none', label: 'None' },
+  { value: 'anterior', label: 'Anterior' },
+  { value: 'inferior', label: 'Inferior' },
+  { value: 'lateral', label: 'Lateral' },
+  { value: 'septal', label: 'Septal' },
+]
+
+const HYPERTROPHY_OPTIONS: { value: HypertrophyKind; label: string }[] = [
+  { value: 'none', label: 'None' },
+  { value: 'lvh', label: 'LVH' },
+  { value: 'rvh', label: 'RVH' },
 ]
 
 export default function AnatomyControlPanel({
@@ -40,6 +63,9 @@ export default function AnatomyControlPanel({
   onTimeScaleChange,
   rateBpm,
   onRateChange,
+  simParams,
+  onSimParamsChange,
+  validation,
 }: AnatomyControlPanelProps) {
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
@@ -49,11 +75,11 @@ export default function AnatomyControlPanel({
   return (
     <aside className="anatomy-panel">
       <header className="anatomy-panel-header">
-        <p className="anatomy-eyebrow">Source model</p>
-        <h1 className="anatomy-title">Cardiac anatomy</h1>
+        <p className="anatomy-eyebrow">Physiological source</p>
+        <h1 className="anatomy-title">ECG Stimulator</h1>
         <p className="anatomy-lede">
-          Conduction glow is driven by physiological events from the simulation
-          clock (SA → atria → AV → His → bundles → Purkinje → repolarization).
+          One cardiac vector M(t) is projected onto 12 lead axes. Conduction
+          stages shape the dipole — leads are never drawn independently.
         </p>
       </header>
 
@@ -103,10 +129,217 @@ export default function AnatomyControlPanel({
             max={140}
             step={1}
             value={rateBpm}
-            onChange={(e) => onRateChange(Number(e.target.value))}
+            onChange={(e) => {
+              const bpm = Number(e.target.value)
+              onRateChange(bpm)
+              onSimParamsChange({ heartRate_bpm: bpm })
+            }}
           />
         </label>
       </section>
+
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">Electrophysiology</h2>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Conduction velocity</span>
+            <span className="anatomy-control-value">
+              ×{simParams.conductionVelocity.toFixed(2)}
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0.4}
+            max={1.6}
+            step={0.05}
+            value={simParams.conductionVelocity}
+            onChange={(e) =>
+              onSimParamsChange({
+                conductionVelocity: Number(e.target.value),
+              })
+            }
+          />
+        </label>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Cardiac axis</span>
+            <span className="anatomy-control-value">
+              {simParams.cardiacAxis_deg}°
+            </span>
+          </span>
+          <input
+            type="range"
+            min={-30}
+            max={120}
+            step={5}
+            value={simParams.cardiacAxis_deg}
+            onChange={(e) =>
+              onSimParamsChange({ cardiacAxis_deg: Number(e.target.value) })
+            }
+          />
+        </label>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>PR scale</span>
+            <span className="anatomy-control-value">
+              ×{simParams.prScale.toFixed(2)}
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0.6}
+            max={2}
+            step={0.05}
+            value={simParams.prScale}
+            onChange={(e) =>
+              onSimParamsChange({ prScale: Number(e.target.value) })
+            }
+          />
+        </label>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>QRS scale</span>
+            <span className="anatomy-control-value">
+              ×{simParams.qrsScale.toFixed(2)}
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0.7}
+            max={2}
+            step={0.05}
+            value={simParams.qrsScale}
+            onChange={(e) =>
+              onSimParamsChange({ qrsScale: Number(e.target.value) })
+            }
+          />
+        </label>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Injury location</span>
+          </span>
+          <select
+            className="anatomy-select"
+            value={simParams.injuryLocation}
+            onChange={(e) =>
+              onSimParamsChange({
+                injuryLocation: e.target.value as InjuryLocation,
+                injurySeverity:
+                  e.target.value === 'none'
+                    ? 0
+                    : Math.max(0.4, simParams.injurySeverity),
+              })
+            }
+          >
+            {INJURY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {simParams.injuryLocation !== 'none' && (
+          <label className="anatomy-control">
+            <span className="anatomy-control-row">
+              <span>Injury severity</span>
+              <span className="anatomy-control-value">
+                {Math.round(simParams.injurySeverity * 100)}%
+              </span>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={simParams.injurySeverity}
+              onChange={(e) =>
+                onSimParamsChange({
+                  injurySeverity: Number(e.target.value),
+                })
+              }
+            />
+          </label>
+        )}
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>Hypertrophy</span>
+          </span>
+          <select
+            className="anatomy-select"
+            value={simParams.hypertrophy}
+            onChange={(e) =>
+              onSimParamsChange({
+                hypertrophy: e.target.value as HypertrophyKind,
+                hypertrophySeverity:
+                  e.target.value === 'none'
+                    ? 0
+                    : Math.max(0.5, simParams.hypertrophySeverity),
+              })
+            }
+          >
+            {HYPERTROPHY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {simParams.hypertrophy !== 'none' && (
+          <label className="anatomy-control">
+            <span className="anatomy-control-row">
+              <span>Hypertrophy severity</span>
+              <span className="anatomy-control-value">
+                {Math.round(simParams.hypertrophySeverity * 100)}%
+              </span>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={simParams.hypertrophySeverity}
+              onChange={(e) =>
+                onSimParamsChange({
+                  hypertrophySeverity: Number(e.target.value),
+                })
+              }
+            />
+          </label>
+        )}
+      </section>
+
+      {validation && (
+        <section className="anatomy-section">
+          <h2 className="anatomy-section-title">ECG validation</h2>
+          <p
+            className={
+              'ecg-validation-badge' +
+              (validation.ok
+                ? ' ecg-validation-badge--ok'
+                : ' ecg-validation-badge--fail')
+            }
+          >
+            {validation.ok ? 'Morphology checks passed' : 'Morphology issues'}
+          </p>
+          <ul className="ecg-validation-metrics">
+            <li>II P {validation.metrics.leadII_pPeak.toFixed(2)} mV</li>
+            <li>II QRS {validation.metrics.leadII_qrsPolarity.toFixed(2)} mV</li>
+            <li>II T {validation.metrics.leadII_tPeak.toFixed(2)} mV</li>
+            <li>aVR {validation.metrics.aVR_qrsPolarity.toFixed(2)} mV</li>
+            <li>V1 {validation.metrics.v1_qrsPolarity.toFixed(2)} mV</li>
+            <li>V6 {validation.metrics.v6_qrsPolarity.toFixed(2)} mV</li>
+          </ul>
+          {validation.issues.length > 0 && (
+            <ul className="ecg-validation-issues">
+              {validation.issues.map((issue) => (
+                <li key={issue.code} data-severity={issue.severity}>
+                  {issue.message}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section className="anatomy-section">
         <h2 className="anatomy-section-title">Heart version</h2>
@@ -163,8 +396,8 @@ export default function AnatomyControlPanel({
           <span>Anatomical labels</span>
         </label>
         <p className="anatomy-version-hint">
-          Opacity drives the <strong>Src</strong> chamber model. Labels: Src
-          chamber tags / V1 nodes / V2 pins / V3 electrodes.
+          Opacity drives the <strong>Src</strong> chamber model. Yellow arrow =
+          instantaneous M(t).
         </p>
       </section>
 
@@ -195,12 +428,6 @@ export default function AnatomyControlPanel({
             )
           })}
         </ul>
-        {heartVersion !== 'anatomy' && (
-          <p className="anatomy-version-hint">
-            Switch to <strong>Src</strong> to highlight chambers in 3D. List
-            selection still shows the clinical note below.
-          </p>
-        )}
       </section>
 
       <section className="anatomy-section anatomy-detail">
@@ -214,8 +441,8 @@ export default function AnatomyControlPanel({
           </>
         ) : (
           <p className="anatomy-detail-body anatomy-detail-body--muted">
-            On <strong>Src</strong>, click a chamber (or the list). On V2–V3,
-            click lead pins / electrodes. Cube faces snap to A/P/L/R/H/B.
+            Adjust EP parameters and watch all 12 leads update from the same
+            dipole. Src view overlays M(t) on the heart.
           </p>
         )}
       </section>

@@ -239,7 +239,7 @@ function LeadPin({
       <Html
         position={pinPos}
         center
-        zIndexRange={[20, 0]}
+        zIndexRange={[12, 2]}
         style={{ pointerEvents: 'none' }}
       >
         <button
