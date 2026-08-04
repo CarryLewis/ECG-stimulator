@@ -17,6 +17,7 @@ export type Territory =
   | 'inferior'
   | 'lateral'
   | 'septal'
+  | 'posterior'
   | 'none'
 
 /** Cardiac electrical vector in body coordinates (mV·scale). */
@@ -108,4 +109,14 @@ export interface CyclePlan {
   dissociated: boolean
   /** Draw a chaotic fibrillatory baseline instead of P waves. */
   fibrillatoryBaseline: boolean
+  /** Continuous atrial flutter (sawtooth) waves instead of discrete P. */
+  flutterBaseline: boolean
+  /** Chaotic ventricular fibrillation — no organized QRS. */
+  ventricularFibrillation: boolean
+  /** Rapid regular sine-wave ventricular flutter. */
+  ventricularFlutter: boolean
+  /** Amplitude scale for VF / ventricular-flutter wave energy (0–1). */
+  chaosAmplitude: number
+  /** Deterministic seed forwarded from the physiological model. */
+  rhythmSeed: number
 }
