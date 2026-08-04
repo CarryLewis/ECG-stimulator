@@ -95,7 +95,7 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V3',
-    position: [0.34, 0.02, 0.52],
+    position: [0.34, 0.02, 0.48],
     labelOffset: [0.12, 0.24, 0.18],
     placeZh: 'V2 与 V4 中点',
     placeEn: 'Midway between V2 and V4',
