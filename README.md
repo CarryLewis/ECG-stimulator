@@ -44,3 +44,17 @@ Diseases **never** hardcode lead millivolts. Packs emit `PhysiologicalEffects` â
 - Body axes: +x patient left, +y superior, +z anterior
 - Heart glow and ECG share `conductionAt(plan, t)`
 - Add a disease by registering a pack that maps params â†’ physiological effects
+
+## Website embed auto-sync
+
+Pushes to `main` or `cursor/pathology-ecg-models-fab9` trigger
+`notify-website.yml`, which asks Carry-website to rebuild
+https://carrylewis.com/ecg-simulator/ via `repository_dispatch` (`ecg-updated`).
+
+Requires repo secret `WEBSITE_DISPATCH_TOKEN` (PAT with access to Carry-website).
+
+Manual test:
+
+```bash
+gh workflow run "Notify website to rebuild ECG embed"
+```
