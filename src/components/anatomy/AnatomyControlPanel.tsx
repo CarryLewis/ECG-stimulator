@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import {
   HEART_VERSIONS,
@@ -18,6 +19,8 @@ interface AnatomyControlPanelProps {
   onTimeScaleChange: (scale: number) => void
   rateBpm: number
   onRateChange: (bpm: number) => void
+  /** Optional pathology / disease controls rendered after the header. */
+  pathologySlot?: ReactNode
 }
 
 const SPEED_PRESETS = [
@@ -39,7 +42,7 @@ export default function AnatomyControlPanel({
   timeScale,
   onTimeScaleChange,
   rateBpm,
-  onRateChange,
+  pathologySlot,
 }: AnatomyControlPanelProps) {
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
@@ -49,13 +52,14 @@ export default function AnatomyControlPanel({
   return (
     <aside className="anatomy-panel">
       <header className="anatomy-panel-header">
-        <p className="anatomy-eyebrow">Source model</p>
-        <h1 className="anatomy-title">Cardiac anatomy</h1>
+        <p className="anatomy-eyebrow">生理源模型</p>
+        <h1 className="anatomy-title">病理心电仿真</h1>
         <p className="anatomy-lede">
-          Conduction glow is driven by physiological events from the simulation
-          clock (SA → atria → AV → His → bundles → Purkinje → repolarization).
+          疾病包修改电生理模型；三维激动与十二导联由同一偶极子采样，而不是手动画波形。
         </p>
       </header>
+
+      {pathologySlot}
 
       <section className="anatomy-section">
         <h2 className="anatomy-section-title">Playback</h2>
@@ -92,20 +96,17 @@ export default function AnatomyControlPanel({
             </button>
           ))}
         </div>
-        <label className="anatomy-control">
+        <div className="anatomy-control">
           <span className="anatomy-control-row">
-            <span>Heart rate</span>
-            <span className="anatomy-control-value">{rateBpm} bpm</span>
+            <span>Ventricular rate</span>
+            <span className="anatomy-control-value">
+              {Math.round(rateBpm)} bpm
+            </span>
           </span>
-          <input
-            type="range"
-            min={40}
-            max={140}
-            step={1}
-            value={rateBpm}
-            onChange={(e) => onRateChange(Number(e.target.value))}
-          />
-        </label>
+          <p className="anatomy-version-hint">
+            Rate follows the active disease plan (edit scenario parameters).
+          </p>
+        </div>
       </section>
 
       <section className="anatomy-section">
@@ -162,10 +163,6 @@ export default function AnatomyControlPanel({
           />
           <span>Anatomical labels</span>
         </label>
-        <p className="anatomy-version-hint">
-          Opacity drives the <strong>Src</strong> chamber model. Labels: Src
-          chamber tags / V1 nodes / V2 pins / V3 electrodes.
-        </p>
       </section>
 
       <section className="anatomy-section">
@@ -195,12 +192,6 @@ export default function AnatomyControlPanel({
             )
           })}
         </ul>
-        {heartVersion !== 'anatomy' && (
-          <p className="anatomy-version-hint">
-            Switch to <strong>Src</strong> to highlight chambers in 3D. List
-            selection still shows the clinical note below.
-          </p>
-        )}
       </section>
 
       <section className="anatomy-section anatomy-detail">
@@ -214,8 +205,8 @@ export default function AnatomyControlPanel({
           </>
         ) : (
           <p className="anatomy-detail-body anatomy-detail-body--muted">
-            On <strong>Src</strong>, click a chamber (or the list). On V2–V3,
-            click lead pins / electrodes. Cube faces snap to A/P/L/R/H/B.
+            Select a pathology above, then watch conduction glow and the
+            12-lead ECG update from the same physiological model.
           </p>
         )}
       </section>

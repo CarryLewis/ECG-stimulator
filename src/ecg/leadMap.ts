@@ -7,6 +7,7 @@ export const TERRITORY_COLOR: Record<Exclude<Territory, 'none'> | 'cavity', stri
     septal: '#8b5cf6',
     lateral: '#3b82f6',
     inferior: '#ef4444',
+    posterior: '#14b8a6',
     cavity: '#94a3b8',
   }
 
@@ -213,5 +214,13 @@ export const WALL_PATCHES: WallPatch[] = [
     scale: [0.9, 0.35, 0.7],
     rotation: [0.9, 0, 0],
     labelZh: '下壁',
+  },
+  {
+    id: 'post',
+    territory: 'posterior',
+    position: [0.15, -0.55, -0.75],
+    scale: [0.85, 0.9, 0.35],
+    rotation: [-0.15, 0, 0],
+    labelZh: '后壁',
   },
 ]
