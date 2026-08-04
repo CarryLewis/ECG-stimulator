@@ -57,6 +57,12 @@ export default function App() {
           elapsed={frame.t}
           timeScale={timeScale}
           rateBpm={rateBpm}
+          field={frame.field}
+          leads={frame.leads}
+          axis={frame.axis}
+          activationIntensity={frame.activationIntensity}
+          ecg={frame.ecg}
+          ecgPhase={frame.ecgPhase}
         />
       </main>
     </div>

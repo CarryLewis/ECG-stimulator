@@ -5,6 +5,12 @@ import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState, LeadName } from '../../ecg/types'
 import type { PhysiologicalEvent } from '../../sim/events'
+import type {
+  InstantaneousElectricalField,
+  LeadVoltages,
+  MeanElectricalAxis,
+} from '../../vector-engine'
+import type { EcgPhaseInfo, EcgSample } from '../../ecg-generator'
 import OrientationCube, {
   CameraSync,
   OrientationLegend,
@@ -12,6 +18,9 @@ import OrientationCube, {
 import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
+import HeartVectorView from '../vector/HeartVectorView'
+import VectorHud from '../vector/VectorHud'
+import EcgMiniMonitor from '../vector/EcgMiniMonitor'
 import AnatomicalHeart from './AnatomicalHeart'
 import ConductionTimeline from './ConductionTimeline'
 
@@ -29,10 +38,16 @@ interface CardiacAnatomyViewportProps {
   elapsed: number
   timeScale: number
   rateBpm: number
+  field: InstantaneousElectricalField
+  leads: LeadVoltages
+  axis: MeanElectricalAxis
+  activationIntensity: number
+  ecg: EcgSample
+  ecgPhase: EcgPhaseInfo
 }
 
 /**
- * Shared 3D viewport for source anatomy + V1 / V2 / V3.
+ * Shared 3D viewport for source anatomy + V1 / V2 / V3 / Vec.
  *
  * The orientation cube is a separate overlay Canvas so it cannot disable
  * R3F’s automatic heart-scene render (priority > 0 useFrame pitfall).
@@ -51,6 +66,12 @@ export default function CardiacAnatomyViewport({
   elapsed,
   timeScale,
   rateBpm,
+  field,
+  leads,
+  axis,
+  activationIntensity,
+  ecg,
+  ecgPhase,
 }: CardiacAnatomyViewportProps) {
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
@@ -67,10 +88,13 @@ export default function CardiacAnatomyViewport({
   )
 
   const isV3 = heartVersion === 'v3'
+  const isVector = heartVersion === 'vector'
   const isSource = heartVersion === 'anatomy'
   const camera = isV3
     ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
-    : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
+    : isVector
+      ? { position: [2.4, 0.9, 3.8] as [number, number, number], fov: 42 }
+      : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
 
   const clearSelection = () => {
     onSelectLead(null)
@@ -113,11 +137,13 @@ export default function CardiacAnatomyViewport({
           args={[
             isV3
               ? '#0a1018'
-              : heartVersion === 'v2'
-                ? '#0c121a'
-                : isSource
-                  ? '#0b1219'
-                  : '#070d14',
+              : isVector
+                ? '#081018'
+                : heartVersion === 'v2'
+                  ? '#0c121a'
+                  : isSource
+                    ? '#0b1219'
+                    : '#070d14',
           ]}
         />
 
@@ -167,6 +193,15 @@ export default function CardiacAnatomyViewport({
             layers={torsoLayers}
           />
         )}
+        {isVector && (
+          <HeartVectorView
+            state={conduction}
+            field={field}
+            axis={axis}
+            activationIntensity={activationIntensity}
+            showLabels={showLabels}
+          />
+        )}
 
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
@@ -193,6 +228,19 @@ export default function CardiacAnatomyViewport({
       <OrientationCube />
       <OrientationLegend />
 
+      {isVector && (
+        <>
+          <VectorHud
+            axis={axis}
+            field={field}
+            leads={leads}
+            activationIntensity={activationIntensity}
+            status={conduction.status}
+          />
+          <EcgMiniMonitor sample={ecg} elapsed={elapsed} phase={ecgPhase} />
+        </>
+      )}
+
       <ConductionTimeline
         phaseMs={phaseMs}
         active={activeEvent}
@@ -205,7 +253,9 @@ export default function CardiacAnatomyViewport({
       <div className="anatomy-viewport-hint" aria-hidden>
         {isSource
           ? 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B'
-          : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
+          : isVector
+            ? 'EP → vectors → lead voltages · Gold = QRS · Cyan = net field · White = MEA'
+            : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
       </div>
     </div>
   )
