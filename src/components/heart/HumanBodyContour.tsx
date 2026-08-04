@@ -74,7 +74,7 @@ export default function HumanBodyContour() {
           emissive={SKIN_EMIT}
           emissiveIntensity={0.32}
           transparent
-          opacity={0.34}
+          opacity={0.42}
           roughness={0.85}
           metalness={0.04}
           depthWrite={false}
