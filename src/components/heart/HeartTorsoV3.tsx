@@ -23,7 +23,8 @@ interface HeartTorsoV3Props {
 /**
  * Version 3 — clinical 12-lead placement schematic:
  * proportional adult body contour + mediastinal heart (heart ~¼–⅓ chest
- * width) + labelled RA/LA/RL/LL and V1–V6 electrodes.
+ * width, apex toward V4 / mid-clavicular) + labelled RA/LA/RL/LL and
+ * V1–V6 electrodes on torso surface landmarks.
  */
 export default function HeartTorsoV3({
   state,
@@ -102,17 +103,36 @@ export default function HeartTorsoV3({
 }
 
 function PlacementGuides() {
+  /** Mid-sternal line — reference for V1/V2 parasternal placement. */
   const midSternal = useMemo<[number, number, number][]>(
     () => [
-      [0, 1.2, 0.55],
-      [0, -0.7, 0.55],
+      [0, 1.2, 0.5],
+      [0, -0.7, 0.5],
     ],
     [],
   )
+  /** Left mid-clavicular — V4 vertical landmark (apex beat). */
   const midClavicular = useMemo<[number, number, number][]>(
     () => [
-      [0.55, 1.1, 0.42],
-      [0.55, -0.55, 0.55],
+      [0.55, 1.05, 0.4],
+      [0.55, -0.55, 0.48],
+    ],
+    [],
+  )
+  /** Left anterior axillary — V5 vertical landmark. */
+  const antAxillary = useMemo<[number, number, number][]>(
+    () => [
+      [0.78, 0.85, 0.22],
+      [0.78, -0.5, 0.22],
+    ],
+    [],
+  )
+  /** Horizontal 5th ICS band linking V4 → V5 → V6. */
+  const fifthIcs = useMemo<[number, number, number][]>(
+    () => [
+      [0.55, -0.12, 0.5],
+      [0.78, -0.12, 0.26],
+      [0.85, -0.12, 0.02],
     ],
     [],
   )
@@ -138,6 +158,26 @@ function PlacementGuides() {
         dashed
         dashSize={0.07}
         gapSize={0.05}
+      />
+      <Line
+        points={antAxillary}
+        color="#64748b"
+        lineWidth={1}
+        transparent
+        opacity={0.32}
+        dashed
+        dashSize={0.06}
+        gapSize={0.05}
+      />
+      <Line
+        points={fifthIcs}
+        color="#7dd3fc"
+        lineWidth={1.35}
+        transparent
+        opacity={0.45}
+        dashed
+        dashSize={0.06}
+        gapSize={0.04}
       />
     </group>
   )

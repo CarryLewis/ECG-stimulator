@@ -6,10 +6,14 @@ import { DoubleSide, Vector2 } from 'three'
  *
  * Anthropometry (scene units before BODY_SCALE):
  *   biacromial (shoulder) ≈ 2.10  →  after BODY_SCALE ≈ 2.69
- *   so the mediastinal heart (scale ≈ 0.36, ~fist-sized) sits at a
+ *   mid-thorax half-width ≈ 0.92 → chest width ≈ 2.35 after scale
+ *   so the mediastinal heart (scale ≈ 0.34, ~fist-sized) sits at a
  *   believable ~¼–⅓ of adult chest width.
  *   Head / neck / thorax / waist / hip follow typical male ratios.
  *   A–P depth flattened (~0.62×) so the silhouette stays readable.
+ *
+ * Landmark band for precordial leads (body-local y):
+ *   4th ICS ≈ 0.16–0.18 · 5th ICS / V4–V6 ≈ −0.12
  *
  * Axes: +x patient left, +y superior, +z anterior.
  */
@@ -95,8 +99,8 @@ export default function HumanBodyContour() {
 
       <UpperArms />
 
-      {/* Soft anterior chest plate so V-leads sit on a surface */}
-      <mesh position={[0, 0.18, 0.4]} scale={[0.9, 1.0, 0.2]}>
+      {/* Soft anterior chest plate — supports V1–V4 on the sternum/precordium */}
+      <mesh position={[0.08, 0.06, 0.38]} scale={[0.95, 1.05, 0.22]}>
         <sphereGeometry args={[0.95, 36, 24]} />
         <meshStandardMaterial
           color="#a8bdd4"

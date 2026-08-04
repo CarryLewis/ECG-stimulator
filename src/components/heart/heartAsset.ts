@@ -23,16 +23,15 @@ export const REALISTIC_HEART_GLB = `${import.meta.env.BASE_URL}models/heart-anim
  * enlarge the heart. Target adult ratio: heart ≈ ¼–⅓ of chest width
  * (fist-sized organ in an adult male thorax).
  *
- * Position / rotation approximate clinical mediastinal orientation:
- *   - slightly left of midline (≈⅔ of the organ mass left of mid-sternum)
- *   - mid-thorax height (base near 2nd–3rd ICS, apex toward 5th ICS / V4)
- *   - behind the sternum, mildly anterior in the chest cavity
- *   - long axis toward left–inferior–anterior (apex points at mid-clavicular)
- *
- * Axes: +x patient left, +y superior, +z anterior.
+ * Clinical mediastinal orientation (axes: +x patient left, +y superior,
+ * +z anterior):
+ *   - ≈⅔ of organ mass left of mid-sternum (center of mass on +x)
+ *   - right atrial border near the right sternal line
+ *   - base near 2nd–3rd ICS; apex toward 5th ICS / mid-clavicular (V4)
+ *   - long axis left–inferior–anterior, behind the anterior chest wall
  */
 export const HEART_MEDIASTINUM_POSE = {
-  position: [-0.16, 0.12, 0.28] as [number, number, number],
-  rotation: [0.38, -0.55, 0.18] as [number, number, number],
-  scale: 0.36,
+  position: [0.32, 0.14, 0.24] as [number, number, number],
+  rotation: [0.55, -0.72, 0.55] as [number, number, number],
+  scale: 0.34,
 }
