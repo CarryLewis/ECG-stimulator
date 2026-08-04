@@ -102,17 +102,21 @@ export const UI = {
   stepRepol: { en: 'Repolarization', zh: '复极' },
 
   hintSource: {
-    en: 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B',
-    zh: '点击心腔选择 · 透明度滑条 · 方向立方体对齐 A/P/L/R/H/B',
+    en: 'Click a chamber to select · Opacity slider · Cube: top H / bottom B / left L / right R',
+    zh: '点击心腔选择 · 透明度滑条 · 立方体：上H / 下B / 左L / 右R',
   },
   hintGlow: {
-    en: 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B',
-    zh: '发光跟随生理事件 · 方向立方体对齐 A/P/L/R/H/B',
+    en: 'Glow follows physiological events · Cube: top H / bottom B / left L / right R',
+    zh: '发光跟随生理事件 · 立方体：上H / 下B / 左L / 右R',
   },
 
   orientationCube: {
     en: 'Orientation cube A/P/L/R/H/B',
     zh: '方向立方体 A/P/L/R/H/B',
+  },
+  orientationCubeHint: {
+    en: 'Cube shows the model aspect you face: top→H, bottom→B, left→L, right→R, front→A, back→P. Click a face to snap.',
+    zh: '立方体表示当前面对的模型方位：上视为H，下视为B，左视为L，右视为R，前视为A，后视为P。点击面对齐视角。',
   },
   snapOrientation: { en: 'Snap orientation', zh: '对齐方位' },
   faceAnterior: { en: 'Anterior', zh: '前' },

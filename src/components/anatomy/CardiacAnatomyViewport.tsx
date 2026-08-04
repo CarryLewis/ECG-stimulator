@@ -35,8 +35,8 @@ interface CardiacAnatomyViewportProps {
 /**
  * Shared 3D viewport for source anatomy + V1 / V2 / V3.
  *
- * The orientation cube is a separate overlay Canvas so it cannot disable
- * R3F’s automatic heart-scene render (priority > 0 useFrame pitfall).
+ * Orientation cube is a DOM/CSS overlay (see OrientationCube.tsx). CameraSync
+ * inside this Canvas snaps OrbitControls to body-axis views A/P/L/R/H/B.
  */
 export default function CardiacAnatomyViewport({
   heartVersion,

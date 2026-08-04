@@ -1,19 +1,31 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Matrix4, Quaternion, Vector3 } from 'three'
+import { Vector3 } from 'three'
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { useLanguage, type UiMessageKey } from '../i18n'
 
 /**
  * DOM / CSS orientation cube — no second WebGL context.
  *
- * History: a priority>0 useFrame inside the heart Canvas disabled R3F’s
- * automatic scene render (labels only). A separate overlay Canvas then caused
- * WebGL context loss on software GL. This CSS cube avoids both failure modes.
+ * Body axes (same as the 3D heart / torso model):
+ *   +x = patient left,  +y = superior (head),  +z = anterior
+ *
+ * Viewing rules — the letter facing the camera is the side you look *from*:
+ *   from above  (superior → inferior) → H
+ *   from below  (inferior → superior) → B
+ *   from left   (patient left → right) → L
+ *   from right  (patient right → left) → R
+ *   from front  (anterior → posterior) → A
+ *   from back   (posterior → anterior) → P
+ *
+ * Clicking a face / legend button snaps OrbitControls so the camera sits on
+ * that body-axis ray and looks at the orbit target.
  */
 
 export interface CubeFaceDef {
   id: string
   label: string
+  /** Outward face normal in body / world axes (= camera offset from target). */
   normal: Vector3
   titleKey: UiMessageKey
 }
@@ -27,83 +39,108 @@ export const ORIENTATION_FACES: CubeFaceDef[] = [
   { id: 'B', label: 'B', titleKey: 'faceBottom', normal: new Vector3(0, -1, 0) },
 ]
 
-const _q = new Quaternion()
-const _v = new Vector3()
-const _m = new Matrix4()
-const _inv = new Quaternion()
+const _offset = new Vector3()
+const _pos = new Vector3()
+const _target = new Vector3()
 
-/** Bridge: main Canvas writes quat; CSS cube reads it each animation frame. */
+/** Bridge: main Canvas writes orbit state; CSS cube + click handlers share it. */
 export const cameraBridge = {
-  quat: new Quaternion(),
   pendingFaceId: null as string | null,
   requestFace(id: string) {
     this.pendingFaceId = id
   },
-  /** Optional DOM node that receives rotate3d CSS. */
+  /** Optional DOM node that receives CSS 3D rotation. */
   cubeEl: null as HTMLDivElement | null,
+}
+
+function isOrbitControls(value: unknown): value is OrbitControlsImpl {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    'getAzimuthalAngle' in value &&
+    'getPolarAngle' in value &&
+    'target' in value
+  )
 }
 
 /**
  * Inside the heart Canvas — default useFrame priority only.
  * Never pass priority > 0 (that disables automatic heart rendering).
+ *
+ * Snaps must update OrbitControls (not only camera.quaternion), otherwise
+ * damping / spherical state immediately undoes the view.
  */
 export function CameraSync() {
-  const { camera } = useThree()
+  const { camera, controls } = useThree()
   const animRef = useRef({
-    targetQuat: new Quaternion(),
     targetPos: new Vector3(),
+    targetLook: new Vector3(),
     active: false,
   })
 
   useFrame(() => {
-    cameraBridge.quat.copy(camera.quaternion)
+    const orbit = isOrbitControls(controls) ? controls : null
 
     const pending = cameraBridge.pendingFaceId
     if (pending) {
       const face = ORIENTATION_FACES.find((f) => f.id === pending)
       cameraBridge.pendingFaceId = null
       if (face) {
-        const dist = camera.position.length()
-        const pos = face.normal.clone().multiplyScalar(dist)
-        const up =
-          Math.abs(face.normal.y) > 0.9
-            ? new Vector3(0, 0, -Math.sign(face.normal.y))
-            : new Vector3(0, 1, 0)
-        _m.lookAt(pos, new Vector3(0, 0, 0), up)
-        animRef.current = {
-          targetQuat: new Quaternion().setFromRotationMatrix(_m),
-          targetPos: pos,
-          active: true,
-        }
+        _target.copy(orbit?.target ?? _target.set(0, 0, 0))
+        _offset.copy(camera.position).sub(_target)
+        const dist = Math.max(_offset.length(), 0.5)
+        _pos.copy(face.normal).multiplyScalar(dist).add(_target)
+        animRef.current.targetPos.copy(_pos)
+        animRef.current.targetLook.copy(_target)
+        animRef.current.active = true
+        if (orbit) orbit.enabled = false
       }
     }
 
     const anim = animRef.current
     if (anim.active) {
-      camera.getWorldQuaternion(_q)
-      _q.slerp(anim.targetQuat, 0.12)
-      const dist = camera.position.length()
-      _v.set(0, 0, dist).applyQuaternion(_q)
-      camera.position.copy(_v)
-      camera.quaternion.copy(_q)
-      if (_q.angleTo(anim.targetQuat) < 0.003) {
+      camera.position.lerp(anim.targetPos, 0.18)
+      camera.up.set(0, 1, 0)
+      camera.lookAt(anim.targetLook)
+      if (camera.position.distanceTo(anim.targetPos) < 0.02) {
         camera.position.copy(anim.targetPos)
-        camera.lookAt(0, 0, 0)
+        camera.up.set(0, 1, 0)
+        camera.lookAt(anim.targetLook)
+        if (orbit) {
+          orbit.target.copy(anim.targetLook)
+          orbit.enabled = true
+          orbit.update()
+        }
         anim.active = false
       }
     }
 
-    // Drive CSS cube (inverse camera → world axes stay readable on the gizmo).
+    // Drive CSS cube from camera offset vs orbit target so the letter facing
+    // the viewer is the body-axis side the camera looks from:
+    //   +Y → H, −Y → B, +X → L, −X → R, +Z → A, −Z → P
+    // Three.js spherical: theta=0 → +Z (A), phi=0 → +Y (H).
+    // CSS 3D is Y-down → rotateX(-(phi−π/2)) rotateY(−theta).
     const el = cameraBridge.cubeEl
     if (el) {
-      _inv.copy(camera.quaternion).invert()
-      el.style.transform = `rotate3d(${_inv.x}, ${_inv.y}, ${_inv.z}, ${2 * Math.acos(Math.min(1, Math.max(-1, _inv.w)))}rad)`
+      const look = orbit?.target ?? _target.set(0, 0, 0)
+      _offset.copy(camera.position).sub(look)
+      const radius = _offset.length()
+      if (radius > 1e-6) {
+        const theta = Math.atan2(_offset.x, _offset.z)
+        const phi = Math.acos(Math.min(1, Math.max(-1, _offset.y / radius)))
+        el.style.transform = `rotateX(${-((phi - Math.PI / 2))}rad) rotateY(${-theta}rad)`
+      }
     }
   })
 
   return null
 }
 
+/**
+ * CSS face placement at cube identity (anterior toward viewer):
+ *   front A (+Z), back P, right-of-widget L (+X = patient left),
+ *   left-of-widget R, top H (+Y), bottom B.
+ */
 const FACE_STYLE: Record<string, CSSProperties> = {
   A: { transform: `translateZ(52px)` },
   P: { transform: `rotateY(180deg) translateZ(52px)` },
@@ -138,6 +175,7 @@ export default function OrientationCube() {
     <div
       className="orientation-cube-overlay"
       aria-label={t('orientationCube')}
+      title={t('orientationCubeHint')}
     >
       <div className="orientation-cube-scene">
         <div className="orientation-cube" ref={cubeRef}>
@@ -169,6 +207,7 @@ export function OrientationLegend() {
       className="orientation-legend"
       role="group"
       aria-label={t('snapOrientation')}
+      title={t('orientationCubeHint')}
     >
       {ORIENTATION_FACES.map((f) => (
         <button
