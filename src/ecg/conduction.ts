@@ -6,12 +6,50 @@ function gauss(x: number, c: number, w: number): number {
   return Math.exp(-(d * d) / (2 * w * w))
 }
 
-/** Smooth trapezoid covering the ST segment after QRS onset. */
+/**
+ * Raised-cosine lobe with compact support.
+ * Used for clinical P / T morphology (not the wider 3D-glow Gaussians).
+ */
+function cosineLobe(t: number, center: number, halfWidth: number): number {
+  if (halfWidth <= 1e-6) return 0
+  const x = (t - center) / halfWidth
+  if (x <= -1 || x >= 1) return 0
+  return 0.5 * (1 + Math.cos(Math.PI * x))
+}
+
+/**
+ * Asymmetric QRS spike: fast upstroke, slightly slower downstroke.
+ * Compact support keeps QRS < 100 ms at qrsWidthFactor = 1.
+ */
+function qrsSpike(
+  t: number,
+  peak: number,
+  width: number,
+  sharpness = 2.2,
+): number {
+  if (width <= 1e-6) return 0
+  const up = width * 0.28
+  const down = width * 0.72
+  if (t < peak - up || t > peak + down) return 0
+  if (t <= peak) {
+    const x = (t - (peak - up)) / up
+    return Math.sin((x * Math.PI) / 2) ** sharpness
+  }
+  const x = (t - peak) / down
+  return Math.cos((x * Math.PI) / 2) ** (sharpness * 0.9)
+}
+
+/**
+ * ST window after a narrow QRS (~80 ms at factor 1) and before T takeoff.
+ * `dt` is time since QRS onset, optionally scaled by qrsWidthFactor so injury
+ * current stays after a widened complex. Injury is injected only here so the
+ * baseline stays isoelectric in NSR.
+ */
 function stShape(dt: number): number {
-  if (dt <= 0.02 || dt >= 0.26) return 0
-  if (dt < 0.06) return (dt - 0.02) / 0.04
-  if (dt < 0.18) return 1
-  return 1 - (dt - 0.18) / 0.08
+  if (dt <= 0.078 || dt >= 0.2) return 0
+  if (dt < 0.095) return (dt - 0.078) / 0.017
+  if (dt < 0.16) return 1
+  return 1 - (dt - 0.16) / 0.04
 }
 
 export interface ConductionOptions {
@@ -126,36 +164,48 @@ export function conductionAt(
     atria = f
     atrialDepol = plan.pAmpFactor * f * 0.85
   } else {
+    // Glow: slightly wider atrial flash for the 3D diagram.
     sa = Math.max(
       gauss(atrialPhase, 0, 0.03),
       gauss(atrialPhase, tAtrial, 0.03),
     )
     atria = gauss(atrialPhase, 0.05, 0.05)
+    // ECG P wave: ~80 ms wide, peak ~40 ms after atrial onset so a clear
+    // isoelectric PR segment remains before QRS (First Aid: PR ≈ 160 ms).
+    const pHalf = 0.04
+    const pPeak = 0.04
     atrialDepol =
       plan.pAmpFactor *
       Math.max(
-        gauss(atrialPhase, 0.04, 0.022),
-        gauss(atrialPhase, tAtrial + 0.04, 0.022),
+        cosineLobe(atrialPhase, pPeak, pHalf),
+        cosineLobe(atrialPhase, tAtrial + pPeak, pHalf),
       )
   }
 
   const avConducts = !plan.dissociated && !plan.fibrillatoryBaseline
   const av = avConducts ? gauss(ventPhase, pr * 0.55, 0.06) : 0
 
+  // Organised sinus: QRS starts after PR. Escape / AF: QRS at phase 0.
   const qrsOnset = plan.dissociated || plan.irregular ? 0 : pr
+  // Glow Gaussians stay a bit wider than the ECG spikes.
   const his = gauss(ventPhase, qrsOnset, 0.03 * qrs)
   const bundle = gauss(ventPhase, qrsOnset + 0.03 * qrs, 0.035 * qrs)
-  const ventricle = gauss(ventPhase, qrsOnset + 0.07 * qrs, 0.055 * qrs)
+  const ventricle = gauss(ventPhase, qrsOnset + 0.05 * qrs, 0.04 * qrs)
 
-  const septalDepol = gauss(ventPhase, qrsOnset + 0.01 * qrs, 0.012 * qrs)
-  const apicalDepol = gauss(ventPhase, qrsOnset + 0.035 * qrs, 0.014 * qrs)
-  const basalDepol = gauss(ventPhase, qrsOnset + 0.06 * qrs, 0.016 * qrs)
+  // ECG QRS: septal → free-wall (R) → basal (S), total ≈ 80 ms at factor 1
+  // (First Aid: QRS normally < 100 ms). Compact spikes avoid ST elevation
+  // from Gaussian tails bleeding past the J point.
+  const q = Math.max(0.55, qrs)
+  const septalDepol = qrsSpike(ventPhase, qrsOnset + 0.012 * q, 0.03 * q, 2.0)
+  const apicalDepol = qrsSpike(ventPhase, qrsOnset + 0.035 * q, 0.05 * q, 2.35)
+  const basalDepol = qrsSpike(ventPhase, qrsOnset + 0.06 * q, 0.034 * q, 2.1)
 
-  const tCenter = qrsOnset + 0.22 * plan.tWidthFactor
-  const tWidth = 0.055 * plan.tWidthFactor
-  const repol = plan.tAmpFactor * gauss(ventPhase, tCenter, tWidth)
+  // T after a short isoelectric ST. Peak ≈ QRS onset + 240 ms at defaults.
+  const tCenter = qrsOnset + 0.24 * plan.tWidthFactor
+  const tHalf = 0.07 * plan.tWidthFactor
+  const repol = plan.tAmpFactor * cosineLobe(ventPhase, tCenter, tHalf)
 
-  const stWindow = stShape(ventPhase - qrsOnset)
+  const stWindow = stShape((ventPhase - qrsOnset) / Math.max(0.55, qrs))
 
   const status: Status = plan.fibrillatoryBaseline
     ? {
