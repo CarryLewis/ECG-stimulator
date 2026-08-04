@@ -1,4 +1,4 @@
-import type { HeartStructureDef, HeartStructureId } from './types'
+import type { HeartStructureDef } from './types'
 
 /**
  * Procedural macroscopic heart layout.
@@ -123,15 +123,3 @@ export const HEART_STRUCTURES: readonly HeartStructureDef[] = [
     renderOrder: 2,
   },
 ] as const
-
-export const HEART_STRUCTURE_BY_ID: Record<
-  HeartStructureId,
-  HeartStructureDef
-> = Object.fromEntries(HEART_STRUCTURES.map((s) => [s.id, s])) as Record<
-  HeartStructureId,
-  HeartStructureDef
->
-
-export const HEART_STRUCTURE_IDS: HeartStructureId[] = HEART_STRUCTURES.map(
-  (s) => s.id,
-)

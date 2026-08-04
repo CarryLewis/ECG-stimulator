@@ -131,12 +131,6 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
 ]
 
-export const ELECTRODE_BY_ID: Record<ElectrodeId, ElectrodeSite> =
-  Object.fromEntries(ELECTRODE_SITES.map((e) => [e.id, e])) as Record<
-    ElectrodeId,
-    ElectrodeSite
-  >
-
 /** Which surface electrodes light up when a 12-lead channel is selected. */
 export const LEAD_ELECTRODES: Record<LeadName, ElectrodeId[]> = {
   I: ['LA', 'RA'],
@@ -267,9 +261,3 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
     noteEn: LEAD_LANDMARK_BY_NAME.V6.faceEn,
   },
 ]
-
-export const LEAD_PLACEMENT_BY_NAME: Record<LeadName, LeadPlacementLabel> =
-  Object.fromEntries(LEAD_PLACEMENT_LABELS.map((l) => [l.lead, l])) as Record<
-    LeadName,
-    LeadPlacementLabel
-  >

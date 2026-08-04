@@ -43,15 +43,6 @@ export function conductionStateFromEvents(
     : 0
   const repol = repEv ? gauss(t, repEv.t, SINUS_WIDTH_S.repol) : 0
 
-  // Wavefront intensities for dipole / future ECG (same event anchors).
-  const atrialDepol = atria
-  const septalDepol = his * 0.85
-  const apicalDepol = ventricle
-  const basalDepol = bundle * 0.55 + ventricle * 0.35
-
-  const qrsOnset = hisEv?.t ?? beat.t0 + 0.2
-  const stWindow = stShape(t - qrsOnset)
-
   const active = activeEventLabel(t, beat)
   const phaseMs = Math.round((t - beat.t0) * 1000)
 
@@ -64,20 +55,8 @@ export function conductionStateFromEvents(
     ventricle,
     avConducts: true,
     status: `t⁺${phaseMs} ms · ${active}`,
-    atrialDepol,
-    septalDepol,
-    apicalDepol,
-    basalDepol,
     repol,
-    stWindow,
   }
-}
-
-function stShape(dt: number): number {
-  if (dt <= 0.02 || dt >= 0.26) return 0
-  if (dt < 0.06) return (dt - 0.02) / 0.04
-  if (dt < 0.18) return 1
-  return 1 - (dt - 0.18) / 0.08
 }
 
 /** Highest-intensity teaching event at time t (for HUD). */
