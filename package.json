@@ -1,17 +1,14 @@
 {
   "name": "ecg-learning-simulator",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Interactive Physiology & ECG Learning Simulator — EP lab with disease packs, vector ECG, and continuous recording.",
+  "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy as the biological source model for ECG generation.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
-    "check:disease": "npx --yes tsx src/disease/selfCheck.ts",
-    "check:ecg": "npx --yes tsx src/ecg/validateMorphology.ts",
-    "validate:ecg": "npx --yes tsx scripts/validate-ecg.ts"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

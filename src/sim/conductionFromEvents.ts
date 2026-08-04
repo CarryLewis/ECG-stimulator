@@ -41,31 +41,19 @@ export function conductionStateFromEvents(
   const ventricle = ventEv
     ? gauss(t, ventEv.t, SINUS_WIDTH_S.ventricle)
     : 0
+  const repol = repEv ? gauss(t, repEv.t, SINUS_WIDTH_S.repol) : 0
 
-  /**
-   * ECG wavefront envelopes — narrow & sequential so P / QRS / T separate
-   * like a real strip (glow intensities above stay wider for 3D teaching).
-   *
-   * Relative to QRS onset (His):
-   *   septal ~ +8 ms, apical ~ +28 ms, basal ~ +52 ms  (≈ 80–100 ms QRS)
-   * P ~ 40 ms atrial; T ~ 350 ms repolarization; amplitudes clinically scaled.
-   */
+  // Wavefront intensities for dipole / future ECG (same event anchors).
+  const atrialDepol = atria
+  const septalDepol = his * 0.85
+  const apicalDepol = ventricle
+  const basalDepol = bundle * 0.55 + ventricle * 0.35
+
   const qrsOnset = hisEv?.t ?? beat.t0 + 0.2
-  const pCenter = atrEv?.t ?? beat.t0 + 0.04
-  const tCenter = repEv?.t ?? beat.t0 + 0.35
-
-  const atrialDepol = atrEv ? 0.42 * gauss(t, pCenter, 0.018) : 0
-  const septalDepol = 0.4 * gauss(t, qrsOnset + 0.005, 0.006)
-  const apicalDepol = 1.0 * gauss(t, qrsOnset + 0.026, 0.010)
-  const basalDepol = 0.7 * gauss(t, qrsOnset + 0.048, 0.011)
-  // Glow + ECG T share this envelope (narrow enough for a distinct T wave).
-  const repol = repEv ? 0.55 * gauss(t, tCenter, 0.042) : 0
-
   const stWindow = stShape(t - qrsOnset)
 
   const active = activeEventLabel(t, beat)
   const phaseMs = Math.round((t - beat.t0) * 1000)
-  const statusLine = `t⁺${phaseMs} ms · ${active}`
 
   return {
     sa,
@@ -75,7 +63,7 @@ export function conductionStateFromEvents(
     bundle,
     ventricle,
     avConducts: true,
-    status: { en: statusLine, zh: statusLine },
+    status: `t⁺${phaseMs} ms · ${active}`,
     atrialDepol,
     septalDepol,
     apicalDepol,
@@ -86,11 +74,10 @@ export function conductionStateFromEvents(
 }
 
 function stShape(dt: number): number {
-  // Isoelectric ST after QRS (~80 ms) until T onset.
-  if (dt <= 0.08 || dt >= 0.28) return 0
-  if (dt < 0.1) return (dt - 0.08) / 0.02
-  if (dt < 0.2) return 1
-  return 1 - (dt - 0.2) / 0.08
+  if (dt <= 0.02 || dt >= 0.26) return 0
+  if (dt < 0.06) return (dt - 0.02) / 0.04
+  if (dt < 0.18) return 1
+  return 1 - (dt - 0.18) / 0.08
 }
 
 /** Highest-intensity teaching event at time t (for HUD). */

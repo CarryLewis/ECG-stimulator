@@ -1,4 +1,4 @@
-export type HeartVersion = 'anatomy' | 'v1' | 'v2' | 'v3' | 'vector'
+export type HeartVersion = 'anatomy' | 'v1' | 'v2' | 'v3'
 
 export const HEART_VERSIONS: readonly {
   id: HeartVersion
@@ -8,32 +8,26 @@ export const HEART_VERSIONS: readonly {
 }[] = [
   {
     id: 'anatomy',
-    short: 'Anatomy',
-    title: 'Anatomy',
-    hint: 'Selectable chambers — biological source model',
+    short: 'Src',
+    title: 'Source chambers',
+    hint: 'Selectable RA/LA/RV/LV/septum/apex — biological source model',
   },
   {
     id: 'v1',
-    short: 'Conduction',
-    title: 'Conduction',
-    hint: 'SA/AV + His–Purkinje activation pathway',
+    short: 'V1',
+    title: 'Conduction schematic',
+    hint: 'Chambers + SA/AV + His–Purkinje tree',
   },
   {
     id: 'v2',
-    short: 'Leads',
-    title: 'Leads',
-    hint: 'Wall territories and 12-lead viewing angles',
+    short: 'V2',
+    title: 'Lead atlas',
+    hint: 'Wall territories and 12-lead pins',
   },
   {
     id: 'v3',
-    short: 'Torso',
-    title: 'Torso',
-    hint: 'Clinical electrode placement on the body surface',
-  },
-  {
-    id: 'vector',
-    short: 'Vectors',
-    title: 'Vectors',
-    hint: 'Myocardial vectors, mean axis, and field direction',
+    short: 'V3',
+    title: 'Torso electrodes',
+    hint: 'Body contour and clinical electrode placement',
   },
 ] as const
