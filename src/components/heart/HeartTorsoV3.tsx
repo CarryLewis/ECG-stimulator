@@ -39,6 +39,7 @@ export default function HeartTorsoV3({
       <group scale={BODY_SCALE}>
         {layers.torso && <HumanBodyContour />}
 
+        {/* Midsternal + left mid-clavicular guides for placement teaching */}
         {layers.torso && <PlacementGuides />}
 
         {selectedLead &&
@@ -86,13 +87,15 @@ export default function HeartTorsoV3({
                 noteEn={label.noteEn}
                 selected={selected}
                 dimmed={dimmed}
-                onSelect={() => onSelectLead(selected ? null : label.lead)}
+                onSelect={() =>
+                  onSelectLead(selected ? null : label.lead)
+                }
               />
             )
           })}
       </group>
 
-      {/* Heart scaled independently — ~⅓ of adult chest width, not body×heart. */}
+      {/* Heart sized independently — ~⅓ of adult chest width, not body×heart. */}
       {layers.heart && <RealisticHeart state={state} />}
     </group>
   )

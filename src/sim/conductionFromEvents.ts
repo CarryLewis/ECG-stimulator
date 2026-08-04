@@ -65,6 +65,7 @@ export function conductionStateFromEvents(
 
   const active = activeEventLabel(t, beat)
   const phaseMs = Math.round((t - beat.t0) * 1000)
+  const statusLine = `t⁺${phaseMs} ms · ${active}`
 
   return {
     sa,
@@ -74,7 +75,7 @@ export function conductionStateFromEvents(
     bundle,
     ventricle,
     avConducts: true,
-    status: `t⁺${phaseMs} ms · ${active}`,
+    status: { en: statusLine, zh: statusLine },
     atrialDepol,
     septalDepol,
     apicalDepol,

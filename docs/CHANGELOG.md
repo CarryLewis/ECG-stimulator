@@ -6,6 +6,46 @@
 
 ---
 
+## 2026-08-04 — Consolidate all open PRs into one tip
+
+**Completed:**
+
+- Merged **every open PR** into `cursor/consolidate-all-prs-fed3` on top of current `main`
+- Kept EP laboratory shell + vector → body-surface → lead pipeline from **#14** (which already absorbed **#9/#11/#12/#13**)
+- Wired physiology-driven **disease packs** + pathology scenarios from **#16/#18** into the lab Clinical rail
+- Added continuous **ECG recording monitor** from **#17** (toggle: 12-lead pathology grid ↔ Record)
+- Brought physiological sim core modules from **#15** (`src/simulation`, `src/visualization`, `scripts/validate-ecg.ts`)
+- Applied adult V3 heart-to-torso proportions from **#21**
+- Shared transport clock: 3D glow + ECG acquisition share one timeline; diseases never paint lead mV directly
+
+### Open PR disposition
+
+| PR | Title | Disposition |
+|----|-------|-------------|
+| **#21** | V3 heart-to-torso proportions | **Included** |
+| **#18** | Pathology ECG models | **Included** (scenarios + CyclePlan bridge) |
+| **#17** | Continuous ECG recording monitor | **Included** (Record mode) |
+| **#16** | Disease Simulation Engine | **Included** (via #18 library + `check:disease`) |
+| **#15** | Physiological ECG sim core | **Included** (modules + `validate:ecg`) |
+| **#14** | Prior consolidate (EP lab + vector + docs) | **Included** (base product shell) |
+| **#13–#11, #9** | Morphology / lab UI / vectors / docs | **Included** via #14 |
+| **#7** | Core data model types | **Already on main** |
+| **#5–#1** | Early V3 / offline / live ECG drafts | **Superseded** |
+| **#6/#8/#10** | Architecture / anatomy / conduction | **Already on main** |
+
+### Physiological spine on this tip
+
+```
+Disease pack → PhysiologicalModel → CyclePlan → conductionAt
+  → Electrical vector → Body surface Φ → 12-lead ECG / recording strip
+```
+
+**Scripts:** `npm run build` · `npm run check:disease` · `npm run check:ecg` · `npm run validate:ecg`
+
+**Next task:** After merge to `main`, close superseded open PRs; deepen recording sampler so Record mode uses the same CyclePlan voltages as the 12-lead grid.
+
+---
+
 ## 2026-07-30 — Full cross-chat / PR consolidation
 
 **Completed:**

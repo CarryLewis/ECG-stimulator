@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import {
   HEART_VERSIONS,
@@ -25,6 +26,8 @@ interface ClinicalPanelProps {
   axis: MeanElectricalAxis
   field: InstantaneousElectricalField
   activationIntensity: number
+  /** Optional pathology scenario picker (disease packs). */
+  pathologySlot?: ReactNode
 }
 
 /**
@@ -43,6 +46,7 @@ export default function ClinicalPanel({
   axis,
   field,
   activationIntensity,
+  pathologySlot,
 }: ClinicalPanelProps) {
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
@@ -61,6 +65,12 @@ export default function ClinicalPanel({
           </p>
         </div>
       </header>
+
+      {pathologySlot ? (
+        <div className="lab-clinical-block lab-clinical-block--pathology">
+          {pathologySlot}
+        </div>
+      ) : null}
 
       <div className="lab-clinical-block">
         <h3 className="lab-clinical-heading">Current mechanism</h3>

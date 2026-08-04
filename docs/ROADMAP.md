@@ -2,7 +2,7 @@
 
 **Document role:** Development stages and sequencing for AI agents  
 **Related:** [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`PRODUCT_REQUIREMENTS.md`](./PRODUCT_REQUIREMENTS.md), [`CHANGELOG.md`](./CHANGELOG.md)  
-**Status:** Phase 0–4 largely delivered on consolidate tip (anatomy + conduction + vector/ECG + EP lab UI); Phase 5 (disease packs) next — see [`CHANGELOG.md`](./CHANGELOG.md)
+**Status:** Phase 0–5 delivered on consolidate tip (anatomy + conduction + vector/ECG + EP lab UI + disease packs + recording); next is Simulation Mode case loop / recording↔plan voltage unify — see [`CHANGELOG.md`](./CHANGELOG.md)
 
 ---
 
@@ -77,29 +77,30 @@ Progress through phases in order unless a documented exception is approved. Do n
 
 ---
 
-## Phase 5 — Clinical Simulation *(current next)*
+## Phase 5 — Clinical Simulation
 
 **Goal:** Clinical reasoning scenarios on top of the spine.
 
-- [ ] STEMI (territory + severity → injury current → lead pattern)
-- [ ] Atrial fibrillation
-- [ ] AV block
-- [ ] Mechanism explanations + derived findings (partial clinical panel exists)
+- [x] STEMI (territory + severity → injury current → lead pattern)
+- [x] Atrial fibrillation (+ flutter, VF/flutter packs)
+- [x] AV block (1° / Mobitz I–II / 3°)
+- [x] Mechanism explanations + derived findings (clinical panel + pathology rail)
 - [ ] Simulation Mode case loop (interpret → reason → debrief); AI tutor later
 
-**Exit criteria:** At least STEMI, AF, and AV block as disease packs; Simulation Mode usable for teaching cases; findings derived from model state.
+**Exit criteria:** At least STEMI, AF, and AV block as disease packs; Simulation Mode usable for teaching cases; findings derived from model state. ✅ (packs + live ECG); Simulation Mode shell still open
 
 ---
 
 ## Beyond Phase 5 (Backlog)
 
-Not scheduled until Phase 5 exit:
+Not scheduled until Simulation Mode exit:
 
-- Electrolyte packs (hyper/hypokalemia) as first-class scenarios
-- Evolving MI stages, bundle branch block library
+- Deeper electrolyte UI scenarios (packs already in library)
+- Evolving MI stages as timed case arcs
 - Broader organ-system simulations
 - Virtual hospital workflow
 - Full AI medical tutor ecosystem
+- Unify Record-mode sampler with CyclePlan voltages (same dipole as 12-lead grid)
 
 Track these in CHANGELOG “Next task” only when prior phase exit criteria are met.
 

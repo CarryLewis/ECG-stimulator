@@ -10,6 +10,7 @@ import { DEFAULT_TISSUE } from '../vector-engine'
  */
 export function wavefrontsFromConduction(
   state: ConductionState,
+  atriaOrganized = true,
 ): MyocardialWavefronts {
   return {
     atrialDepol: state.atrialDepol,
@@ -18,8 +19,7 @@ export function wavefrontsFromConduction(
     basalDepol: state.basalDepol,
     repol: state.repol,
     stWindow: state.stWindow,
-    // Current EP path is organised sinus; AF packs will clear this flag.
-    atriaOrganized: true,
+    atriaOrganized,
   }
 }
 
@@ -36,9 +36,10 @@ export function vectorInputFromConduction(
   state: ConductionState,
   tissue: Partial<TissueModifiers> = {},
 ) {
+  const atriaOrganized = !(tissue.fibrillatoryBaseline ?? false)
   return {
     t,
-    wavefronts: wavefrontsFromConduction(state),
+    wavefronts: wavefrontsFromConduction(state, atriaOrganized),
     tissue: { ...defaultSinusTissue(), ...tissue },
   }
 }

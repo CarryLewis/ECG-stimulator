@@ -46,6 +46,7 @@ export const TERRITORY_VECTOR: Readonly<
   inferior: { x: 0.1, y: 1, z: 0.1 },
   lateral: { x: 1, y: 0.1, z: 0.2 },
   septal: { x: -0.2, y: 0.05, z: 0.9 },
+  posterior: { x: 0.15, y: 0.1, z: -1 },
 }
 
 /** Lead axes in the vector-engine Vec3 shape (for projection context). */

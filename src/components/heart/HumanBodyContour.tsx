@@ -4,10 +4,12 @@ import { DoubleSide, Vector2 } from 'three'
 /**
  * Adult-male body contour for V3 ECG placement.
  *
- * Anthropometry (scene units): shoulder breadth ≈ 2.4 so the mediastinal
- * heart (~0.5 scale) sits at a believable ~1/4–1/3 of chest width.
- * Head / neck / thorax / waist / hip follow typical male ratios.
- * A–P depth flattened (~0.62×) so the silhouette stays readable.
+ * Anthropometry (scene units before BODY_SCALE):
+ *   biacromial (shoulder) ≈ 2.10  →  after BODY_SCALE ≈ 2.69
+ *   so the mediastinal heart (scale ≈ 0.36, ~fist-sized) sits at a
+ *   believable ~¼–⅓ of adult chest width.
+ *   Head / neck / thorax / waist / hip follow typical male ratios.
+ *   A–P depth flattened (~0.62×) so the silhouette stays readable.
  *
  * Axes: +x patient left, +y superior, +z anterior.
  */
@@ -30,7 +32,7 @@ const TORSO_PROFILE: [number, number][] = [
   [0.18, 1.22],
   [0.38, 1.16], // trapezius
   [0.88, 1.12], // lateral neck → shoulder
-  [1.05, 1.06], // acromion
+  [1.05, 1.06], // acromion (matches RA/LA height)
   [1.08, 0.98],
   [1.0, 0.82], // deltoid falloff
   [0.94, 0.58], // upper thorax

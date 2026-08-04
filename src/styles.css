@@ -1006,3 +1006,607 @@ input {
     max-width: 92%;
   }
 }
+.locale-btn:hover {
+  color: var(--text);
+}
+
+.locale-btn--active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.app--pathology {
+  grid-template-columns: minmax(280px, 360px) 1fr;
+}
+
+.pathology-workspace {
+  display: grid;
+  grid-template-rows: minmax(280px, 1fr) minmax(280px, 42vh);
+  min-height: 100vh;
+  min-width: 0;
+}
+
+.pathology-workspace .anatomy-stage {
+  position: relative;
+  min-height: 0;
+}
+
+.pathology-status-bar {
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0.75rem;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: rgba(8, 14, 22, 0.82);
+  backdrop-filter: blur(8px);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.pathology-status-bar span:first-child {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pathology-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0.85rem;
+}
+
+.pathology-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pathology-btn:hover {
+  border-color: rgba(61, 184, 168, 0.45);
+}
+
+.pathology-btn--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.pathology-btn-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pathology-btn-short {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.pathology-explain {
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(61, 184, 168, 0.08);
+  border: 1px solid rgba(61, 184, 168, 0.2);
+}
+
+.pathology-explain-summary {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.pathology-explain-findings {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.pathology-select {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.pathology-trace {
+  margin-top: 0.5rem;
+}
+
+.ecg-stage {
+  overflow: auto;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--stroke);
+  background: linear-gradient(180deg, #0a121a, #071018);
+}
+
+.ecg-stage-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.55rem;
+}
+
+.ecg-stage-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.ecg-stage-header p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.ecg-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.ecg-live-badge {
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(61, 184, 168, 0.1);
+  border: 1px solid rgba(61, 184, 168, 0.35);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  width: fit-content;
+}
+
+.ecg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.ecg-cell {
+  min-width: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ecg-strip {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.ecg-lead,
+.ecg-lead--live {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fff;
+  vertical-align: top;
+}
+
+@media (max-width: 1100px) {
+  .app--pathology {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .anatomy-panel {
+    max-height: 42vh;
+    border-right: none;
+    border-bottom: 1px solid var(--stroke);
+  }
+
+  .pathology-workspace {
+    grid-template-rows: minmax(240px, 48vh) minmax(260px, 1fr);
+    min-height: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .ecg-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 860px) {
+  .conduction-timeline {
+    width: calc(100% - 1.5rem);
+    top: auto;
+    bottom: 3.2rem;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  ECG recording monitor                                                      */
+/* -------------------------------------------------------------------------- */
+
+.ecg-monitor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 0;
+  min-width: 0;
+  padding: 0.75rem 0.9rem 0.85rem;
+  border-top: 1px solid var(--stroke);
+  background:
+    linear-gradient(180deg, rgba(8, 18, 24, 0.96), rgba(4, 10, 14, 0.98));
+  overflow: auto;
+  position: relative;
+  z-index: 5;
+  isolation: isolate;
+  pointer-events: auto;
+}
+
+.ecg-monitor--paper {
+  background: linear-gradient(180deg, #ebe4dc, #e2d8ce);
+  color: #1a1a1a;
+}
+
+.ecg-monitor-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+}
+
+.ecg-monitor-eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.ecg-monitor--paper .ecg-monitor-eyebrow {
+  color: #0f766e;
+}
+
+.ecg-monitor-title {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ecg-monitor-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ecg-hud-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(94, 234, 212, 0.28);
+  background: rgba(15, 40, 38, 0.7);
+  color: #99f6e4;
+}
+
+.ecg-hud-pill--hr {
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fecaca;
+  background: rgba(60, 20, 24, 0.65);
+}
+
+.ecg-monitor--paper .ecg-hud-pill {
+  border-color: rgba(15, 118, 110, 0.35);
+  background: rgba(255, 255, 255, 0.7);
+  color: #134e4a;
+}
+
+.ecg-monitor--paper .ecg-hud-pill--hr {
+  border-color: rgba(185, 28, 28, 0.35);
+  color: #7f1d1d;
+  background: rgba(254, 226, 226, 0.8);
+}
+
+.ecg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+  align-items: flex-end;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: rgba(10, 20, 28, 0.65);
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+}
+
+.ecg-monitor--paper .ecg-controls {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(120, 90, 90, 0.25);
+}
+
+.ecg-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.ecg-controls-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ecg-monitor--paper .ecg-controls-label {
+  color: #6b7280;
+}
+
+.ecg-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ecg-btn {
+  appearance: none;
+  border: 1px solid rgba(148, 175, 200, 0.28);
+  background: rgba(18, 32, 42, 0.9);
+  color: var(--text);
+  border-radius: 7px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.ecg-btn:hover {
+  border-color: rgba(61, 184, 168, 0.55);
+  background: rgba(24, 48, 52, 0.95);
+}
+
+.ecg-btn--primary {
+  background: rgba(13, 148, 136, 0.35);
+  border-color: rgba(45, 212, 191, 0.55);
+}
+
+.ecg-btn--active {
+  background: rgba(61, 184, 168, 0.28);
+  border-color: rgba(94, 234, 212, 0.7);
+  color: #ccfbf1;
+}
+
+.ecg-monitor--paper .ecg-btn {
+  background: #fff;
+  color: #111827;
+  border-color: rgba(120, 90, 90, 0.3);
+}
+
+.ecg-monitor--paper .ecg-btn--active,
+.ecg-monitor--paper .ecg-btn--primary {
+  background: #ccfbf1;
+  border-color: #0f766e;
+  color: #134e4a;
+}
+
+.ecg-controls-group input[type='range'] {
+  width: 140px;
+}
+
+.ecg-lead-select {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ecg-lead-select select {
+  background: rgba(18, 32, 42, 0.95);
+  color: var(--text);
+  border: 1px solid rgba(148, 175, 200, 0.28);
+  border-radius: 6px;
+  padding: 0.3rem 0.45rem;
+}
+
+.ecg-monitor-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.ecg-lead-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--ecg-cols, 1), minmax(0, 1fr));
+  gap: 0.4rem;
+  overflow: hidden;
+}
+
+.ecg-lead-grid--lead_ii,
+.ecg-lead-grid--single {
+  grid-template-columns: 1fr;
+}
+
+.ecg-lead-cell {
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(61, 184, 168, 0.18);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+  position: relative;
+  max-width: 100%;
+}
+
+.ecg-lead-cell:focus-visible {
+  outline: 2px solid rgba(94, 234, 212, 0.7);
+  outline-offset: 1px;
+}
+
+.ecg-lead-cell--selected {
+  border-color: rgba(94, 234, 212, 0.7);
+  box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.25);
+}
+
+.ecg-monitor--paper .ecg-lead-cell {
+  border-color: rgba(185, 80, 90, 0.35);
+}
+
+.ecg-strip-canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  vertical-align: top;
+  pointer-events: none;
+}
+
+.ecg-rhythm-strip {
+  border: 1px solid rgba(61, 184, 168, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ecg-rhythm-label {
+  margin: 0;
+  padding: 0.35rem 0.55rem 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ecg-monitor--paper .ecg-rhythm-label {
+  color: #6b7280;
+}
+
+.ecg-monitor-footer {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.ecg-monitor--paper .ecg-monitor-footer {
+  color: #6b7280;
+}
+
+@media (max-width: 980px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .anatomy-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--stroke);
+    max-height: 40vh;
+  }
+
+  .app--with-ecg .workspace {
+    grid-template-rows: minmax(240px, 36vh) minmax(360px, 1fr);
+  }
+}
+
+
+/* Consolidated lab: pathology status + ECG mode toggle */
+.lab-app--consolidated .lab-stage {
+  position: relative;
+}
+
+.lab-status-bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.lab-panel--ecg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 220px;
+}
+
+.lab-panel--ecg .lab-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lab-ecg-mode {
+  display: inline-flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.lab-ecg-mode-btn {
+  border: 1px solid var(--stroke, rgba(255, 255, 255, 0.18));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.lab-ecg-mode-btn--active {
+  background: rgba(80, 180, 220, 0.22);
+  border-color: rgba(80, 180, 220, 0.55);
+}
+
+.lab-clinical-block--pathology {
+  max-height: 280px;
+  overflow: auto;
+}
+
+.lab-panel--ecg .ecg-grid-wrap,
+.lab-panel--ecg .ecg-monitor {
+  flex: 1;
+  min-height: 180px;
+}
