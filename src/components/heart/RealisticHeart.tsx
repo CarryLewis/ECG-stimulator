@@ -3,18 +3,10 @@ import type { ConductionState } from '../../ecg/types'
 import { HEART_MEDIASTINUM_POSE } from './heartAsset'
 
 /**
- * Anatomical heart for V3 — procedural cutaway myocardium seated in the
- * mediastinum. Lit brightly so chambers / vessels read through the body shell.
+ * Procedural mediastinal heart for V3 — atria, ventricles, great vessels.
+ * Lit so chambers read through the translucent body shell.
  */
 export default function RealisticHeart({ state }: { state: ConductionState }) {
-  return <ProceduralCutawayHeart state={state} />
-}
-
-/**
- * Bright procedural cutaway: atria, ventricles, aorta, pulmonary trunk.
- * Higher albedo + emissive so structure stays clear on the dark UI.
- */
-export function ProceduralCutawayHeart({ state }: { state: ConductionState }) {
   const beat = useMemo(
     () => 1 + state.ventricle * 0.05 + state.atria * 0.02,
     [state.atria, state.ventricle],

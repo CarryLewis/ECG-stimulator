@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.2.0",
   "type": "module",
-  "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy as the biological source model for ECG generation.",
+  "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy and event-driven conduction teaching (baseline before live 12-lead / disease packs).",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

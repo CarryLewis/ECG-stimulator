@@ -12,7 +12,7 @@
 
 ## Goal
 
-Evolve from today’s single-dipole teaching SPA into a modular medical simulation stack where anatomy, electrophysiology, vectors, ECG synthesis, and clinical presentation are separable, testable, and extensible.
+Evolve from today’s **anatomy + event-driven conduction** teaching SPA into a modular medical simulation stack where anatomy, electrophysiology, vectors, ECG synthesis, and clinical presentation are separable, testable, and extensible.
 
 **Design principle:** Each layer speaks only to its neighbors through typed contracts. Disease modules inject parameters at the electrophysiology and/or clinical layers — they never rewrite ECG drawing code or lead axes by hand.
 
@@ -88,7 +88,7 @@ Bottom layers are **physiology truth**. Top layers are **observation and educati
 
 **Does not:** project onto leads or draw ECG paper.
 
-**Maps from current codebase:** Generalizes `conduction.ts` + rhythm parts of `diseases.buildPlan` into a real state machine, not only Gaussian envelopes.
+**Maps from current codebase:** Extends `src/sim/*` event scheduling + glow sampling (`conductionFromEvents`) into a full EP state machine (block / AF / escape). Historical PR branches also had `conduction.ts` + `CyclePlan` rhythm flags — not on this `main` tip.
 
 ---
 
@@ -106,7 +106,7 @@ Bottom layers are **physiology truth**. Top layers are **observation and educati
 
 **Does not:** own disease narratives or Canvas monitors.
 
-**Maps from current codebase:** `dipole.ts` + `leads.ts` + `TERRITORY_VECTOR`.
+**Maps from current codebase:** Builds on teaching lead axes in `src/ecg/leadMap.ts` / `electrodeMap.ts`. Historical PR branches had `dipole.ts` + `leads.ts` — not on this `main` tip.
 
 ---
 
@@ -125,7 +125,7 @@ Bottom layers are **physiology truth**. Top layers are **observation and educati
 
 **Does not:** decide STEMI territory or K⁺ effects; it only samples what the vector engine emits.
 
-**Maps from current codebase:** `generator.ts` + `EcgGrid` / `EcgLead` (split: engine vs view).
+**Maps from current codebase:** Not shipped on this `main` tip. Historical PR branches had `generator.ts` + `EcgGrid` / recording monitors — reintroduce as a separate module.
 
 ---
 
@@ -144,7 +144,7 @@ Bottom layers are **physiology truth**. Top layers are **observation and educati
 
 **Does not:** contain Gaussian timing constants or lead-axis math.
 
-**Maps from current codebase:** `diseases.ts` explain text + `ControlPanel` + `ExplanationPanel` + i18n (physics mapping moves downward).
+**Maps from current codebase:** Today’s `AnatomyControlPanel` + conduction timeline HUD. Historical PR branches had disease packs / pathology panels — not on this `main` tip.
 
 ---
 
@@ -434,16 +434,19 @@ flowchart BT
 
 ---
 
-## 7. Migration Stance (From Current Code)
+## 7. Migration Stance (From Current `main`)
 
-| Current artifact | Future home |
-|------------------|-------------|
-| `leadMap` / `electrodeMap` / chamber layout | Heart Anatomy Model |
-| `conduction.ts` + rhythm flags in `CyclePlan` | Cardiac EP Engine |
-| `dipole.ts` + `leads.ts` | Electrical Vector Engine |
-| `generator.ts` + monitor sampling | ECG Generator |
-| `diseases.ts` explain + ControlPanel | Clinical Layer + Disease Packs |
-| `CyclePlan` | Split into `EpModifiers` + derived `TissueState` + display hints |
+This tip ships **anatomy + event-driven conduction glow** only. Map existing artifacts forward; do not assume historical PR files are present.
+
+| Current artifact on `main` | Future home |
+|----------------------------|-------------|
+| `src/anatomy/*`, heart meshes, torso / lead maps | Heart Anatomy Model |
+| `src/sim/*` (sinus schedule → glow) | Cardiac EP Engine |
+| `src/ecg/leadMap.ts`, `electrodeMap.ts` | Anatomy + (later) Vector Engine axes |
+| `AnatomyControlPanel` / timeline HUD | Clinical Layer (teaching chrome) |
+| `docs/core-data-model/*` | Platform contracts (design → runtime) |
+
+Historical / not on this tip (feature branches only): `dipole.ts`, `generator.ts`, disease packs, EP lab shell, vector-engine, recording monitor.
 
 Near-term architecture success looks like: **same educational UX**, but STEMI / AF / block / hyperkalemia are packs, and a test can assert “anterior STEMI ⇒ ST↑ in V2–V4” without mounting React.
 

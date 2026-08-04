@@ -92,22 +92,3 @@ export function heartbeatAt(
   const t0 = sequence * len
   return scheduleSinusHeartbeat(sequence, t0, rateBpm)
 }
-
-/** Events whose onset is in [t0, t1). */
-export function eventsInRange(
-  t0: number,
-  t1: number,
-  rateBpm: number = DEFAULT_HEART_RATE_BPM,
-): PhysiologicalEvent[] {
-  const out: PhysiologicalEvent[] = []
-  const len = cycleLength_s(rateBpm)
-  const startSeq = Math.max(0, Math.floor(t0 / len) - 1)
-  const endSeq = Math.floor(t1 / len) + 1
-  for (let s = startSeq; s <= endSeq; s++) {
-    const beat = scheduleSinusHeartbeat(s, s * len, rateBpm)
-    for (const ev of beat.events) {
-      if (ev.t >= t0 && ev.t < t1) out.push(ev)
-    }
-  }
-  return out
-}

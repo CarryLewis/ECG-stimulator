@@ -7,7 +7,6 @@ import {
   type ElectrodeSite,
 } from '../../ecg/electrodeMap'
 import type { ConductionState, LeadName } from '../../ecg/types'
-import { useLanguage } from '../../i18n/useLanguage'
 import HumanBodyContour from './HumanBodyContour'
 import RealisticHeart from './RealisticHeart'
 
@@ -83,7 +82,6 @@ export default function HeartTorsoV3({
               lead={label.lead}
               position={label.position}
               color={label.color}
-              noteZh={label.noteZh}
               noteEn={label.noteEn}
               selected={selected}
               dimmed={dimmed}
@@ -170,8 +168,7 @@ function ElectrodeMarker({
   focused: boolean
   onSelect: () => void
 }) {
-  const { locale } = useLanguage()
-  const place = locale === 'zh' ? site.placeZh : site.placeEn
+  const place = site.placeEn
   const labelPos: [number, number, number] = [
     site.position[0] + site.labelOffset[0],
     site.position[1] + site.labelOffset[1],
@@ -247,7 +244,6 @@ function LeadCallout({
   lead,
   position,
   color,
-  noteZh,
   noteEn,
   selected,
   dimmed,
@@ -256,14 +252,12 @@ function LeadCallout({
   lead: LeadName
   position: [number, number, number]
   color: string
-  noteZh: string
   noteEn: string
   selected: boolean
   dimmed: boolean
   onSelect: () => void
 }) {
-  const { locale } = useLanguage()
-  const note = locale === 'zh' ? noteZh : noteEn
+  const note = noteEn
 
   return (
     <Html

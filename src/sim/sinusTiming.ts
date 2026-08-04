@@ -19,7 +19,6 @@ export const SINUS_OFFSET_S = {
   his: 0.2,
   bundle: 0.22,
   purkinje: 0.245,
-  ventricular: 0.2,
   repolarization: 0.35,
 } as const
 

@@ -6,8 +6,6 @@ import {
   WALL_PATCHES,
 } from '../../ecg/leadMap'
 import type { ConductionState, LeadName, Territory } from '../../ecg/types'
-import { useLanguage } from '../../i18n/useLanguage'
-
 export type AnatomyLayer = 'walls' | 'pins'
 
 interface HeartAnatomyV2Props {
@@ -209,8 +207,7 @@ function LeadPin({
   dimmed: boolean
   onSelect: () => void
 }) {
-  const { locale } = useLanguage()
-  const face = locale === 'zh' ? landmark.faceZh : landmark.faceEn
+  const face = landmark.faceEn
   const pinPos: [number, number, number] = [
     landmark.position[0] + landmark.pinOffset[0],
     landmark.position[1] + landmark.pinOffset[1],
