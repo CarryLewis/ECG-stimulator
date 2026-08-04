@@ -75,7 +75,7 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V1',
-    position: [-0.12, 0.18, 0.6],
+    position: [-0.12, 0.18, 0.52],
     labelOffset: [-0.3, 0.2, 0.14],
     placeZh: '胸骨右缘第 4 肋间',
     placeEn: '4th ICS, right sternal border',
@@ -85,7 +85,7 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V2',
-    position: [0.12, 0.16, 0.62],
+    position: [0.12, 0.16, 0.54],
     labelOffset: [0.08, 0.28, 0.16],
     placeZh: '胸骨左缘第 4 肋间',
     placeEn: '4th ICS, left sternal border',
@@ -95,7 +95,7 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V3',
-    position: [0.34, 0.02, 0.64],
+    position: [0.34, 0.02, 0.52],
     labelOffset: [0.12, 0.24, 0.18],
     placeZh: 'V2 与 V4 中点',
     placeEn: 'Midway between V2 and V4',
@@ -105,8 +105,8 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V4',
-    position: [0.55, -0.12, 0.5],
-    labelOffset: [0.16, -0.08, 0.26],
+    position: [0.55, -0.12, 0.4],
+    labelOffset: [0.16, -0.08, 0.22],
     placeZh: '左锁骨中线第 5 肋间',
     placeEn: '5th ICS, mid-clavicular line',
     leads: ['V4'],
@@ -115,8 +115,9 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V5',
-    position: [0.78, -0.12, 0.26],
-    labelOffset: [0.3, 0.06, 0.14],
+    // On elliptical chest wall (A–P scale 0.62); anterior axillary lateral to V4.
+    position: [0.72, -0.12, 0.24],
+    labelOffset: [0.28, 0.06, 0.12],
     placeZh: '左腋前线，与 V4 同水平',
     placeEn: 'Anterior axillary line, level with V4',
     leads: ['V5'],
@@ -125,8 +126,9 @@ export const ELECTRODE_SITES: ElectrodeSite[] = [
   },
   {
     id: 'V6',
-    position: [0.85, -0.12, 0.02],
-    labelOffset: [0.34, 0.1, 0.02],
+    // Mid-axillary on left lateral wall — elliptical radius stays ≤ torso profile.
+    position: [0.82, -0.12, 0.06],
+    labelOffset: [0.32, 0.1, 0.02],
     placeZh: '左腋中线，与 V4 同水平',
     placeEn: 'Mid-axillary line, level with V4',
     leads: ['V6'],
@@ -224,7 +226,7 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
   },
   {
     lead: 'V1',
-    position: [-0.12, 0.38, 0.82],
+    position: [-0.12, 0.36, 0.72],
     territory: 'septal',
     color: TERRITORY_COLOR.septal,
     noteZh: LEAD_LANDMARK_BY_NAME.V1.faceZh,
@@ -232,7 +234,7 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
   },
   {
     lead: 'V2',
-    position: [0.12, 0.38, 0.84],
+    position: [0.12, 0.36, 0.74],
     territory: 'anterior',
     color: TERRITORY_COLOR.anterior,
     noteZh: LEAD_LANDMARK_BY_NAME.V2.faceZh,
@@ -240,7 +242,7 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
   },
   {
     lead: 'V3',
-    position: [0.34, 0.2, 0.88],
+    position: [0.34, 0.2, 0.74],
     territory: 'anterior',
     color: TERRITORY_COLOR.anterior,
     noteZh: LEAD_LANDMARK_BY_NAME.V3.faceZh,
@@ -248,7 +250,7 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
   },
   {
     lead: 'V4',
-    position: [0.55, 0.08, 0.78],
+    position: [0.55, 0.08, 0.66],
     territory: 'anterior',
     color: TERRITORY_COLOR.anterior,
     noteZh: LEAD_LANDMARK_BY_NAME.V4.faceZh,
@@ -256,7 +258,7 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
   },
   {
     lead: 'V5',
-    position: [0.92, 0.08, 0.42],
+    position: [0.88, 0.08, 0.38],
     territory: 'lateral',
     color: TERRITORY_COLOR.lateral,
     noteZh: LEAD_LANDMARK_BY_NAME.V5.faceZh,
@@ -264,7 +266,7 @@ export const LEAD_PLACEMENT_LABELS: LeadPlacementLabel[] = [
   },
   {
     lead: 'V6',
-    position: [1.08, 0.1, 0.12],
+    position: [1.0, 0.1, 0.14],
     territory: 'lateral',
     color: TERRITORY_COLOR.lateral,
     noteZh: LEAD_LANDMARK_BY_NAME.V6.faceZh,

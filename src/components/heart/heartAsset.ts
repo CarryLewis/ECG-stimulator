@@ -31,7 +31,7 @@ export const REALISTIC_HEART_GLB = `${import.meta.env.BASE_URL}models/heart-anim
  *   - long axis left–inferior–anterior, behind the anterior chest wall
  */
 export const HEART_MEDIASTINUM_POSE = {
-  position: [0.32, 0.14, 0.24] as [number, number, number],
-  rotation: [0.55, -0.72, 0.55] as [number, number, number],
-  scale: 0.34,
+  position: [0.3, 0.12, 0.26] as [number, number, number],
+  rotation: [0.52, -0.7, 0.52] as [number, number, number],
+  scale: 0.38,
 }

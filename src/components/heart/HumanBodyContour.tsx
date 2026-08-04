@@ -7,8 +7,8 @@ import { DoubleSide, Vector2 } from 'three'
  * Anthropometry (scene units before BODY_SCALE):
  *   biacromial (shoulder) ≈ 2.10  →  after BODY_SCALE ≈ 2.69
  *   mid-thorax half-width ≈ 0.92 → chest width ≈ 2.35 after scale
- *   so the mediastinal heart (scale ≈ 0.34, ~fist-sized) sits at a
- *   believable ~¼–⅓ of adult chest width.
+ *   so the mediastinal heart (scale ≈ 0.38, ~fist-sized) sits at a
+ *   believable ~⅓ of adult chest width.
  *   Head / neck / thorax / waist / hip follow typical male ratios.
  *   A–P depth flattened (~0.62×) so the silhouette stays readable.
  *

@@ -122,17 +122,17 @@ function PlacementGuides() {
   /** Left anterior axillary — V5 vertical landmark. */
   const antAxillary = useMemo<[number, number, number][]>(
     () => [
-      [0.78, 0.85, 0.22],
-      [0.78, -0.5, 0.22],
+      [0.72, 0.85, 0.2],
+      [0.72, -0.5, 0.2],
     ],
     [],
   )
   /** Horizontal 5th ICS band linking V4 → V5 → V6. */
   const fifthIcs = useMemo<[number, number, number][]>(
     () => [
-      [0.55, -0.12, 0.5],
-      [0.78, -0.12, 0.26],
-      [0.85, -0.12, 0.02],
+      [0.55, -0.12, 0.4],
+      [0.72, -0.12, 0.24],
+      [0.82, -0.12, 0.06],
     ],
     [],
   )
