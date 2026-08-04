@@ -24,7 +24,7 @@ npm run preview
 - Playback pace + heart-rate controls
 - Anatomical labels toggle; Src supports myocardium opacity + structure pick
 
-Diseases and live 12-lead ECG sampling are **not** included yet.
+Diseases are modeled as **physiology packs** (`src/disease/`) — they modify the physiological model, not ECG templates. See [`docs/disease-architecture.md`](./docs/disease-architecture.md). Live 12-lead ECG sampling from the full EP→vector pipeline is still evolving.
 
 ## Layout
 
@@ -32,8 +32,15 @@ Diseases and live 12-lead ECG sampling are **not** included yet.
 |------|------|
 | `src/anatomy/` | Structure definitions (ids aligned with `docs/core-data-model`) |
 | `src/components/anatomy/` | R3F viewport + heart mesh + control panel |
+| `src/disease/` | Disease Simulation Engine + first disease library |
 | `docs/core-data-model/` | Event-driven type contracts for the full platform |
 | `docs/software-architecture-design.md` | Layered architecture |
+| `docs/disease-architecture.md` | Disease engine architecture |
+
+```bash
+npm run check:disease   # headless physiology-driven disease invariants
+```
+
 
 ## Design notes
 
