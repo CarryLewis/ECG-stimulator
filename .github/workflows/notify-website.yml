@@ -1,0 +1,38 @@
+name: Notify website to rebuild ECG embed
+
+on:
+  push:
+    branches:
+      - main
+      - cursor/pathology-ecg-models-fab9
+  workflow_dispatch:
+
+concurrency:
+  group: notify-website
+  cancel-in-progress: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check dispatch token
+        env:
+          TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          if [[ -z "$TOKEN" ]]; then
+            echo "::error::Missing secret WEBSITE_DISPATCH_TOKEN on ECG-stimulator."
+            echo "Create a PAT with access to CarryLewis/Carry-website, then:"
+            echo "  gh secret set WEBSITE_DISPATCH_TOKEN --repo CarryLewis/ECG-stimulator"
+            exit 1
+          fi
+
+      - name: Trigger Carry-website deploy (repository_dispatch)
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/CarryLewis/Carry-website/dispatches \
+            -f event_type='ecg-updated' \
+            -f "client_payload[ref]=${{ github.ref_name }}" \
+            -f "client_payload[sha]=${{ github.sha }}" \
+            -f "client_payload[source]=ecg-stimulator"
+          echo "Dispatched ecg-updated → CarryLewis/Carry-website (ref=${{ github.ref_name }})"

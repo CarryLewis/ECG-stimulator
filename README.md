@@ -40,3 +40,17 @@ Diseases and live 12-lead ECG sampling are **not** included yet.
 - Procedural meshes (shared sphere geometry) for performance and offline use
 - Body axes: +x patient left, +y superior, +z anterior
 - No CDN runtime dependency once `node_modules` are installed
+
+## Website embed auto-sync
+
+Pushes to `main` or `cursor/pathology-ecg-models-fab9` trigger
+`notify-website.yml`, which asks Carry-website to rebuild
+https://carrylewis.com/ecg-simulator/ via `repository_dispatch` (`ecg-updated`).
+
+Requires repo secret `WEBSITE_DISPATCH_TOKEN` (PAT with access to Carry-website).
+
+Manual test:
+
+```bash
+gh workflow run "Notify website to rebuild ECG embed"
+```
