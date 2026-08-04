@@ -17,6 +17,7 @@ export type Territory =
   | 'inferior'
   | 'lateral'
   | 'septal'
+  | 'posterior'
   | 'none'
 
 /** Cardiac electrical vector in body coordinates (mV·scale). */
@@ -48,7 +49,8 @@ export interface ConductionState {
   ventricle: number
   /** False when AV conduction is blocked or absent (AF / complete block). */
   avConducts: boolean
-  status: string
+  /** Teaching status line (localized). */
+  status: { en: string; zh: string }
   /** Wavefront intensities that feed the cardiac dipole. */
   atrialDepol: number
   septalDepol: number
@@ -108,4 +110,14 @@ export interface CyclePlan {
   dissociated: boolean
   /** Draw a chaotic fibrillatory baseline instead of P waves. */
   fibrillatoryBaseline: boolean
+  /** Continuous atrial flutter (sawtooth) waves instead of discrete P. */
+  flutterBaseline: boolean
+  /** Chaotic ventricular fibrillation — no organized QRS. */
+  ventricularFibrillation: boolean
+  /** Rapid regular sine-wave ventricular flutter. */
+  ventricularFlutter: boolean
+  /** Amplitude scale for VF / ventricular-flutter wave energy (0–1). */
+  chaosAmplitude: number
+  /** Deterministic seed forwarded from the physiological model. */
+  rhythmSeed: number
 }

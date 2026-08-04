@@ -52,8 +52,9 @@ export default function AnatomyControlPanel({
         <p className="anatomy-eyebrow">Source model</p>
         <h1 className="anatomy-title">Cardiac anatomy</h1>
         <p className="anatomy-lede">
-          Conduction glow is driven by physiological events from the simulation
-          clock (SA → atria → AV → His → bundles → Purkinje → repolarization).
+          Conduction glow is driven by physiological events (SA → atria → AV →
+          His → ventricle → repolarization). The Vec view projects myocardial
+          activation into a cardiac dipole that the ECG generator samples.
         </p>
       </header>
 
