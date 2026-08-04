@@ -1,6 +1,6 @@
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Vector3 } from 'three'
+import { MathUtils, Vector3 } from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { useLanguage, type UiMessageKey } from '../i18n'
 
@@ -18,8 +18,8 @@ import { useLanguage, type UiMessageKey } from '../i18n'
  *   from front  (anterior → posterior) → A
  *   from back   (posterior → anterior) → P
  *
- * Clicking a face / legend button snaps OrbitControls so the camera sits on
- * that body-axis ray and looks at the orbit target.
+ * Clicks snap OrbitControls via setAzimuthalAngle / setPolarAngle so the
+ * spherical state (not only camera.position) matches the requested face.
  */
 
 export interface CubeFaceDef {
@@ -28,24 +28,70 @@ export interface CubeFaceDef {
   /** Outward face normal in body / world axes (= camera offset from target). */
   normal: Vector3
   titleKey: UiMessageKey
+  /** OrbitControls spherical angles for this face (Three.js Y-up). */
+  theta: number
+  phi: number
 }
 
 export const ORIENTATION_FACES: CubeFaceDef[] = [
-  { id: 'A', label: 'A', titleKey: 'faceAnterior', normal: new Vector3(0, 0, 1) },
-  { id: 'P', label: 'P', titleKey: 'facePosterior', normal: new Vector3(0, 0, -1) },
-  { id: 'L', label: 'L', titleKey: 'faceLeft', normal: new Vector3(1, 0, 0) },
-  { id: 'R', label: 'R', titleKey: 'faceRight', normal: new Vector3(-1, 0, 0) },
-  { id: 'H', label: 'H', titleKey: 'faceHead', normal: new Vector3(0, 1, 0) },
-  { id: 'B', label: 'B', titleKey: 'faceBottom', normal: new Vector3(0, -1, 0) },
+  {
+    id: 'A',
+    label: 'A',
+    titleKey: 'faceAnterior',
+    normal: new Vector3(0, 0, 1),
+    theta: 0,
+    phi: Math.PI / 2,
+  },
+  {
+    id: 'P',
+    label: 'P',
+    titleKey: 'facePosterior',
+    normal: new Vector3(0, 0, -1),
+    theta: Math.PI,
+    phi: Math.PI / 2,
+  },
+  {
+    id: 'L',
+    label: 'L',
+    titleKey: 'faceLeft',
+    normal: new Vector3(1, 0, 0),
+    theta: Math.PI / 2,
+    phi: Math.PI / 2,
+  },
+  {
+    id: 'R',
+    label: 'R',
+    titleKey: 'faceRight',
+    normal: new Vector3(-1, 0, 0),
+    theta: -Math.PI / 2,
+    phi: Math.PI / 2,
+  },
+  {
+    id: 'H',
+    label: 'H',
+    titleKey: 'faceHead',
+    normal: new Vector3(0, 1, 0),
+    theta: 0,
+    // OrbitControls.makeSafe() forbids exact 0; keep a tiny offset from the pole.
+    phi: 0.12,
+  },
+  {
+    id: 'B',
+    label: 'B',
+    titleKey: 'faceBottom',
+    normal: new Vector3(0, -1, 0),
+    theta: 0,
+    phi: Math.PI - 0.12,
+  },
 ]
 
 const _offset = new Vector3()
-const _pos = new Vector3()
 const _target = new Vector3()
 
 /** Bridge: main Canvas writes orbit state; CSS cube + click handlers share it. */
 export const cameraBridge = {
   pendingFaceId: null as string | null,
+  activeFaceId: null as string | null,
   requestFace(id: string) {
     this.pendingFaceId = id
   },
@@ -57,78 +103,102 @@ function isOrbitControls(value: unknown): value is OrbitControlsImpl {
   return (
     !!value &&
     typeof value === 'object' &&
-    'getAzimuthalAngle' in value &&
-    'getPolarAngle' in value &&
+    typeof (value as OrbitControlsImpl).getAzimuthalAngle === 'function' &&
+    typeof (value as OrbitControlsImpl).getPolarAngle === 'function' &&
+    typeof (value as OrbitControlsImpl).setAzimuthalAngle === 'function' &&
+    typeof (value as OrbitControlsImpl).setPolarAngle === 'function' &&
     'target' in value
   )
+}
+
+function nearestFaceId(offset: Vector3): string | null {
+  if (offset.lengthSq() < 1e-8) return null
+  const dir = offset.clone().normalize()
+  let best: string | null = null
+  let bestDot = -Infinity
+  for (const face of ORIENTATION_FACES) {
+    const d = dir.dot(face.normal)
+    if (d > bestDot) {
+      bestDot = d
+      best = face.id
+    }
+  }
+  return bestDot > 0.55 ? best : null
 }
 
 /**
  * Inside the heart Canvas — default useFrame priority only.
  * Never pass priority > 0 (that disables automatic heart rendering).
- *
- * Snaps must update OrbitControls (not only camera.quaternion), otherwise
- * damping / spherical state immediately undoes the view.
  */
 export function CameraSync() {
   const { camera, controls } = useThree()
-  const animRef = useRef({
-    targetPos: new Vector3(),
-    targetLook: new Vector3(),
-    active: false,
-  })
+  const listenersRef = useRef(false)
 
   useFrame(() => {
     const orbit = isOrbitControls(controls) ? controls : null
 
+    // Expose for manual QA / DevTools: window.__ecgCube.requestFace('H')
+    if (typeof window !== 'undefined' && !listenersRef.current) {
+      ;(
+        window as unknown as {
+          __ecgCube?: {
+            requestFace: (id: string) => void
+            getActive: () => string | null
+          }
+        }
+      ).__ecgCube = {
+        requestFace: (id: string) => cameraBridge.requestFace(id),
+        getActive: () => cameraBridge.activeFaceId,
+      }
+      listenersRef.current = true
+    }
+
     const pending = cameraBridge.pendingFaceId
-    if (pending) {
+    if (pending && orbit) {
       const face = ORIENTATION_FACES.find((f) => f.id === pending)
       cameraBridge.pendingFaceId = null
       if (face) {
-        _target.copy(orbit?.target ?? _target.set(0, 0, 0))
-        _offset.copy(camera.position).sub(_target)
-        const dist = Math.max(_offset.length(), 0.5)
-        _pos.copy(face.normal).multiplyScalar(dist).add(_target)
-        animRef.current.targetPos.copy(_pos)
-        animRef.current.targetLook.copy(_target)
-        animRef.current.active = true
-        if (orbit) orbit.enabled = false
-      }
-    }
-
-    const anim = animRef.current
-    if (anim.active) {
-      camera.position.lerp(anim.targetPos, 0.18)
-      camera.up.set(0, 1, 0)
-      camera.lookAt(anim.targetLook)
-      if (camera.position.distanceTo(anim.targetPos) < 0.02) {
-        camera.position.copy(anim.targetPos)
+        // OrbitControls with enableDamping only applies a fraction of
+        // setPolarAngle / setAzimuthalAngle per update(). Snap by writing
+        // camera.position from the face spherical angles, then update() with
+        // damping briefly disabled so spherical state rebuilds in one frame.
+        const look = _target.copy(orbit.target)
+        const dist = Math.max(camera.position.distanceTo(look), 0.5)
+        const prevDamping = orbit.enableDamping
+        orbit.enableDamping = false
+        // Three.js spherical: (r, phi from +Y, theta around Y) — matches OrbitControls.
+        _offset.setFromSphericalCoords(dist, face.phi, face.theta)
+        camera.position.copy(look).add(_offset)
         camera.up.set(0, 1, 0)
-        camera.lookAt(anim.targetLook)
-        if (orbit) {
-          orbit.target.copy(anim.targetLook)
-          orbit.enabled = true
-          orbit.update()
-        }
-        anim.active = false
+        orbit.update()
+        orbit.enableDamping = prevDamping
+        cameraBridge.activeFaceId = face.id
       }
     }
 
-    // Drive CSS cube from camera offset vs orbit target so the letter facing
-    // the viewer is the body-axis side the camera looks from:
-    //   +Y → H, −Y → B, +X → L, −X → R, +Z → A, −Z → P
-    // Three.js spherical: theta=0 → +Z (A), phi=0 → +Y (H).
-    // CSS 3D is Y-down → rotateX(-(phi−π/2)) rotateY(−theta).
     const el = cameraBridge.cubeEl
-    if (el) {
-      const look = orbit?.target ?? _target.set(0, 0, 0)
-      _offset.copy(camera.position).sub(look)
-      const radius = _offset.length()
-      if (radius > 1e-6) {
-        const theta = Math.atan2(_offset.x, _offset.z)
-        const phi = Math.acos(Math.min(1, Math.max(-1, _offset.y / radius)))
+    const look = orbit?.target ?? _target.set(0, 0, 0)
+    _offset.copy(camera.position).sub(look)
+    const radius = _offset.length()
+    if (radius > 1e-6) {
+      cameraBridge.activeFaceId = nearestFaceId(_offset)
+
+      // CSS 3D is Y-down. Map Three.js camera offset (Y-up) so the face whose
+      // normal matches the view-from direction fills the front of the widget:
+      //   +Y → H, −Y → B, +X → L, −X → R, +Z → A, −Z → P
+      const theta = Math.atan2(_offset.x, _offset.z)
+      const phi = Math.acos(MathUtils.clamp(_offset.y / radius, -1, 1))
+      if (el) {
         el.style.transform = `rotateX(${-((phi - Math.PI / 2))}rad) rotateY(${-theta}rad)`
+      }
+
+      // Highlight the active face button for a visible rule cue.
+      if (el) {
+        const active = cameraBridge.activeFaceId
+        for (const node of el.querySelectorAll<HTMLElement>('.orientation-cube-face')) {
+          const id = node.dataset.faceId
+          node.classList.toggle('orientation-cube-face--active', id === active)
+        }
       }
     }
   })
@@ -138,8 +208,12 @@ export function CameraSync() {
 
 /**
  * CSS face placement at cube identity (anterior toward viewer):
- *   front A (+Z), back P, right-of-widget L (+X = patient left),
- *   left-of-widget R, top H (+Y), bottom B.
+ *   front A (+Z), back P,
+ *   right-of-widget L (+X = patient left when facing the patient),
+ *   left-of-widget R (−X),
+ *   top H (+Y), bottom B (−Y).
+ *
+ * CSS Y points down; rotateX(90deg) places a face on the visual top of the widget.
  */
 const FACE_STYLE: Record<string, CSSProperties> = {
   A: { transform: `translateZ(52px)` },
@@ -184,6 +258,7 @@ export default function OrientationCube() {
               key={f.id}
               type="button"
               className="orientation-cube-face"
+              data-face-id={f.id}
               title={t(f.titleKey)}
               style={{
                 ...FACE_STYLE[f.id],
@@ -202,6 +277,18 @@ export default function OrientationCube() {
 
 export function OrientationLegend() {
   const { t } = useLanguage()
+  const [activeId, setActiveId] = useState<string | null>(null)
+
+  useEffect(() => {
+    let raf = 0
+    const tick = () => {
+      setActiveId(cameraBridge.activeFaceId)
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
   return (
     <div
       className="orientation-legend"
@@ -213,7 +300,11 @@ export function OrientationLegend() {
         <button
           key={f.id}
           type="button"
+          data-face-id={f.id}
           title={t(f.titleKey)}
+          className={
+            activeId === f.id ? 'orientation-legend-btn--active' : undefined
+          }
           onClick={() => cameraBridge.requestFace(f.id)}
         >
           {f.label}
