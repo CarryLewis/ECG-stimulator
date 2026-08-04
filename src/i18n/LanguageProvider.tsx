@@ -54,10 +54,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en'
-    document.title =
-      locale === 'zh'
-        ? '病理心电仿真 — ECG Stimulator'
-        : 'Pathology ECG Simulator — ECG Stimulator'
+    document.title = 'ECG stimulator'
   }, [locale])
 
   const value = useMemo<LanguageContextValue>(

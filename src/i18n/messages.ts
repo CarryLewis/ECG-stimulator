@@ -3,16 +3,16 @@ import type { LocalizedString } from './types'
 /** All chrome / panel / HUD copy — disease packs keep their own LocalizedString fields. */
 export const UI = {
   appEyebrow: {
-    en: 'Physiology source model',
-    zh: '生理源模型',
+    en: 'Interactive physiology learning',
+    zh: '交互式生理学习',
   },
   appTitle: {
-    en: 'Pathology ECG Simulator',
-    zh: '病理心电仿真',
+    en: 'ECG stimulator',
+    zh: 'ECG stimulator',
   },
   appLede: {
-    en: 'Disease packs modify the electrophysiology model. The 3D activation glow and 12-lead ECG are sampled from the same cardiac dipole — not hand-drawn waveforms.',
-    zh: '疾病包修改电生理模型；三维激动与十二导联由同一偶极子采样，而不是手动画波形。',
+    en: 'An interactive Physiology & ECG learning simulator: 3D cardiac anatomy is the biological source model, and pathology packs drive both heart activation glow and a live 12-lead ECG from the same cardiac dipole.',
+    zh: '交互式生理与心电学习仿真器：以三维心脏解剖为生物学源模型，病理疾病包驱动同一心脏偶极子，同步生成激动发光与实时十二导联心电图。',
   },
 
   language: { en: 'Language', zh: '语言' },
@@ -21,8 +21,8 @@ export const UI = {
 
   pathology: { en: 'Pathology', zh: '病理情景' },
   pathologyHint: {
-    en: 'Disease packs modify physiology; ECG and heart glow share one dipole.',
-    zh: '疾病改变生理模型；十二导联与心脏激动由同一偶极子采样。',
+    en: 'Choose a scenario to reshape conduction physiology — then watch the 3D heart and 12-lead ECG update together from one shared model.',
+    zh: '选择病理情景以改变传导生理，三维心脏激动与十二导联心电图由同一模型同步更新。',
   },
   pathway: { en: 'Pathway', zh: '传导路径' },
   pathologyScenarios: {
