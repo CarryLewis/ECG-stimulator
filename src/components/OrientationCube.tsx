@@ -1,6 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Matrix4, Quaternion, Vector3 } from 'three'
+import { useLanguage, type UiMessageKey } from '../i18n'
 
 /**
  * DOM / CSS orientation cube — no second WebGL context.
@@ -14,16 +15,16 @@ export interface CubeFaceDef {
   id: string
   label: string
   normal: Vector3
-  title: string
+  titleKey: UiMessageKey
 }
 
 export const ORIENTATION_FACES: CubeFaceDef[] = [
-  { id: 'A', label: 'A', title: 'Anterior', normal: new Vector3(0, 0, 1) },
-  { id: 'P', label: 'P', title: 'Posterior', normal: new Vector3(0, 0, -1) },
-  { id: 'L', label: 'L', title: 'Left', normal: new Vector3(1, 0, 0) },
-  { id: 'R', label: 'R', title: 'Right', normal: new Vector3(-1, 0, 0) },
-  { id: 'H', label: 'H', title: 'Head', normal: new Vector3(0, 1, 0) },
-  { id: 'B', label: 'B', title: 'Bottom', normal: new Vector3(0, -1, 0) },
+  { id: 'A', label: 'A', titleKey: 'faceAnterior', normal: new Vector3(0, 0, 1) },
+  { id: 'P', label: 'P', titleKey: 'facePosterior', normal: new Vector3(0, 0, -1) },
+  { id: 'L', label: 'L', titleKey: 'faceLeft', normal: new Vector3(1, 0, 0) },
+  { id: 'R', label: 'R', titleKey: 'faceRight', normal: new Vector3(-1, 0, 0) },
+  { id: 'H', label: 'H', titleKey: 'faceHead', normal: new Vector3(0, 1, 0) },
+  { id: 'B', label: 'B', titleKey: 'faceBottom', normal: new Vector3(0, -1, 0) },
 ]
 
 const _q = new Quaternion()
@@ -123,6 +124,7 @@ const FACE_COLOR: Record<string, string> = {
 
 /** CSS 3D orientation cube overlay (single WebGL context for the heart only). */
 export default function OrientationCube() {
+  const { t } = useLanguage()
   const cubeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -135,7 +137,7 @@ export default function OrientationCube() {
   return (
     <div
       className="orientation-cube-overlay"
-      aria-label="Orientation cube A/P/L/R/H/B"
+      aria-label={t('orientationCube')}
     >
       <div className="orientation-cube-scene">
         <div className="orientation-cube" ref={cubeRef}>
@@ -144,7 +146,7 @@ export default function OrientationCube() {
               key={f.id}
               type="button"
               className="orientation-cube-face"
-              title={f.title}
+              title={t(f.titleKey)}
               style={{
                 ...FACE_STYLE[f.id],
                 background: FACE_COLOR[f.id],
@@ -161,17 +163,18 @@ export default function OrientationCube() {
 }
 
 export function OrientationLegend() {
+  const { t } = useLanguage()
   return (
     <div
       className="orientation-legend"
       role="group"
-      aria-label="Snap orientation"
+      aria-label={t('snapOrientation')}
     >
       {ORIENTATION_FACES.map((f) => (
         <button
           key={f.id}
           type="button"
-          title={f.title}
+          title={t(f.titleKey)}
           onClick={() => cameraBridge.requestFace(f.id)}
         >
           {f.label}

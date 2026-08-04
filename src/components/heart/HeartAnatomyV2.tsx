@@ -6,7 +6,7 @@ import {
   WALL_PATCHES,
 } from '../../ecg/leadMap'
 import type { ConductionState, LeadName, Territory } from '../../ecg/types'
-import { useLanguage } from '../../i18n/useLanguage'
+import { useLanguage } from '../../i18n'
 
 export type AnatomyLayer = 'walls' | 'pins'
 

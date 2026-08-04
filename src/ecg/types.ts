@@ -49,7 +49,8 @@ export interface ConductionState {
   ventricle: number
   /** False when AV conduction is blocked or absent (AF / complete block). */
   avConducts: boolean
-  status: string
+  /** Teaching status line (localized). */
+  status: { en: string; zh: string }
   /** Wavefront intensities that feed the cardiac dipole. */
   atrialDepol: number
   septalDepol: number

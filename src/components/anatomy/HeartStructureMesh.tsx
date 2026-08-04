@@ -3,6 +3,7 @@ import type { ThreeEvent } from '@react-three/fiber'
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import type { HeartStructureDef } from '../../anatomy/types'
+import { useLanguage } from '../../i18n'
 
 interface HeartStructureMeshProps {
   def: HeartStructureDef
@@ -29,6 +30,7 @@ export default function HeartStructureMesh({
   activation = 0,
   onSelect,
 }: HeartStructureMeshProps) {
+  const { L } = useLanguage()
   const opacity = useMemo(() => {
     const base = Math.max(
       0.45,
@@ -125,7 +127,7 @@ export default function HeartStructureMesh({
             }}
           >
             <span className="anatomy-label-abbr">{def.abbr}</span>
-            <span className="anatomy-label-name">{def.label.en}</span>
+            <span className="anatomy-label-name">{L(def.label)}</span>
           </button>
         </Html>
       )}

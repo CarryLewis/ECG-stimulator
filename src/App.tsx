@@ -17,6 +17,7 @@ import {
   SCENARIO_EXTRA_PARAMS,
   type DiseaseParamValues,
 } from './disease'
+import { useLanguage } from './i18n'
 import {
   DEFAULT_TIME_SCALE,
   useSimulationClock,
@@ -45,7 +46,6 @@ function resolveScenario(scenarioId: string, params: DiseaseParamValues) {
   const scenario = PATHOLOGY_SCENARIO_BY_ID[scenarioId] ?? PATHOLOGY_SCENARIOS[0]!
   const diseaseId = scenario.remapDiseaseId?.(params) ?? scenario.diseaseId
   const disease = requireDisease(diseaseId)
-  // Drop scenario-only keys that the pack may not define.
   const packKeys = new Set(disease.params.map((p) => p.key))
   const packParamsMutable: Record<string, number | string | boolean> = {}
   for (const [k, v] of Object.entries(params)) {
@@ -60,6 +60,7 @@ function resolveScenario(scenarioId: string, params: DiseaseParamValues) {
 }
 
 export default function App() {
+  const { t, L, locale } = useLanguage()
   const [heartVersion, setHeartVersion] = useState<HeartVersion>('v1')
   const [selectedId, setSelectedId] = useState<HeartStructureId | null>(null)
   const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
@@ -80,7 +81,6 @@ export default function App() {
 
   const rateBpm = plan.ventricularRate
 
-  // Shared simulation clock — views do not animate on their own.
   const elapsed = useSimulationClock('sinus', timeScale)
   const frame = useSimulationFrame(elapsed, plan, rateBpm)
 
@@ -96,13 +96,11 @@ export default function App() {
     clearIrregularBeatCache()
     setParams((prev) => {
       const next = { ...prev, [key]: value }
-      // Remap disease when territory / degree changes.
       const s = PATHOLOGY_SCENARIO_BY_ID[scenarioId]
       if (s?.remapDiseaseId) {
         const newId = s.remapDiseaseId(next)
         if (newId !== diseaseId) {
-          const remapped = buildParams(scenarioId, newId, next)
-          return remapped
+          return buildParams(scenarioId, newId, next)
         }
       }
       return next
@@ -110,7 +108,7 @@ export default function App() {
   }
 
   return (
-    <div className="app app--pathology">
+    <div className="app app--pathology" lang={locale}>
       <AnatomyControlPanel
         heartVersion={heartVersion}
         onHeartVersionChange={setHeartVersion}
@@ -124,7 +122,7 @@ export default function App() {
         onTimeScaleChange={setTimeScale}
         rateBpm={rateBpm}
         onRateChange={() => {
-          /* Rate is driven by the disease plan; keep prop for UI display. */
+          /* Rate is driven by the disease plan. */
         }}
         pathologySlot={
           <PathologyPanel
@@ -134,7 +132,6 @@ export default function App() {
             scenario={scenario}
             params={params}
             onParamChange={handleParamChange}
-            locale="zh"
           />
         }
       />
@@ -156,24 +153,24 @@ export default function App() {
             rateBpm={rateBpm}
           />
           <div className="pathology-status-bar" aria-live="polite">
-            <span>{disease.name.zh}</span>
+            <span>{L(disease.name)}</span>
             <span>·</span>
-            <span>{frame.state.status}</span>
+            <span>{L(frame.state.status)}</span>
             <span>·</span>
             <span>{Math.round(rateBpm)} bpm</span>
             {result.model.injuryCurrentEnabled && (
               <>
                 <span>·</span>
-                <span>损伤电流</span>
+                <span>{t('injuryCurrent')}</span>
               </>
             )}
           </div>
         </main>
-        <section className="ecg-stage" aria-label="12-lead ECG">
+        <section className="ecg-stage" aria-label={t('ecgStage')}>
           <header className="ecg-stage-header">
-            <h2>十二导联心电图</h2>
+            <h2>{t('ecgTitle')}</h2>
             <p>
-              {disease.ecgManifestations.morphology.zh} · 25 mm/s · 10 mm/mV
+              {L(disease.ecgManifestations.morphology)} · {t('calibration')}
             </p>
           </header>
           <EcgGrid
@@ -188,5 +185,4 @@ export default function App() {
   )
 }
 
-// Ensure registry is warm even if tree-shaken imports rearrange.
 void getDisease('normal_sinus_rhythm')

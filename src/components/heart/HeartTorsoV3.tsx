@@ -7,7 +7,7 @@ import {
   type ElectrodeSite,
 } from '../../ecg/electrodeMap'
 import type { ConductionState, LeadName } from '../../ecg/types'
-import { useLanguage } from '../../i18n/useLanguage'
+import { useLanguage } from '../../i18n'
 import HumanBodyContour from './HumanBodyContour'
 import RealisticHeart from './RealisticHeart'
 

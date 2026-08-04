@@ -5,6 +5,7 @@ import {
   type HeartVersion,
 } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
+import { useLanguage } from '../../i18n'
 
 interface AnatomyControlPanelProps {
   heartVersion: HeartVersion
@@ -23,12 +24,35 @@ interface AnatomyControlPanelProps {
   pathologySlot?: ReactNode
 }
 
-const SPEED_PRESETS = [
-  { label: 'Slow', value: 0.2 },
-  { label: 'Learn', value: 0.35 },
-  { label: 'Clear', value: 0.5 },
-  { label: 'Real', value: 1 },
+const SPEED_PRESET_KEYS = [
+  { key: 'speedSlow' as const, value: 0.2 },
+  { key: 'speedLearn' as const, value: 0.35 },
+  { key: 'speedClear' as const, value: 0.5 },
+  { key: 'speedReal' as const, value: 1 },
 ]
+
+const VERSION_COPY = {
+  anatomy: {
+    short: 'versionAnatomyShort',
+    title: 'versionAnatomyTitle',
+    hint: 'versionAnatomyHint',
+  },
+  v1: {
+    short: 'versionV1Short',
+    title: 'versionV1Title',
+    hint: 'versionV1Hint',
+  },
+  v2: {
+    short: 'versionV2Short',
+    title: 'versionV2Title',
+    hint: 'versionV2Hint',
+  },
+  v3: {
+    short: 'versionV3Short',
+    title: 'versionV3Title',
+    hint: 'versionV3Hint',
+  },
+} as const
 
 export default function AnatomyControlPanel({
   heartVersion,
@@ -44,28 +68,54 @@ export default function AnatomyControlPanel({
   rateBpm,
   pathologySlot,
 }: AnatomyControlPanelProps) {
+  const { t, L, locale, setLocale } = useLanguage()
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
     : null
   const versionMeta = HEART_VERSIONS.find((v) => v.id === heartVersion)
+  const versionKeys = VERSION_COPY[heartVersion]
 
   return (
     <aside className="anatomy-panel">
       <header className="anatomy-panel-header">
-        <p className="anatomy-eyebrow">生理源模型</p>
-        <h1 className="anatomy-title">病理心电仿真</h1>
-        <p className="anatomy-lede">
-          疾病包修改电生理模型；三维激动与十二导联由同一偶极子采样，而不是手动画波形。
-        </p>
+        <div className="anatomy-panel-header-row">
+          <p className="anatomy-eyebrow">{t('appEyebrow')}</p>
+          <div
+            className="locale-toggle"
+            role="group"
+            aria-label={t('language')}
+          >
+            <button
+              type="button"
+              className={
+                'locale-btn' + (locale === 'zh' ? ' locale-btn--active' : '')
+              }
+              onClick={() => setLocale('zh')}
+            >
+              {t('langZh')}
+            </button>
+            <button
+              type="button"
+              className={
+                'locale-btn' + (locale === 'en' ? ' locale-btn--active' : '')
+              }
+              onClick={() => setLocale('en')}
+            >
+              {t('langEn')}
+            </button>
+          </div>
+        </div>
+        <h1 className="anatomy-title">{t('appTitle')}</h1>
+        <p className="anatomy-lede">{t('appLede')}</p>
       </header>
 
       {pathologySlot}
 
       <section className="anatomy-section">
-        <h2 className="anatomy-section-title">Playback</h2>
+        <h2 className="anatomy-section-title">{t('playback')}</h2>
         <label className="anatomy-control">
           <span className="anatomy-control-row">
-            <span>Time scale</span>
+            <span>{t('timeScale')}</span>
             <span className="anatomy-control-value">
               ×{timeScale.toFixed(2)}
             </span>
@@ -79,8 +129,8 @@ export default function AnatomyControlPanel({
             onChange={(e) => onTimeScaleChange(Number(e.target.value))}
           />
         </label>
-        <div className="speed-presets" role="group" aria-label="Pace presets">
-          {SPEED_PRESETS.map((p) => (
+        <div className="speed-presets" role="group" aria-label={t('pacePresets')}>
+          {SPEED_PRESET_KEYS.map((p) => (
             <button
               key={p.value}
               type="button"
@@ -92,29 +142,27 @@ export default function AnatomyControlPanel({
               }
               onClick={() => onTimeScaleChange(p.value)}
             >
-              {p.label}
+              {t(p.key)}
             </button>
           ))}
         </div>
         <div className="anatomy-control">
           <span className="anatomy-control-row">
-            <span>Ventricular rate</span>
+            <span>{t('ventricularRate')}</span>
             <span className="anatomy-control-value">
               {Math.round(rateBpm)} bpm
             </span>
           </span>
-          <p className="anatomy-version-hint">
-            Rate follows the active disease plan (edit scenario parameters).
-          </p>
+          <p className="anatomy-version-hint">{t('rateHint')}</p>
         </div>
       </section>
 
       <section className="anatomy-section">
-        <h2 className="anatomy-section-title">Heart version</h2>
+        <h2 className="anatomy-section-title">{t('heartVersion')}</h2>
         <div
           className="heart-version-toggle"
           role="group"
-          aria-label="Heart model version"
+          aria-label={t('heartVersionGroup')}
         >
           {HEART_VERSIONS.map((v) => (
             <button
@@ -126,22 +174,22 @@ export default function AnatomyControlPanel({
               }
               onClick={() => onHeartVersionChange(v.id)}
             >
-              {v.short}
+              {t(VERSION_COPY[v.id].short)}
             </button>
           ))}
         </div>
         {versionMeta && (
           <p className="anatomy-version-hint">
-            <strong>{versionMeta.title}</strong> — {versionMeta.hint}
+            <strong>{t(versionKeys.title)}</strong> — {t(versionKeys.hint)}
           </p>
         )}
       </section>
 
       <section className="anatomy-section">
-        <h2 className="anatomy-section-title">Display</h2>
+        <h2 className="anatomy-section-title">{t('display')}</h2>
         <label className="anatomy-control">
           <span className="anatomy-control-row">
-            <span>Myocardium opacity</span>
+            <span>{t('myocardiumOpacity')}</span>
             <span className="anatomy-control-value">
               {Math.round(myocardiumOpacity * 100)}%
             </span>
@@ -161,13 +209,17 @@ export default function AnatomyControlPanel({
             checked={showLabels}
             onChange={(e) => onToggleLabels(e.target.checked)}
           />
-          <span>Anatomical labels</span>
+          <span>{t('anatomicalLabels')}</span>
         </label>
       </section>
 
       <section className="anatomy-section">
-        <h2 className="anatomy-section-title">Structures</h2>
-        <ul className="structure-list" role="listbox" aria-label="Heart structures">
+        <h2 className="anatomy-section-title">{t('structures')}</h2>
+        <ul
+          className="structure-list"
+          role="listbox"
+          aria-label={t('structuresList')}
+        >
           {HEART_STRUCTURES.map((s) => {
             const active = selectedId === s.id
             return (
@@ -185,7 +237,7 @@ export default function AnatomyControlPanel({
                   <span className="structure-swatch" />
                   <span className="structure-btn-text">
                     <span className="structure-abbr">{s.abbr}</span>
-                    <span className="structure-name">{s.label.en}</span>
+                    <span className="structure-name">{L(s.label)}</span>
                   </span>
                 </button>
               </li>
@@ -196,17 +248,16 @@ export default function AnatomyControlPanel({
 
       <section className="anatomy-section anatomy-detail">
         <h2 className="anatomy-section-title">
-          {selected ? selected.label.en : 'Selection'}
+          {selected ? L(selected.label) : t('selection')}
         </h2>
         {selected ? (
           <>
             <p className="anatomy-detail-abbr">{selected.abbr}</p>
-            <p className="anatomy-detail-body">{selected.description.en}</p>
+            <p className="anatomy-detail-body">{L(selected.description)}</p>
           </>
         ) : (
           <p className="anatomy-detail-body anatomy-detail-body--muted">
-            Select a pathology above, then watch conduction glow and the
-            12-lead ECG update from the same physiological model.
+            {t('selectionHint')}
           </p>
         )}
       </section>

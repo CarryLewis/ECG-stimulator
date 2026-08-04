@@ -19,14 +19,10 @@ export interface ConductionOptions {
   afSeed?: number
 }
 
+type Status = ConductionState['status']
+
 /**
  * Shared conduction timeline used by both the heart diagram and the ECG dipole.
- *
- * Timing convention for a conducted sinus beat: cycle phase 0 = SA / atrial
- * onset, QRS begins at `plan.prInterval`. Dissociation runs independent atrial
- * and ventricular clocks. AF uses an irregular ventricular schedule with no
- * organised atrial phase. VF / ventricular flutter replace organized QRS with
- * chaotic or sine-wave ventricular activation.
  */
 export function conductionAt(
   plan: CyclePlan,
@@ -39,7 +35,6 @@ export function conductionAt(
   const qrs = plan.qrsWidthFactor
   const afSeed = opts.afSeed ?? plan.rhythmSeed ?? 23
 
-  // --- Ventricular fibrillation: chaotic myocardial wavelets ---
   if (plan.ventricularFibrillation) {
     const amp = plan.chaosAmplitude || 0.7
     const flicker =
@@ -58,7 +53,10 @@ export function conductionAt(
       bundle: v * 0.7,
       ventricle: v,
       avConducts: false,
-      status: 'Ventricular fibrillation — chaotic wavelets, no organized QRS',
+      status: {
+        en: 'Ventricular fibrillation — chaotic wavelets, no organized QRS',
+        zh: '心室颤动 — 紊乱微波，无有序 QRS',
+      },
       atrialDepol: 0,
       septalDepol: v * 0.55 * Math.sin(elapsed * 29),
       apicalDepol: v * (0.5 + 0.5 * Math.sin(elapsed * 41 + 0.7)),
@@ -68,12 +66,12 @@ export function conductionAt(
     }
   }
 
-  // --- Ventricular flutter: rapid regular sine-wave activation ---
   if (plan.ventricularFlutter) {
     const amp = plan.chaosAmplitude || 0.85
     const phase = ((elapsed % tVent) + tVent) % tVent
     const sine = Math.sin((2 * Math.PI * phase) / tVent)
     const v = amp * (0.55 + 0.45 * Math.abs(sine))
+    const rate = Math.round(plan.ventricularRate)
     return {
       sa: 0.05,
       atria: 0.05,
@@ -82,7 +80,10 @@ export function conductionAt(
       bundle: v * 0.75,
       ventricle: v,
       avConducts: false,
-      status: `Ventricular flutter — sine-wave reentry @ ${Math.round(plan.ventricularRate)} /min`,
+      status: {
+        en: `Ventricular flutter — sine-wave reentry @ ${rate} /min`,
+        zh: `心室扑动 — 正弦波折返 @ ${rate} 次/分`,
+      },
       atrialDepol: 0,
       septalDepol: amp * 0.4 * sine,
       apicalDepol: amp * sine,
@@ -117,10 +118,10 @@ export function conductionAt(
     atria = flicker
     atrialDepol = flicker * 0.55
   } else if (plan.flutterBaseline) {
-    // Continuous atrial flutter — rapid regular F-wave activation.
     const flutterCycle = 60 / Math.max(1, plan.atrialRate)
     const fPhase = ((elapsed % flutterCycle) + flutterCycle) % flutterCycle
-    const f = 0.55 + 0.45 * Math.abs(Math.sin((2 * Math.PI * fPhase) / flutterCycle))
+    const f =
+      0.55 + 0.45 * Math.abs(Math.sin((2 * Math.PI * fPhase) / flutterCycle))
     sa = 0.2
     atria = f
     atrialDepol = plan.pAmpFactor * f * 0.85
@@ -156,13 +157,25 @@ export function conductionAt(
 
   const stWindow = stShape(ventPhase - qrsOnset)
 
-  const status = plan.fibrillatoryBaseline
-    ? 'No organised atrial activity — chaotic fibrillatory wavelets'
+  const status: Status = plan.fibrillatoryBaseline
+    ? {
+        en: 'No organised atrial activity — chaotic fibrillatory wavelets',
+        zh: '无有序心房活动 — 紊乱颤动微波',
+      }
     : plan.flutterBaseline
-      ? `Atrial flutter — continuous F waves @ ~${Math.round(plan.atrialRate)} /min`
+      ? {
+          en: `Atrial flutter — continuous F waves @ ~${Math.round(plan.atrialRate)} /min`,
+          zh: `心房扑动 — 连续 F 波 @ 约 ${Math.round(plan.atrialRate)} 次/分`,
+        }
       : plan.dissociated
-        ? 'Complete block — atria and ventricles beat independently'
-        : `AV delay (PR): ${Math.round(pr * 1000)} ms`
+        ? {
+            en: 'Complete block — atria and ventricles beat independently',
+            zh: '完全阻滞 — 心房与心室独立搏动',
+          }
+        : {
+            en: `AV delay (PR): ${Math.round(pr * 1000)} ms`,
+            zh: `房室延迟（PR）：${Math.round(pr * 1000)} ms`,
+          }
 
   return {
     sa,

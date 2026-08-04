@@ -46,6 +46,7 @@ function pickActiveFromState(
   beat: HeartbeatCycle,
   t: number,
 ): PhysiologicalEvent | null {
+  const statusLabel = state.status.en
   if (state.ventricle > 0.35) {
     return (
       beat.events.find((e) => e.type === 'ventricular_activation') ?? {
@@ -54,7 +55,7 @@ function pickActiveFromState(
         t,
         heartbeatId: beat.id,
         region: 'ventricle',
-        label: state.status,
+        label: statusLabel,
         offset_s: t - beat.t0,
       }
     )
@@ -67,7 +68,7 @@ function pickActiveFromState(
         t,
         heartbeatId: beat.id,
         region: 'atria',
-        label: state.status,
+        label: statusLabel,
         offset_s: t - beat.t0,
       }
     )

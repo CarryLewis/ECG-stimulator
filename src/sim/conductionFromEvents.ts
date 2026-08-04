@@ -63,7 +63,10 @@ export function conductionStateFromEvents(
     bundle,
     ventricle,
     avConducts: true,
-    status: `t⁺${phaseMs} ms · ${active}`,
+    status: {
+      en: `t⁺${phaseMs} ms · ${active.en}`,
+      zh: `t⁺${phaseMs} ms · ${active.zh}`,
+    },
     atrialDepol,
     septalDepol,
     apicalDepol,
@@ -80,8 +83,33 @@ function stShape(dt: number): number {
   return 1 - (dt - 0.18) / 0.08
 }
 
+const EVENT_LABELS: Record<
+  string,
+  { en: string; zh: string }
+> = {
+  sa_node_activation: { en: 'SA node activation', zh: '窦房结激动' },
+  atrial_activation: { en: 'Atrial depolarization', zh: '心房除极' },
+  av_node_activation: { en: 'AV delay', zh: '房室结延迟' },
+  his_activation: { en: 'Bundle of His', zh: '希氏束' },
+  bundle_branch_activation: {
+    en: 'Bundle branches (RBB / LBB)',
+    zh: '束支（右/左）',
+  },
+  ventricular_activation: {
+    en: 'Purkinje → ventricular myocardium',
+    zh: '浦肯野 → 心室肌',
+  },
+  repolarization: {
+    en: 'Ventricular repolarization',
+    zh: '心室复极',
+  },
+}
+
 /** Highest-intensity teaching event at time t (for HUD). */
-export function activeEventLabel(t: number, beat: HeartbeatCycle): string {
+export function activeEventLabel(
+  t: number,
+  beat: HeartbeatCycle,
+): { en: string; zh: string } {
   const scored = beat.events
     .filter((e) => e.type !== 'cycle_start' && e.type !== 'cycle_end')
     .map((e) => {
@@ -104,8 +132,15 @@ export function activeEventLabel(t: number, beat: HeartbeatCycle): string {
     .sort((a, b) => b.score - a.score)
 
   const top = scored[0]
-  if (!top || top.score < 0.12) return 'Diastole / resting'
-  return top.e.label
+  if (!top || top.score < 0.12) {
+    return { en: 'Diastole / resting', zh: '舒张 / 静息' }
+  }
+  return (
+    EVENT_LABELS[top.e.type] ?? {
+      en: top.e.label,
+      zh: top.e.label,
+    }
+  )
 }
 
 export function activeEvent(

@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState, LeadName } from '../../ecg/types'
+import { useLanguage } from '../../i18n'
 import type { PhysiologicalEvent } from '../../sim/events'
 import OrientationCube, {
   CameraSync,
@@ -52,6 +53,7 @@ export default function CardiacAnatomyViewport({
   timeScale,
   rateBpm,
 }: CardiacAnatomyViewportProps) {
+  const { t } = useLanguage()
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
     [showLabels],
@@ -203,9 +205,7 @@ export default function CardiacAnatomyViewport({
       />
 
       <div className="anatomy-viewport-hint" aria-hidden>
-        {isSource
-          ? 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B'
-          : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
+        {isSource ? t('hintSource') : t('hintGlow')}
       </div>
     </div>
   )

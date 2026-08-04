@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { voltageSample } from '../../ecg/generator'
 import { LEAD_GRID, LEAD_ORDER } from '../../ecg/leads'
 import type { CyclePlan, LeadName } from '../../ecg/types'
+import { useLanguage } from '../../i18n'
 import EcgLeadLive from './EcgLead'
 
 const FS = 250
@@ -48,6 +49,7 @@ export default function EcgGrid({
   afSeed = 23,
   resetKey,
 }: EcgGridProps) {
+  const { t } = useLanguage()
   const gridN = Math.ceil(FS * GRID_DURATION)
   const stripN = Math.ceil(FS * STRIP_DURATION)
 
@@ -137,7 +139,7 @@ export default function EcgGrid({
   return (
     <div className="ecg-grid-wrap">
       <div className="ecg-live-badge" aria-live="polite">
-        Live dipole projection · synced to conduction clock
+        {t('ecgLiveBadge')}
       </div>
       <div className="ecg-grid">
         {LEAD_GRID.flatMap((row) => row.map((name) => cell(name)))}

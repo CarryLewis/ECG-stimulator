@@ -14,6 +14,11 @@ npm run build
 npm run check:disease
 ```
 
+## Language
+
+Top-left panel: **中文 / English** toggle. Choice is stored in `localStorage`.
+All chrome UI, pathology copy, conduction HUD, and anatomy labels switch together.
+
 ## Pathology scenarios
 
 | Scenario | Physiology change | ECG / heart model |

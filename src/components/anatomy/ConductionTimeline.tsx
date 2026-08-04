@@ -1,52 +1,57 @@
 import type { PhysiologicalEvent } from '../../sim/events'
 import { SINUS_OFFSET_S } from '../../sim/sinusTiming'
+import {
+  useLanguage,
+  type LocalizedString,
+  type UiMessageKey,
+} from '../../i18n'
 
 const PATHWAY: {
   key: string
   offsetMs: number
-  label: string
+  labelKey: UiMessageKey
   match: PhysiologicalEvent['type']
 }[] = [
   {
     key: 'sa',
     offsetMs: SINUS_OFFSET_S.sa * 1000,
-    label: 'SA node',
+    labelKey: 'stepSa',
     match: 'sa_node_activation',
   },
   {
     key: 'atrial',
     offsetMs: SINUS_OFFSET_S.atrial * 1000,
-    label: 'Atrial conduction',
+    labelKey: 'stepAtrial',
     match: 'atrial_activation',
   },
   {
     key: 'av',
     offsetMs: SINUS_OFFSET_S.av * 1000,
-    label: 'AV node (delay)',
+    labelKey: 'stepAv',
     match: 'av_node_activation',
   },
   {
     key: 'his',
     offsetMs: SINUS_OFFSET_S.his * 1000,
-    label: 'Bundle of His',
+    labelKey: 'stepHis',
     match: 'his_activation',
   },
   {
     key: 'bundle',
     offsetMs: SINUS_OFFSET_S.bundle * 1000,
-    label: 'RBB / LBB',
+    labelKey: 'stepBundle',
     match: 'bundle_branch_activation',
   },
   {
     key: 'purkinje',
     offsetMs: SINUS_OFFSET_S.purkinje * 1000,
-    label: 'Purkinje fibers',
+    labelKey: 'stepPurkinje',
     match: 'ventricular_activation',
   },
   {
     key: 'repol',
     offsetMs: SINUS_OFFSET_S.repolarization * 1000,
-    label: 'Repolarization',
+    labelKey: 'stepRepol',
     match: 'repolarization',
   },
 ]
@@ -54,7 +59,7 @@ const PATHWAY: {
 interface ConductionTimelineProps {
   phaseMs: number
   active: PhysiologicalEvent | null
-  status: string
+  status: LocalizedString | string
   elapsed: number
   timeScale: number
   rateBpm: number
@@ -62,7 +67,6 @@ interface ConductionTimelineProps {
 
 /**
  * Teaching HUD — lights each pathway step from the active physiological event.
- * Does not run its own clock; phase comes from the simulation frame.
  */
 export default function ConductionTimeline({
   phaseMs,
@@ -72,13 +76,19 @@ export default function ConductionTimeline({
   timeScale,
   rateBpm,
 }: ConductionTimelineProps) {
+  const { t, L, locale } = useLanguage()
+  const statusText =
+    typeof status === 'string'
+      ? status
+      : L(status)
+
   return (
     <div className="conduction-timeline" aria-live="polite">
       <div className="conduction-timeline-head">
-        <strong>Conduction cascade</strong>
+        <strong>{t('conductionCascade')}</strong>
         <span className="conduction-timeline-meta">
-          t = {elapsed.toFixed(2)} s · ×{timeScale.toFixed(2)} · {rateBpm} bpm ·
-          phase {phaseMs} ms
+          t = {elapsed.toFixed(2)} s · ×{timeScale.toFixed(2)} · {rateBpm} bpm ·{' '}
+          {t('phase')} {phaseMs} ms
         </span>
       </div>
       <ol className="conduction-pathway">
@@ -96,12 +106,14 @@ export default function ConductionTimeline({
             >
               {i > 0 && <span className="conduction-pathway-arrow" aria-hidden />}
               <span className="conduction-pathway-ms">{step.offsetMs} ms</span>
-              <span className="conduction-pathway-label">{step.label}</span>
+              <span className="conduction-pathway-label">{t(step.labelKey)}</span>
             </li>
           )
         })}
       </ol>
-      <p className="conduction-timeline-status">{status}</p>
+      <p className="conduction-timeline-status" lang={locale}>
+        {statusText}
+      </p>
     </div>
   )
 }

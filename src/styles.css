@@ -891,7 +891,50 @@ input {
   }
 }
 
-/* ---- Pathology scenarios + 12-lead ECG workspace ---- */
+/* Language toggle */
+
+.anatomy-panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+
+.anatomy-panel-header-row .anatomy-eyebrow {
+  margin: 0;
+}
+
+.locale-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.locale-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.28rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.locale-btn:hover {
+  color: var(--text);
+}
+
+.locale-btn--active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
 
 .app--pathology {
   grid-template-columns: minmax(280px, 360px) 1fr;
