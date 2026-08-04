@@ -8,7 +8,7 @@ export const UI = {
   },
   appTitle: {
     en: 'ECG stimulator',
-    zh: 'ECG stimulator',
+    zh: '心电图模拟器',
   },
   appLede: {
     en: 'An interactive Physiology & ECG learning simulator: 3D cardiac anatomy is the biological source model, and pathology packs drive both heart activation glow and a live 12-lead ECG from the same cardiac dipole.',
