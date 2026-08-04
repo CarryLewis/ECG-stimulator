@@ -58,4 +58,19 @@ Synchronization: **P** ← atrial activation · **QRS** ← ventricular depolari
 
 - Data flow: **EP → Vector → ECG** (one-way for signals)
 - Body axes: +x patient left, +y superior (scene), +z anterior; lead math uses Einthoven +y inferior
-- Procedural meshes for performance and offline use
+- Procedural meshes (shared sphere geometry) for performance and offline use
+- No CDN runtime dependency once `node_modules` are installed
+
+## Website embed auto-sync
+
+Pushes to `main` or `cursor/pathology-ecg-models-fab9` trigger
+`notify-website.yml`, which asks Carry-website to rebuild
+https://carrylewis.com/ecg-simulator/ via `repository_dispatch` (`ecg-updated`).
+
+Requires repo secret `WEBSITE_DISPATCH_TOKEN` (PAT with access to Carry-website).
+
+Manual test:
+
+```bash
+gh workflow run "Notify website to rebuild ECG embed"
+```
