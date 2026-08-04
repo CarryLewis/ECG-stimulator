@@ -1,6 +1,6 @@
-# ECG Stimulator — Cardiac Electrophysiology Laboratory
+# ECG Stimulator — Interactive 3D Cardiac Anatomy
 
-Physiology-first teaching SPA: a laboratory interface with a large interactive 3D heart, live ECG monitor, conduction timeline, clinical interpretation, and pathology scenarios.
+First visualization module: the heart as the **biological source model** for future ECG generation.
 
 ## Run
 
@@ -9,42 +9,29 @@ npm ci
 npm run dev      # http://127.0.0.1:5173
 ```
 
-## Interface
-
-| Region | Role |
-|--------|------|
-| **Main stage** | Large interactive 3D heart (anatomy / conduction / leads / torso / vectors) |
-| **ECG monitor** | Continuous recording from activation → vector → body surface → lead calculation |
-| **Timeline** | Physiological cascade + playback (time scale, heart rate) |
-| **Clinical / Pathology** | Disease packs, mechanism copy, mean axis, activation contributions |
-
-## ECG pipeline
-
-```
-Cardiac anatomy → Electrophysiology → Electrical activation → Electrical vector
-  → Body surface potential → 12-lead ECG → Clinical interpretation
+```bash
+npm run build
+npm run preview
 ```
 
-Diseases modify the physiological model — they never paint lead millivolts directly.
+## This module
 
-P ← atrial activation · QRS ← ventricular depolarization · T ← repolarization
+- Four heart views: **Src** (selectable chambers), **V1** conduction, **V2** lead atlas, **V3** torso electrodes
+- Shared **orientation cube** on every version: **A / P / L / R / H / B**
+- **Event-driven conduction animation** (no manual keyframes):
+  - 0 ms SA → 40 ms atria → 120 ms AV → 200 ms His / ventricular cascade → 350 ms repolarization
+  - Glow sampled from physiological events on the shared simulation clock (including Src chambers)
+- Playback pace + heart-rate controls
+- Anatomical labels toggle; Src supports myocardium opacity + structure pick
 
-## Documentation
-
-AI Project Control Center lives under [`docs/`](./docs/): vision, requirements, architecture, medical model, disease architecture, roadmap, and per-module memory. See [`docs/CHANGELOG.md`](./docs/CHANGELOG.md) for consolidation history.
+Diseases and live 12-lead ECG sampling are **not** included yet.
 
 ## Layout
 
 | Path | Role |
 |------|------|
 | `src/anatomy/` | Structure definitions (ids aligned with `docs/core-data-model`) |
-| `src/components/lab/` | EP laboratory shell (header, ECG, timeline, clinical) |
-| `src/components/anatomy/` | R3F viewport + heart mesh |
-| `src/vector-engine/` | Activation → electrical vector → body-surface Φ → leads |
-| `src/ecg-generator/` | Sampled ECG from the vector pipeline |
-| `src/disease/` | Physiology-driven disease packs + scenario UI mapping |
-| `src/recording/` | Continuous ECG ring-buffer acquisition + transport clock |
-| `src/simulation/` | Shared dipole physiological sim core (teaching params) |
+| `src/components/anatomy/` | R3F viewport + heart mesh + control panel |
 | `docs/core-data-model/` | Event-driven type contracts for the full platform |
 | `docs/software-architecture-design.md` | Layered architecture |
 
@@ -56,7 +43,8 @@ AI Project Control Center lives under [`docs/`](./docs/): vision, requirements, 
 
 ## Website embed auto-sync
 
-Pushes to `main` trigger `notify-website.yml`, which asks Carry-website to rebuild
+Pushes to `main` or `cursor/pathology-ecg-models-fab9` trigger
+`notify-website.yml`, which asks Carry-website to rebuild
 https://carrylewis.com/ecg-simulator/ via `repository_dispatch` (`ecg-updated`).
 
 Requires repo secret `WEBSITE_DISPATCH_TOKEN` (PAT with access to Carry-website).
