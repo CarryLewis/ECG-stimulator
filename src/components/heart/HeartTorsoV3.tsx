@@ -8,7 +8,7 @@ import {
 } from '../../ecg/electrodeMap'
 import type { ConductionState, LeadName } from '../../ecg/types'
 import { useLanguage } from '../../i18n/useLanguage'
-import HumanBodyContour from './HumanBodyContour'
+import HumanBodyContour, { BODY_SCALE } from './HumanBodyContour'
 import RealisticHeart from './RealisticHeart'
 
 export type TorsoLayer = 'torso' | 'heart' | 'electrodes' | 'leads'
@@ -22,8 +22,9 @@ interface HeartTorsoV3Props {
 
 /**
  * Version 3 — clinical 12-lead placement schematic:
- * clear proportional human body contour + mediastinal heart +
- * labelled RA/LA/RL/LL and V1–V6 electrodes with derived lead callouts.
+ * proportional adult body contour + mediastinal heart (heart ~¼–⅓ chest
+ * width, apex toward V4 / mid-clavicular) + labelled RA/LA/RL/LL and
+ * V1–V6 electrodes on torso surface landmarks.
  */
 export default function HeartTorsoV3({
   state,
@@ -35,80 +36,103 @@ export default function HeartTorsoV3({
 
   return (
     <group position={[0, 0.05, 0]}>
-      {layers.torso && <HumanBodyContour />}
+      {/* Body + surface electrodes share one scale so placement stays aligned. */}
+      <group scale={BODY_SCALE}>
+        {layers.torso && <HumanBodyContour />}
 
+        {/* Midsternal + left mid-clavicular guides for placement teaching */}
+        {layers.torso && <PlacementGuides />}
+
+        {selectedLead &&
+          (selectedLead === 'I' ||
+            selectedLead === 'II' ||
+            selectedLead === 'III') && (
+            <EinthovenHighlight lead={selectedLead} />
+          )}
+
+        {layers.electrodes &&
+          ELECTRODE_SITES.map((site) => {
+            const active =
+              !activeElectrodes || activeElectrodes.includes(site.id)
+            const focused =
+              activeElectrodes !== null && activeElectrodes.includes(site.id)
+            return (
+              <ElectrodeMarker
+                key={site.id}
+                site={site}
+                active={active}
+                focused={focused}
+                onSelect={() => {
+                  const lead = site.leads[0] ?? null
+                  onSelectLead(
+                    selectedLead && site.leads.includes(selectedLead)
+                      ? null
+                      : lead,
+                  )
+                }}
+              />
+            )
+          })}
+
+        {layers.leads &&
+          LEAD_PLACEMENT_LABELS.map((label) => {
+            const selected = selectedLead === label.lead
+            const dimmed = selectedLead !== null && !selected
+            return (
+              <LeadCallout
+                key={label.lead}
+                lead={label.lead}
+                position={label.position}
+                color={label.color}
+                noteZh={label.noteZh}
+                noteEn={label.noteEn}
+                selected={selected}
+                dimmed={dimmed}
+                onSelect={() =>
+                  onSelectLead(selected ? null : label.lead)
+                }
+              />
+            )
+          })}
+      </group>
+
+      {/* Heart sized independently — ~⅓ of adult chest width, not body×heart. */}
       {layers.heart && <RealisticHeart state={state} />}
-
-      {/* Midsternal + left mid-clavicular guides for placement teaching */}
-      {layers.torso && <PlacementGuides />}
-
-      {selectedLead &&
-        (selectedLead === 'I' ||
-          selectedLead === 'II' ||
-          selectedLead === 'III') && (
-          <EinthovenHighlight lead={selectedLead} />
-        )}
-
-      {layers.electrodes &&
-        ELECTRODE_SITES.map((site) => {
-          const active =
-            !activeElectrodes || activeElectrodes.includes(site.id)
-          const focused =
-            activeElectrodes !== null && activeElectrodes.includes(site.id)
-          return (
-            <ElectrodeMarker
-              key={site.id}
-              site={site}
-              active={active}
-              focused={focused}
-              onSelect={() => {
-                const lead = site.leads[0] ?? null
-                onSelectLead(
-                  selectedLead && site.leads.includes(selectedLead)
-                    ? null
-                    : lead,
-                )
-              }}
-            />
-          )
-        })}
-
-      {layers.leads &&
-        LEAD_PLACEMENT_LABELS.map((label) => {
-          const selected = selectedLead === label.lead
-          const dimmed = selectedLead !== null && !selected
-          return (
-            <LeadCallout
-              key={label.lead}
-              lead={label.lead}
-              position={label.position}
-              color={label.color}
-              noteZh={label.noteZh}
-              noteEn={label.noteEn}
-              selected={selected}
-              dimmed={dimmed}
-              onSelect={() =>
-                onSelectLead(selected ? null : label.lead)
-              }
-            />
-          )
-        })}
     </group>
   )
 }
 
 function PlacementGuides() {
+  /** Mid-sternal line — reference for V1/V2 parasternal placement. */
   const midSternal = useMemo<[number, number, number][]>(
     () => [
-      [0, 1.2, 0.55],
-      [0, -0.7, 0.55],
+      [0, 1.2, 0.5],
+      [0, -0.7, 0.5],
     ],
     [],
   )
+  /** Left mid-clavicular — V4 vertical landmark (apex beat). */
   const midClavicular = useMemo<[number, number, number][]>(
     () => [
-      [0.55, 1.1, 0.42],
-      [0.55, -0.55, 0.55],
+      [0.55, 1.05, 0.4],
+      [0.55, -0.55, 0.48],
+    ],
+    [],
+  )
+  /** Left anterior axillary — V5 vertical landmark. */
+  const antAxillary = useMemo<[number, number, number][]>(
+    () => [
+      [0.72, 0.85, 0.2],
+      [0.72, -0.5, 0.2],
+    ],
+    [],
+  )
+  /** Horizontal 5th ICS band linking V4 → V5 → V6. */
+  const fifthIcs = useMemo<[number, number, number][]>(
+    () => [
+      [0.55, -0.12, 0.4],
+      [0.72, -0.12, 0.24],
+      [0.82, -0.12, 0.06],
     ],
     [],
   )
@@ -134,6 +158,26 @@ function PlacementGuides() {
         dashed
         dashSize={0.07}
         gapSize={0.05}
+      />
+      <Line
+        points={antAxillary}
+        color="#64748b"
+        lineWidth={1}
+        transparent
+        opacity={0.32}
+        dashed
+        dashSize={0.06}
+        gapSize={0.05}
+      />
+      <Line
+        points={fifthIcs}
+        color="#7dd3fc"
+        lineWidth={1.35}
+        transparent
+        opacity={0.45}
+        dashed
+        dashSize={0.06}
+        gapSize={0.04}
       />
     </group>
   )

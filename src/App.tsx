@@ -14,7 +14,8 @@ import { DEFAULT_HEART_RATE_BPM } from './sim/sinusTiming'
 const DEFAULT_OPACITY = 0.95
 
 export default function App() {
-  const [heartVersion, setHeartVersion] = useState<HeartVersion>('anatomy')
+  /** Open on V3 so the adult torso + 12-lead placement schematic is front-and-center. */
+  const [heartVersion, setHeartVersion] = useState<HeartVersion>('v3')
   const [selectedId, setSelectedId] = useState<HeartStructureId | null>(null)
   const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
   const [myocardiumOpacity, setMyocardiumOpacity] = useState(DEFAULT_OPACITY)
@@ -32,9 +33,11 @@ export default function App() {
         heartVersion={heartVersion}
         onHeartVersionChange={setHeartVersion}
         selectedId={selectedId}
+        selectedLead={selectedLead}
         myocardiumOpacity={myocardiumOpacity}
         showLabels={showLabels}
         onSelect={setSelectedId}
+        onSelectLead={setSelectedLead}
         onOpacityChange={setMyocardiumOpacity}
         onToggleLabels={setShowLabels}
         timeScale={timeScale}

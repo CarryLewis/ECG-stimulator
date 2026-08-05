@@ -69,7 +69,7 @@ export default function CardiacAnatomyViewport({
   const isV3 = heartVersion === 'v3'
   const isSource = heartVersion === 'anatomy'
   const camera = isV3
-    ? { position: [0.15, 0.55, 4.6] as [number, number, number], fov: 40 }
+    ? { position: [0.35, 0.4, 5.5] as [number, number, number], fov: 40 }
     : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
 
   const clearSelection = () => {
@@ -170,10 +170,10 @@ export default function CardiacAnatomyViewport({
 
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, isV3 ? -2.16 : -1.86, 0]}
+          position={[0, isV3 ? -2.55 : -1.86, 0]}
           onClick={clearSelection}
         >
-          <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
+          <circleGeometry args={[isV3 ? 3.8 : 2.6, 48]} />
           <meshStandardMaterial color="#0a1018" roughness={1} metalness={0} />
         </mesh>
 
@@ -181,9 +181,9 @@ export default function CardiacAnatomyViewport({
           makeDefault
           enableDamping
           dampingFactor={0.08}
-          minDistance={isV3 ? 2.6 : 2.0}
-          maxDistance={isV3 ? 10 : 8}
-          target={isV3 ? [0, 0.05, 0] : [0, -0.15, 0]}
+          minDistance={isV3 ? 3.2 : 2.0}
+          maxDistance={isV3 ? 12 : 8}
+          target={isV3 ? [0.12, 0.05, 0] : [0, -0.15, 0]}
           enablePan={false}
         />
 
@@ -205,7 +205,9 @@ export default function CardiacAnatomyViewport({
       <div className="anatomy-viewport-hint" aria-hidden>
         {isSource
           ? 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B'
-          : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
+          : isV3
+            ? 'Heart ~⅓ chest · apex → V4 · click electrodes · Cube snaps A/P/L/R/H/B'
+            : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
       </div>
     </div>
   )
