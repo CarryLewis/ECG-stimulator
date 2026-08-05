@@ -114,17 +114,25 @@ export const UI = {
     en: 'Orientation cube A/P/L/R/H/B',
     zh: '方向立方体 A/P/L/R/H/B',
   },
+  orientationCubeBanner: {
+    en: 'View from · H↑ B↓ L← R→',
+    zh: '面对方位 · 上H 下B 左L 右R',
+  },
+  orientationCubeIdle: {
+    en: 'Drag or click a face',
+    zh: '拖动或点击面对齐',
+  },
   orientationCubeHint: {
     en: 'Cube shows the model aspect you face: top→H, bottom→B, left→L, right→R, front→A, back→P. Click a face to snap.',
     zh: '立方体表示当前面对的模型方位：上视为H，下视为B，左视为L，右视为R，前视为A，后视为P。点击面对齐视角。',
   },
   snapOrientation: { en: 'Snap orientation', zh: '对齐方位' },
-  faceAnterior: { en: 'Anterior', zh: '前' },
-  facePosterior: { en: 'Posterior', zh: '后' },
+  faceAnterior: { en: 'Ant', zh: '前' },
+  facePosterior: { en: 'Post', zh: '后' },
   faceLeft: { en: 'Left', zh: '左' },
   faceRight: { en: 'Right', zh: '右' },
   faceHead: { en: 'Head', zh: '头' },
-  faceBottom: { en: 'Bottom', zh: '足' },
+  faceBottom: { en: 'Base', zh: '底' },
 
   statusVf: {
     en: 'Ventricular fibrillation — chaotic wavelets, no organized QRS',
