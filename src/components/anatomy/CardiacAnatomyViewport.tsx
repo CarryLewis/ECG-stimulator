@@ -205,7 +205,9 @@ export default function CardiacAnatomyViewport({
       <div className="anatomy-viewport-hint" aria-hidden>
         {isSource
           ? 'Click a chamber to select · Opacity slider · Cube snaps A/P/L/R/H/B'
-          : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
+          : isV3
+            ? 'Heart ~⅓ chest · apex → V4 · click electrodes · Cube snaps A/P/L/R/H/B'
+            : 'Glow follows physiological events · Cube snaps to A/P/L/R/H/B'}
       </div>
     </div>
   )

@@ -28,6 +28,6 @@ export const HEART_VERSIONS: readonly {
     id: 'v3',
     short: 'V3',
     title: 'Torso electrodes',
-    hint: 'Body contour and clinical electrode placement',
+    hint: 'Adult heart–torso proportions + clinical 12-lead surface sites',
   },
 ] as const
