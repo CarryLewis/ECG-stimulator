@@ -6,9 +6,10 @@ import { DoubleSide, Vector2 } from 'three'
  *
  * Anthropometry (scene units chosen so shoulder breadth matches electrode
  * RA/LA at x ≈ ±1.05):
- *   biacromial (shoulder) ≈ 2.10
+ *   biacromial (shoulder) ≈ 2.16 (acromion x = 1.08)
  *   head / neck / chest / waist / hip follow typical male ratios
  *   A–P depth flattened (~0.58×) so the silhouette reads clearly
+ *   mediastinal heart (see heartAsset.ts) ≈ 35–40% of thoracic width
  *
  * Axes: +x patient left, +y superior, +z anterior.
  */
@@ -87,9 +88,9 @@ export default function HumanBodyContour() {
 
       <UpperArms />
 
-      {/* Soft anterior chest plate so V-leads sit on a surface */}
-      <mesh position={[0, 0.15, 0.42]} scale={[0.92, 1.05, 0.22]}>
-        <sphereGeometry args={[0.95, 36, 24]} />
+      {/* Soft anterior chest plate — V-leads sit on this surface */}
+      <mesh position={[0, 0.08, 0.36]} scale={[0.86, 0.96, 0.18]}>
+        <sphereGeometry args={[0.88, 36, 24]} />
         <meshStandardMaterial
           color="#a8bdd4"
           emissive="#4a6582"
@@ -110,11 +111,11 @@ function UpperArms() {
   return (
     <group>
       <mesh
-        position={[-1.15, 0.55, 0.05]}
+        position={[-1.08, 0.58, 0.04]}
         rotation={[0.15, 0, 0.35]}
-        scale={[0.9, 1, 0.85]}
+        scale={[0.88, 1, 0.82]}
       >
-        <capsuleGeometry args={[0.16, 0.85, 6, 12]} />
+        <capsuleGeometry args={[0.14, 0.78, 6, 12]} />
         <meshStandardMaterial
           color={SKIN}
           emissive={SKIN_EMIT}
@@ -127,11 +128,11 @@ function UpperArms() {
         />
       </mesh>
       <mesh
-        position={[1.15, 0.55, 0.05]}
+        position={[1.08, 0.58, 0.04]}
         rotation={[0.15, 0, -0.35]}
-        scale={[0.9, 1, 0.85]}
+        scale={[0.88, 1, 0.82]}
       >
-        <capsuleGeometry args={[0.16, 0.85, 6, 12]} />
+        <capsuleGeometry args={[0.14, 0.78, 6, 12]} />
         <meshStandardMaterial
           color={SKIN}
           emissive={SKIN_EMIT}

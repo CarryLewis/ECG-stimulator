@@ -26,7 +26,11 @@ export function ProceduralCutawayHeart({ state }: { state: ConductionState }) {
     <group
       position={HEART_MEDIASTINUM_POSE.position}
       rotation={HEART_MEDIASTINUM_POSE.rotation}
-      scale={HEART_MEDIASTINUM_POSE.scale * beat}
+      scale={[
+        HEART_MEDIASTINUM_POSE.scale * beat,
+        HEART_MEDIASTINUM_POSE.scale * beat,
+        HEART_MEDIASTINUM_POSE.scale * HEART_MEDIASTINUM_POSE.depthScale * beat,
+      ]}
     >
       {/* Local fill so the heart stays readable inside the translucent body */}
       <pointLight

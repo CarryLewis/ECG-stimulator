@@ -34,7 +34,7 @@ export default function HeartTorsoV3({
   const activeElectrodes = selectedLead ? LEAD_ELECTRODES[selectedLead] : null
 
   return (
-    <group position={[0, 0.05, 0]}>
+    <group position={[0, 0.02, 0]}>
       {layers.torso && <HumanBodyContour />}
 
       {layers.heart && <RealisticHeart state={state} />}

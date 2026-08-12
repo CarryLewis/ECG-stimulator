@@ -18,10 +18,17 @@ export const REALISTIC_HEART_GLB = `${import.meta.env.BASE_URL}models/heart-anim
 
 /**
  * Mediastinal pose inside the V3 body contour.
- * Scale kept large enough to read clearly through the translucent shell.
+ *
+ * Scene units: biacromial ≈ 2.16, thoracic height (shoulders→costal margin) ≈ 1.6.
+ * Adult heart ≈ 12 cm wide × 9 cm tall → ~35–40% of thoracic width.
+ * Procedural heart local bbox ≈ 2.2 × 3.1 → scale ≈ 0.38 keeps it inside the shell.
  */
 export const HEART_MEDIASTINUM_POSE = {
-  position: [-0.12, 0.02, 0.18] as [number, number, number],
-  rotation: [0.28, -0.45, 0.12] as [number, number, number],
-  scale: 0.82,
+  /** Slightly patient-left (+x) of midline, centered in the V-lead band. */
+  position: [0.1, -0.06, 0.06] as [number, number, number],
+  rotation: [0.2, -0.36, 0.08] as [number, number, number],
+  /** Uniform scale — chambers read clearly but no longer fill the thorax. */
+  scale: 0.38,
+  /** Extra A–P compression so the heart sits behind the chest plate (torso z ≈ 0.58×). */
+  depthScale: 0.72,
 }
