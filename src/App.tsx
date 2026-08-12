@@ -110,8 +110,6 @@ export default function App() {
   return (
     <div className="app app--pathology" lang={locale}>
       <AnatomyControlPanel
-        heartVersion={heartVersion}
-        onHeartVersionChange={setHeartVersion}
         selectedId={selectedId}
         myocardiumOpacity={myocardiumOpacity}
         showLabels={showLabels}
@@ -139,6 +137,7 @@ export default function App() {
         <main className="anatomy-stage">
           <CardiacAnatomyViewport
             heartVersion={heartVersion}
+            onHeartVersionChange={setHeartVersion}
             selectedStructureId={selectedId}
             onSelectStructure={setSelectedId}
             selectedLead={selectedLead}

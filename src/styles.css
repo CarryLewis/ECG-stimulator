@@ -265,9 +265,9 @@ input {
 }
 
 .orientation-cube-overlay {
-  position: absolute;
-  top: 0.55rem;
-  right: 0.55rem;
+  position: relative;
+  top: auto;
+  right: auto;
   z-index: 20;
   width: 148px;
   padding: 0.35rem 0.35rem 0.4rem;
@@ -278,6 +278,61 @@ input {
   overflow: visible;
   pointer-events: auto;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  flex: none;
+}
+
+.viewport-top-right {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.45rem;
+  pointer-events: none;
+}
+
+.viewport-top-right > * {
+  pointer-events: auto;
+}
+
+.heart-version-viewport {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 10px;
+  border: 1px solid rgba(138, 160, 187, 0.45);
+  background: linear-gradient(165deg, rgba(10, 18, 28, 0.92), rgba(6, 12, 20, 0.88));
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  flex: none;
+}
+
+.heart-version-viewport-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9eb6d4;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.heart-version-toggle--compact {
+  width: auto;
+  min-width: 7.5rem;
+}
+
+.heart-version-toggle--compact .heart-version-btn {
+  min-width: 1.65rem;
+  padding: 5px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
 }
 
 .orientation-cube-banner {
@@ -792,13 +847,17 @@ input {
 }
 
 .orientation-legend {
-  position: absolute;
-  top: 0.85rem;
-  right: 10.6rem;
+  position: relative;
+  top: auto;
+  right: auto;
   display: flex;
+  flex-direction: row;
   gap: 0.35rem;
   pointer-events: auto;
   z-index: 20;
+  flex: none;
+  align-self: flex-start;
+  margin-top: 0.35rem;
 }
 
 .orientation-legend button {
@@ -828,13 +887,29 @@ input {
 }
 
 @media (max-width: 860px) {
+  .viewport-top-right {
+    top: 0.45rem;
+    right: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: calc(100% - 0.9rem);
+  }
+
+  .heart-version-viewport {
+    order: 1;
+  }
+
   .orientation-legend {
-    right: 0.75rem;
-    top: 0.55rem;
+    order: 2;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    max-width: none;
+    padding-top: 0;
   }
 
   .orientation-cube-overlay {
-    top: 2.4rem;
+    order: 3;
+    width: 112px;
   }
 }
 

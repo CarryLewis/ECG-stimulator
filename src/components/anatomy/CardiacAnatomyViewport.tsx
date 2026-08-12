@@ -10,6 +10,7 @@ import OrientationCube, {
   CameraSync,
   OrientationLegend,
 } from '../OrientationCube'
+import HeartVersionToggle from './HeartVersionToggle'
 import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
@@ -18,6 +19,7 @@ import ConductionTimeline from './ConductionTimeline'
 
 interface CardiacAnatomyViewportProps {
   heartVersion: HeartVersion
+  onHeartVersionChange: (v: HeartVersion) => void
   selectedStructureId: HeartStructureId | null
   onSelectStructure: (id: HeartStructureId | null) => void
   selectedLead: LeadName | null
@@ -40,6 +42,7 @@ interface CardiacAnatomyViewportProps {
  */
 export default function CardiacAnatomyViewport({
   heartVersion,
+  onHeartVersionChange,
   selectedStructureId,
   onSelectStructure,
   selectedLead,
@@ -192,8 +195,14 @@ export default function CardiacAnatomyViewport({
         <CameraSync />
       </Canvas>
 
-      <OrientationCube />
-      <OrientationLegend />
+      <div className="viewport-top-right">
+        <HeartVersionToggle
+          heartVersion={heartVersion}
+          onHeartVersionChange={onHeartVersionChange}
+        />
+        <OrientationLegend />
+        <OrientationCube />
+      </div>
 
       <ConductionTimeline
         phaseMs={phaseMs}

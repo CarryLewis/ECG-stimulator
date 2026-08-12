@@ -1,15 +1,9 @@
 import type { ReactNode } from 'react'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
-import {
-  HEART_VERSIONS,
-  type HeartVersion,
-} from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
 import { useLanguage } from '../../i18n'
 
 interface AnatomyControlPanelProps {
-  heartVersion: HeartVersion
-  onHeartVersionChange: (v: HeartVersion) => void
   selectedId: HeartStructureId | null
   myocardiumOpacity: number
   showLabels: boolean
@@ -31,32 +25,7 @@ const SPEED_PRESET_KEYS = [
   { key: 'speedReal' as const, value: 1 },
 ]
 
-const VERSION_COPY = {
-  anatomy: {
-    short: 'versionAnatomyShort',
-    title: 'versionAnatomyTitle',
-    hint: 'versionAnatomyHint',
-  },
-  v1: {
-    short: 'versionV1Short',
-    title: 'versionV1Title',
-    hint: 'versionV1Hint',
-  },
-  v2: {
-    short: 'versionV2Short',
-    title: 'versionV2Title',
-    hint: 'versionV2Hint',
-  },
-  v3: {
-    short: 'versionV3Short',
-    title: 'versionV3Title',
-    hint: 'versionV3Hint',
-  },
-} as const
-
 export default function AnatomyControlPanel({
-  heartVersion,
-  onHeartVersionChange,
   selectedId,
   myocardiumOpacity,
   showLabels,
@@ -72,8 +41,6 @@ export default function AnatomyControlPanel({
   const selected = selectedId
     ? HEART_STRUCTURES.find((s) => s.id === selectedId)
     : null
-  const versionMeta = HEART_VERSIONS.find((v) => v.id === heartVersion)
-  const versionKeys = VERSION_COPY[heartVersion]
 
   return (
     <aside className="anatomy-panel">
@@ -155,34 +122,6 @@ export default function AnatomyControlPanel({
           </span>
           <p className="anatomy-version-hint">{t('rateHint')}</p>
         </div>
-      </section>
-
-      <section className="anatomy-section">
-        <h2 className="anatomy-section-title">{t('heartVersion')}</h2>
-        <div
-          className="heart-version-toggle"
-          role="group"
-          aria-label={t('heartVersionGroup')}
-        >
-          {HEART_VERSIONS.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              className={
-                'heart-version-btn' +
-                (heartVersion === v.id ? ' heart-version-btn--active' : '')
-              }
-              onClick={() => onHeartVersionChange(v.id)}
-            >
-              {t(VERSION_COPY[v.id].short)}
-            </button>
-          ))}
-        </div>
-        {versionMeta && (
-          <p className="anatomy-version-hint">
-            <strong>{t(versionKeys.title)}</strong> — {t(versionKeys.hint)}
-          </p>
-        )}
       </section>
 
       <section className="anatomy-section">
