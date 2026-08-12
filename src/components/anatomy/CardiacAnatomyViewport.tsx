@@ -196,11 +196,13 @@ export default function CardiacAnatomyViewport({
       </Canvas>
 
       <div className="viewport-top-right">
-        <HeartVersionToggle
-          heartVersion={heartVersion}
-          onHeartVersionChange={onHeartVersionChange}
-        />
-        <OrientationLegend />
+        <div className="viewport-controls-stack">
+          <OrientationLegend />
+          <HeartVersionToggle
+            heartVersion={heartVersion}
+            onHeartVersionChange={onHeartVersionChange}
+          />
+        </div>
         <OrientationCube />
       </div>
 
