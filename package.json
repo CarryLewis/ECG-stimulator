@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.2.0",
   "type": "module",
-  "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy, event-driven conduction, and a foundation for 12-lead ECG generation.",
+  "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy, event-driven conduction, and a foundation for 12-lead ECG generation. / 交互式生理与心电图学习模拟器：三维心脏解剖、事件驱动传导，并为十二导联 ECG 打下基础。",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
