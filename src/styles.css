@@ -98,6 +98,7 @@ input {
   margin: 0.65rem 0 0;
   font-size: 0.92rem;
   line-height: 1.5;
+  color: var(--text-muted);
 }
 
 .local-download-actions {
@@ -140,8 +141,6 @@ input {
 
 .local-download-links a:hover {
   text-decoration: underline;
-}
-  color: var(--text-muted);
 }
 
 .anatomy-section {
