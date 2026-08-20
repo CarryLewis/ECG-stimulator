@@ -1,0 +1,48 @@
+name: Publish local download bundles
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Main publishes must not cancel each other — a cancelled delete+create
+# could leave users with no downloadable latest zip.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('local-download-pr-{0}', github.ref) || 'local-download-publish-main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install, pack, verify latest-download URLs
+        run: |
+          npm ci
+          bash scripts/pack-local.sh
+          bash scripts/verify-latest-download.sh
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecg-stimulator-local
+          path: |
+            local-bundle/*.zip
+            local-bundle/latest.json
+            local-bundle/BUILD.txt
+
+      - name: Publish rolling GitHub Release (main only)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/publish-local-latest.sh

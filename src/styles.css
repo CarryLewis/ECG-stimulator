@@ -101,6 +101,55 @@ input {
   color: var(--text-muted);
 }
 
+.local-download-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.local-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(61, 184, 168, 0.4);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.local-download-btn:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.local-download-meta {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.local-download-links {
+  margin: 0.55rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.local-download-links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.local-download-links a:hover {
+  text-decoration: underline;
+}
+
 .anatomy-section {
   display: flex;
   flex-direction: column;
