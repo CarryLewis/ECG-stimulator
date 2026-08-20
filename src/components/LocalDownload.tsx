@@ -18,24 +18,30 @@ export default function LocalDownload() {
         <a
           className="local-download-btn"
           href={SOURCE_ZIP_URL}
+          target="_blank"
           rel="noreferrer"
         >
           Source ZIP
         </a>
-        <a className="local-download-btn" href={VIEW_ZIP_URL} rel="noreferrer">
+        <a
+          className="local-download-btn"
+          href={VIEW_ZIP_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
           View ZIP
         </a>
       </div>
       <p className="local-download-links">
-        <a href={README_DOWNLOAD_ZH_URL} rel="noreferrer">
+        <a href={README_DOWNLOAD_ZH_URL} target="_blank" rel="noreferrer">
           本地下载与调试
         </a>
         <span aria-hidden="true"> · </span>
-        <a href={README_DOWNLOAD_EN_URL} rel="noreferrer">
+        <a href={README_DOWNLOAD_EN_URL} target="_blank" rel="noreferrer">
           Download locally and debug
         </a>
         <span aria-hidden="true"> · </span>
-        <a href={GITHUB_REPO_URL} rel="noreferrer">
+        <a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer">
           GitHub
         </a>
       </p>
