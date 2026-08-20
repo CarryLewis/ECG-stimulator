@@ -5,7 +5,7 @@
 
 [中文](#中文) · [English](#english)
 
-[Live demo](https://carrylewis.com/ecg-simulator/) · [PRD](docs/product-requirement-document.md) · [Architecture](docs/software-architecture-design.md)
+[Live demo](https://carrylewis.com/ecg-simulator/) · [本地下载](#本地下载与调试) · [Download](#download-locally-and-debug) · [PRD](docs/product-requirement-document.md) · [Architecture](docs/software-architecture-design.md)
 
 ---
 
@@ -81,9 +81,22 @@ ECG 生成（采样 · 12 导联 · 监护 / 记录条）
 
 底层是**生理真相**，上层是**观察与教学**。类型契约见 [`docs/core-data-model/`](docs/core-data-model/)。
 
-### 本地运行
+### 本地下载与调试
+
+整份模拟器可以下载到自己的电脑上**查看**或**调试**。下载入口就在本 README（仓库首页简介）；在线演示侧栏也指向这里。
+
+| 目的 | 下载 | 下一步 |
+|------|------|--------|
+| **只查看**（不必装 Git / Node） | [ecg-stimulator-view.zip](https://github.com/CarryLewis/ECG-stimulator/releases/latest/download/ecg-stimulator-view.zip) | 解压后运行 `view.sh`（macOS / Linux）或 `view.bat`（Windows），浏览器打开 http://127.0.0.1:4173 |
+| **调试 / 改代码** | [源码 ZIP](https://github.com/CarryLewis/ECG-stimulator/archive/refs/heads/main.zip)（即 GitHub **Code → Download ZIP**） | 见下方命令 |
+
+不要用 `file://` 直接打开 `index.html`（ES 模块会加载失败），必须走本地 HTTP。
+
+克隆与热更新调试（需要 Node.js 18+）：
 
 ```bash
+git clone https://github.com/CarryLewis/ECG-stimulator.git
+cd ECG-stimulator
 npm ci
 npm run dev      # http://127.0.0.1:5173
 ```
@@ -92,9 +105,10 @@ npm run dev      # http://127.0.0.1:5173
 npm run build
 npm run preview  # http://127.0.0.1:4173
 npm run lint
+npm run pack:local   # 在 local-bundle/ 生成查看包与源码包
 ```
 
-需要 Node.js 18+。
+逐步说明：[docs/local-download.md](docs/local-download.md)。每次推送到 `main` 会把两个 zip 挂到滚动 Release [`local-latest`](https://github.com/CarryLewis/ECG-stimulator/releases/tag/local-latest)。
 
 ### 仓库结构
 
@@ -108,12 +122,14 @@ npm run lint
 | `docs/product-requirement-document.md` | 产品愿景、用户、功能与路线图 |
 | `docs/software-architecture-design.md` | 分层架构与模块边界 |
 | `docs/core-data-model/` | 事件驱动 TypeScript 接口（解剖 / EP / 向量 / ECG / 临床） |
+| `docs/local-download.md` | 本地下载、查看与调试 |
+| `scripts/pack-local.sh` | 打包查看 zip + 源码 zip |
 
 ### 实现备注
 
 - 教学用程序化网格（共享球体几何），兼顾性能与离线使用，不是 CT 分割模型
 - 身体坐标：+x 患者左侧，+y 头侧，+z 腹侧
-- 生产构建使用 `base: './'`，`dist/` 可从本地目录直接打开
+- 生产构建使用 `base: './'`，`dist/` 需用本地 HTTP 打开（`view.sh` / `npm run preview`），不要用 `file://`
 - 疾病模块应向电生理 / 临床层注入参数，不得按疾病 ID 直接绘制导联毫伏值
 
 ### 网站嵌入自动同步
@@ -208,9 +224,22 @@ Heart anatomy model (chambers · conduction tree · territories · electrodes)  
 
 Bottom layers are **physiological truth**. Top layers are **observation and teaching**. Typed contracts: [`docs/core-data-model/`](docs/core-data-model/).
 
-### Run locally
+### Download locally and debug
+
+The whole simulator can be downloaded to your own computer to **view** or **debug**. This README (the GitHub repo intro) is the download entry; the live-demo sidebar points here too.
+
+| Goal | Download | Next step |
+|------|----------|-----------|
+| **View only** (no Git / Node) | [ecg-stimulator-view.zip](https://github.com/CarryLewis/ECG-stimulator/releases/latest/download/ecg-stimulator-view.zip) | Unzip, run `view.sh` (macOS / Linux) or `view.bat` (Windows), open http://127.0.0.1:4173 |
+| **Debug / edit source** | [Source ZIP](https://github.com/CarryLewis/ECG-stimulator/archive/refs/heads/main.zip) (GitHub **Code → Download ZIP**) | Commands below |
+
+Do not open `index.html` via `file://` (ES modules will fail). Serve it over local HTTP.
+
+Clone and hot-reload (Node.js 18+):
 
 ```bash
+git clone https://github.com/CarryLewis/ECG-stimulator.git
+cd ECG-stimulator
 npm ci
 npm run dev      # http://127.0.0.1:5173
 ```
@@ -219,9 +248,10 @@ npm run dev      # http://127.0.0.1:5173
 npm run build
 npm run preview  # http://127.0.0.1:4173
 npm run lint
+npm run pack:local   # writes view + source zips under local-bundle/
 ```
 
-Requires Node.js 18+.
+Step-by-step: [docs/local-download.md](docs/local-download.md). Each push to `main` attaches both zips to the rolling Release [`local-latest`](https://github.com/CarryLewis/ECG-stimulator/releases/tag/local-latest).
 
 ### Repository layout
 
@@ -235,12 +265,14 @@ Requires Node.js 18+.
 | `docs/product-requirement-document.md` | Product vision, users, features, roadmap |
 | `docs/software-architecture-design.md` | Layered architecture and module boundaries |
 | `docs/core-data-model/` | Event-driven TypeScript interfaces (anatomy / EP / vector / ECG / clinical) |
+| `docs/local-download.md` | Local download, viewing, and debugging |
+| `scripts/pack-local.sh` | Pack the view zip + source zip |
 
 ### Implementation notes
 
 - Procedural teaching meshes (shared sphere geometry) for performance and offline use — not a CT segmentation
 - Body axes: +x patient left, +y superior, +z anterior
-- Production build uses `base: './'` so `dist/` can be opened from a local folder
+- Production build uses `base: './'`; serve `dist/` over local HTTP (`view.sh` / `npm run preview`), do not use `file://`
 - Disease modules should inject parameters at the EP / clinical layers — they must not paint lead millivolts by disease ID
 
 ### Website embed auto-sync

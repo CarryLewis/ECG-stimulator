@@ -5,5 +5,6 @@ dist-ssr
 .DS_Store
 *.tsbuildinfo
 offline-bundle
+local-bundle
 public/models/*.glb
 public/models/*.gltf

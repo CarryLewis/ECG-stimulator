@@ -4,6 +4,7 @@ import {
   type HeartVersion,
 } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
+import LocalDownload from '../LocalDownload'
 
 interface AnatomyControlPanelProps {
   heartVersion: HeartVersion
@@ -56,6 +57,8 @@ export default function AnatomyControlPanel({
           clock (SA → atria → AV → His → bundles → Purkinje → repolarization).
         </p>
       </header>
+
+      <LocalDownload />
 
       <section className="anatomy-section">
         <h2 className="anatomy-section-title">Playback</h2>
