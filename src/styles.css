@@ -127,6 +127,13 @@ input {
   color: #fff;
 }
 
+.local-download-meta {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
 .local-download-links {
   margin: 0.55rem 0 0;
   font-size: 0.75rem;

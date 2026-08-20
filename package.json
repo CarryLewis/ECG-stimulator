@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "pack:local": "bash scripts/pack-local.sh",
-    "view:local": "bash scripts/view-local.sh"
+    "view:local": "bash scripts/view-local.sh",
+    "verify:download": "bash scripts/verify-latest-download.sh"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

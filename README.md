@@ -85,14 +85,16 @@ ECG 生成（采样 · 12 导联 · 监护 / 记录条）
 
 整份模拟器可以下载到自己的电脑上**查看**或**调试**。下载入口就在本 README（仓库首页简介）；在线演示侧栏也指向这里。
 
+**规则：每次代码更新之后，下载入口必须给出当时最新的文件。** 源码 ZIP 直接取当前 `main` 的实时快照（不是某个旧提交）。查看包在每次推送到 `main` 时由 Actions **删除并重建** Release [`local-latest`](https://github.com/CarryLewis/ECG-stimulator/releases/tag/local-latest)，因此文件名不变，内容是最新一次构建。
+
 | 目的 | 下载 | 下一步 |
 |------|------|--------|
-| **只查看**（不必装 Git / Node） | [ecg-stimulator-view.zip](https://github.com/CarryLewis/ECG-stimulator/releases/latest/download/ecg-stimulator-view.zip) | 解压后运行 `view.sh`（macOS / Linux）或 `view.bat`（Windows），浏览器打开 http://127.0.0.1:4173 |
-| **调试 / 改代码** | [源码 ZIP](https://github.com/CarryLewis/ECG-stimulator/archive/refs/heads/main.zip)（即 GitHub **Code → Download ZIP**） | 见下方命令 |
+| **只查看**（不必装 Git / Node） | [ecg-stimulator-view.zip](https://github.com/CarryLewis/ECG-stimulator/releases/download/local-latest/ecg-stimulator-view.zip) | 解压后运行 `view.sh`（macOS / Linux）或 `view.bat`（Windows），浏览器打开 http://127.0.0.1:4173 |
+| **调试 / 改代码** | [源码 ZIP](https://github.com/CarryLewis/ECG-stimulator/archive/refs/heads/main.zip)（即 GitHub **Code → Download ZIP**，始终是最新 `main`） | 见下方命令 |
 
 不要用 `file://` 直接打开 `index.html`（ES 模块会加载失败），必须走本地 HTTP。
 
-克隆与热更新调试（需要 Node.js 18+）：
+克隆后要拿到最新代码请再执行 `git pull origin main`（需要 Node.js 18+）：
 
 ```bash
 git clone https://github.com/CarryLewis/ECG-stimulator.git
@@ -108,7 +110,7 @@ npm run lint
 npm run pack:local   # 在 local-bundle/ 生成查看包与源码包
 ```
 
-逐步说明：[docs/local-download.md](docs/local-download.md)。每次推送到 `main` 会把两个 zip 挂到滚动 Release [`local-latest`](https://github.com/CarryLewis/ECG-stimulator/releases/tag/local-latest)。
+逐步说明：[docs/local-download.md](docs/local-download.md)。CI 工作流 `publish-local-download.yml` 在每次 `main` 更新时重建 zip 并发布。
 
 ### 仓库结构
 
@@ -124,6 +126,7 @@ npm run pack:local   # 在 local-bundle/ 生成查看包与源码包
 | `docs/core-data-model/` | 事件驱动 TypeScript 接口（解剖 / EP / 向量 / ECG / 临床） |
 | `docs/local-download.md` | 本地下载、查看与调试 |
 | `scripts/pack-local.sh` | 打包查看 zip + 源码 zip |
+| `scripts/publish-local-latest.sh` | 每次 `main` 更新时重建 `local-latest` |
 
 ### 实现备注
 
@@ -228,14 +231,16 @@ Bottom layers are **physiological truth**. Top layers are **observation and teac
 
 The whole simulator can be downloaded to your own computer to **view** or **debug**. This README (the GitHub repo intro) is the download entry; the live-demo sidebar points here too.
 
+**Rule: after every code update, the download entry must serve the newest files.** The source ZIP is a live snapshot of current `main` (not a pinned old commit). The view bundle is **deleted and recreated** on every push to `main` as Release [`local-latest`](https://github.com/CarryLewis/ECG-stimulator/releases/tag/local-latest), so the filename stays stable while the bytes are the latest build.
+
 | Goal | Download | Next step |
 |------|----------|-----------|
-| **View only** (no Git / Node) | [ecg-stimulator-view.zip](https://github.com/CarryLewis/ECG-stimulator/releases/latest/download/ecg-stimulator-view.zip) | Unzip, run `view.sh` (macOS / Linux) or `view.bat` (Windows), open http://127.0.0.1:4173 |
-| **Debug / edit source** | [Source ZIP](https://github.com/CarryLewis/ECG-stimulator/archive/refs/heads/main.zip) (GitHub **Code → Download ZIP**) | Commands below |
+| **View only** (no Git / Node) | [ecg-stimulator-view.zip](https://github.com/CarryLewis/ECG-stimulator/releases/download/local-latest/ecg-stimulator-view.zip) | Unzip, run `view.sh` (macOS / Linux) or `view.bat` (Windows), open http://127.0.0.1:4173 |
+| **Debug / edit source** | [Source ZIP](https://github.com/CarryLewis/ECG-stimulator/archive/refs/heads/main.zip) (GitHub **Code → Download ZIP**, always latest `main`) | Commands below |
 
 Do not open `index.html` via `file://` (ES modules will fail). Serve it over local HTTP.
 
-Clone and hot-reload (Node.js 18+):
+After cloning, run `git pull origin main` to get the newest code (Node.js 18+):
 
 ```bash
 git clone https://github.com/CarryLewis/ECG-stimulator.git
@@ -251,7 +256,7 @@ npm run lint
 npm run pack:local   # writes view + source zips under local-bundle/
 ```
 
-Step-by-step: [docs/local-download.md](docs/local-download.md). Each push to `main` attaches both zips to the rolling Release [`local-latest`](https://github.com/CarryLewis/ECG-stimulator/releases/tag/local-latest).
+Step-by-step: [docs/local-download.md](docs/local-download.md). CI workflow `publish-local-download.yml` rebuilds and republishes the zips on every `main` update.
 
 ### Repository layout
 
@@ -267,6 +272,7 @@ Step-by-step: [docs/local-download.md](docs/local-download.md). Each push to `ma
 | `docs/core-data-model/` | Event-driven TypeScript interfaces (anatomy / EP / vector / ECG / clinical) |
 | `docs/local-download.md` | Local download, viewing, and debugging |
 | `scripts/pack-local.sh` | Pack the view zip + source zip |
+| `scripts/publish-local-latest.sh` | Recreate `local-latest` on every `main` update |
 
 ### Implementation notes
 
