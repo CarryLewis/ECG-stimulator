@@ -731,6 +731,40 @@ input {
   color: var(--text-muted);
 }
 
+.v3-proportion-notes {
+  margin: 0;
+  padding: 0.55rem 0.75rem 0.55rem 1.25rem;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: rgba(18, 28, 40, 0.65);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.v3-proportion-notes li + li {
+  margin-top: 0.35rem;
+}
+
+.v3-proportion-notes strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.electrode-list .electrode-place {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.electrode-swatch {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--swatch, var(--accent)) 35%, transparent);
+}
+
+
 .orientation-legend {
   position: absolute;
   top: 0.85rem;

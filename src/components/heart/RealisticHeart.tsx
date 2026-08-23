@@ -31,14 +31,14 @@ export function ProceduralCutawayHeart({ state }: { state: ConductionState }) {
       {/* Local fill so the heart stays readable inside the translucent body */}
       <pointLight
         position={[0.2, 0.4, 1.2]}
-        intensity={1.35}
-        distance={4.5}
+        intensity={1.6}
+        distance={3.2}
         color="#ffe8e0"
       />
       <pointLight
         position={[-0.8, 0.6, 0.6]}
-        intensity={0.55}
-        distance={3.5}
+        intensity={0.7}
+        distance={2.8}
         color="#ffc8c0"
       />
 
