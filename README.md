@@ -1,6 +1,13 @@
-# ECG Stimulator — Pathology ECG Models
+# ECG Stimulator 2.0
 
 Interactive 3D cardiac anatomy + physiology-driven disease packs that drive both the **heart activation model** and the **12-lead ECG**.
+
+## Versions / 版本
+
+- **1.0** · [Archived source / 归档源码](https://github.com/CarryLewis/ECG-stimulator/tree/release/1.0). Exact source of the original website demo at commit `00dd7e3`.
+- **2.0** · The learning interface on this branch, built directly from 1.0. It adds synchronized pause and resume, linked lead selection, responsive layouts, and scenario-specific rhythm feedback. The 12 leads now share one 250 Hz time grid.
+
+The simulator illustrates electrical activity for education. Use the on-screen time and amplitude scale to read the simulated waveform.
 
 ## Run
 
@@ -17,7 +24,7 @@ npm run check:disease
 ## Language
 
 Top-left panel: **中文 / English** toggle. Choice is stored in `localStorage`.
-All chrome UI, pathology copy, conduction HUD, and anatomy labels switch together.
+Controls, pathology explanations, and anatomy labels switch together.
 
 ## Pathology scenarios
 
@@ -51,6 +58,8 @@ Diseases **never** hardcode lead millivolts. Packs emit `PhysiologicalEffects` �
 - Add a disease by registering a pack that maps params → physiological effects
 
 ## Website embed auto-sync
+
+The 2.0 branch is separate from the website deployment branches. The site can adopt 2.0 by pinning its ECG embed to the tested commit on `release/2.0`.
 
 Pushes to `main` or `cursor/pathology-ecg-models-fab9` trigger
 `notify-website.yml`, which asks Carry-website to rebuild

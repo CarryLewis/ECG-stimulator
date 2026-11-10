@@ -32,7 +32,7 @@ interface HeartVersionToggleProps {
   onHeartVersionChange: (v: HeartVersion) => void
 }
 
-/** Src / V1 / V2 / V3 switcher — lives on the 3D viewport top-right bar. */
+/** Named views of the same simulated heart. */
 export default function HeartVersionToggle({
   heartVersion,
   onHeartVersionChange,
@@ -60,6 +60,7 @@ export default function HeartVersionToggle({
               (heartVersion === v.id ? ' heart-version-btn--active' : '')
             }
             title={`${t(VERSION_COPY[v.id].title)} — ${t(VERSION_COPY[v.id].hint)}`}
+            aria-pressed={heartVersion === v.id}
             onClick={() => onHeartVersionChange(v.id)}
           >
             {t(VERSION_COPY[v.id].short)}

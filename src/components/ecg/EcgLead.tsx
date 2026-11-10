@@ -15,6 +15,7 @@ interface EcgLeadLiveProps {
   height?: number
   /** Increments each simulation frame to trigger redraw. */
   tick: number
+  showScale?: boolean
 }
 
 /**
@@ -28,6 +29,7 @@ export default function EcgLeadLive({
   duration,
   height = 130,
   tick,
+  showScale = false,
 }: EcgLeadLiveProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -36,7 +38,7 @@ export default function EcgLeadLive({
     if (!canvas) return
 
     const width = duration * PX_PER_S
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const dpr = Math.max(showScale ? 2 : 1, Math.min(window.devicePixelRatio || 1, 2))
     const cssW = Math.round(width * dpr)
     const cssH = Math.round(height * dpr)
     if (canvas.width !== cssW) canvas.width = cssW
@@ -110,7 +112,22 @@ export default function EcgLeadLive({
     ctx.fillStyle = '#111827'
     ctx.font = '700 13px system-ui, sans-serif'
     ctx.fillText(lead, 6, 16)
-  }, [lead, samples, filled, duration, height, tick])
+
+    if (showScale) {
+      const x = 12
+      const y = height - 14
+      ctx.strokeStyle = '#475569'
+      ctx.lineWidth = 1.25
+      ctx.beginPath()
+      ctx.moveTo(x, y - 0.5 * PX_PER_MV)
+      ctx.lineTo(x, y)
+      ctx.lineTo(x + 0.2 * PX_PER_S, y)
+      ctx.stroke()
+      ctx.font = '10px system-ui, sans-serif'
+      ctx.fillText('0.5 mV', x + 4, y - 16)
+      ctx.fillText('200 ms', x + 27, y + 3)
+    }
+  }, [lead, samples, filled, duration, height, tick, showScale])
 
   return (
     <canvas

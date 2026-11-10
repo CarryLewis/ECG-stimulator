@@ -1,7 +1,7 @@
 {
   "name": "ecg-learning-simulator",
   "private": true,
-  "version": "0.2.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "Interactive Physiology & ECG Learning Simulator — 3D cardiac anatomy as the biological source model for ECG generation.",
   "scripts": {

@@ -10,6 +10,7 @@ export const DEFAULT_TIME_SCALE = 0.35
 export function useSimulationClock(
   resetKey: unknown = 'default',
   timeScale: number = DEFAULT_TIME_SCALE,
+  playing = true,
 ): number {
   const [elapsed, setElapsed] = useState(0)
   const timeScaleRef = useRef(timeScale)
@@ -18,6 +19,10 @@ export function useSimulationClock(
 
   useEffect(() => {
     setElapsed(0)
+  }, [resetKey])
+
+  useEffect(() => {
+    if (!playing) return
     let last = performance.now()
 
     const tick = (now: number) => {
@@ -30,7 +35,7 @@ export function useSimulationClock(
 
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
-  }, [resetKey])
+  }, [playing])
 
   return elapsed
 }

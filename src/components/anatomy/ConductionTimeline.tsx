@@ -1,119 +1,62 @@
-import type { PhysiologicalEvent } from '../../sim/events'
-import { SINUS_OFFSET_S } from '../../sim/sinusTiming'
-import {
-  useLanguage,
-  type LocalizedString,
-  type UiMessageKey,
-} from '../../i18n'
-
-const PATHWAY: {
-  key: string
-  offsetMs: number
-  labelKey: UiMessageKey
-  match: PhysiologicalEvent['type']
-}[] = [
-  {
-    key: 'sa',
-    offsetMs: SINUS_OFFSET_S.sa * 1000,
-    labelKey: 'stepSa',
-    match: 'sa_node_activation',
-  },
-  {
-    key: 'atrial',
-    offsetMs: SINUS_OFFSET_S.atrial * 1000,
-    labelKey: 'stepAtrial',
-    match: 'atrial_activation',
-  },
-  {
-    key: 'av',
-    offsetMs: SINUS_OFFSET_S.av * 1000,
-    labelKey: 'stepAv',
-    match: 'av_node_activation',
-  },
-  {
-    key: 'his',
-    offsetMs: SINUS_OFFSET_S.his * 1000,
-    labelKey: 'stepHis',
-    match: 'his_activation',
-  },
-  {
-    key: 'bundle',
-    offsetMs: SINUS_OFFSET_S.bundle * 1000,
-    labelKey: 'stepBundle',
-    match: 'bundle_branch_activation',
-  },
-  {
-    key: 'purkinje',
-    offsetMs: SINUS_OFFSET_S.purkinje * 1000,
-    labelKey: 'stepPurkinje',
-    match: 'ventricular_activation',
-  },
-  {
-    key: 'repol',
-    offsetMs: SINUS_OFFSET_S.repolarization * 1000,
-    labelKey: 'stepRepol',
-    match: 'repolarization',
-  },
-]
+import type { ConductionState, CyclePlan } from '../../ecg/types'
+import { useLanguage } from '../../i18n'
 
 interface ConductionTimelineProps {
-  phaseMs: number
-  active: PhysiologicalEvent | null
-  status: LocalizedString | string
-  elapsed: number
-  timeScale: number
-  rateBpm: number
+  plan: CyclePlan
+  state: ConductionState
+  intermittentBlock: boolean
 }
 
-/**
- * Teaching HUD — lights each pathway step from the active physiological event.
- */
+/** Teach only the pathway supported by the current simulation state. */
 export default function ConductionTimeline({
-  phaseMs,
-  active,
-  status,
-  elapsed,
-  timeScale,
-  rateBpm,
+  plan,
+  state,
+  intermittentBlock,
 }: ConductionTimelineProps) {
-  const { t, L, locale } = useLanguage()
-  const statusText =
-    typeof status === 'string'
-      ? status
-      : L(status)
+  const { t, L } = useLanguage()
+  const ventricularArrhythmia = plan.ventricularFibrillation || plan.ventricularFlutter
+  const showDissociation = plan.dissociated && !ventricularArrhythmia
+  const showPathway = !ventricularArrhythmia && !showDissociation
+    && !plan.fibrillatoryBaseline && !plan.flutterBaseline && !intermittentBlock
+  const steps = [
+    [t('stepSa'), state.sa],
+    [t('stepAtrial'), state.atria],
+    [t('stepAv'), state.av],
+    [t('stepHis'), state.his],
+    [t('stepBundle'), state.bundle],
+    [t('stepPurkinje'), state.ventricle],
+    [t('stepRepol'), state.repol],
+  ] as const
 
   return (
-    <div className="conduction-timeline" aria-live="polite">
-      <div className="conduction-timeline-head">
-        <strong>{t('conductionCascade')}</strong>
-        <span className="conduction-timeline-meta">
-          t = {elapsed.toFixed(2)} s · ×{timeScale.toFixed(2)} · {rateBpm} bpm ·{' '}
-          {t('phase')} {phaseMs} ms
-        </span>
-      </div>
-      <ol className="conduction-pathway">
-        {PATHWAY.map((step, i) => {
-          const live = active?.type === step.match
-          const passed = phaseMs >= step.offsetMs - 5
-          return (
-            <li
-              key={step.key}
-              className={
-                'conduction-pathway-step' +
-                (live ? ' conduction-pathway-step--live' : '') +
-                (passed && !live ? ' conduction-pathway-step--passed' : '')
-              }
-            >
-              {i > 0 && <span className="conduction-pathway-arrow" aria-hidden />}
-              <span className="conduction-pathway-ms">{step.offsetMs} ms</span>
-              <span className="conduction-pathway-label">{t(step.labelKey)}</span>
-            </li>
-          )
-        })}
-      </ol>
-      <p className="conduction-timeline-status" lang={locale}>
-        {statusText}
-      </p>
-    </div>
+    <details className="learning-details conduction-details" open>
+      <summary>{t('conductionCascade')}</summary>
+      {showPathway && (
+        <>
+          <ol className="conduction-pathway">
+            {steps.map(([label, activity]) => (
+              <li key={label} className={activity >= 0.35 ? 'conduction-pathway-step--live' : ''}>
+                {label}
+              </li>
+            ))}
+          </ol>
+          <p>{t('prInterval')} · {Math.round(plan.prInterval * 1000)} ms</p>
+        </>
+      )}
+      {showDissociation && (
+        <div className="activation-tracks">
+          <p>{t('simulatedActivity')}</p>
+          <label>
+            <span>{t('atria')} · {Math.round(plan.atrialRate)} bpm</span>
+            <meter min={0} max={1} value={Math.max(state.sa, state.atria)} />
+          </label>
+          <label>
+            <span>{t('ventricles')} · {Math.round(plan.ventricularRate)} bpm</span>
+            <meter min={0} max={1} value={state.ventricle} />
+          </label>
+        </div>
+      )}
+      {!showPathway && <p>{intermittentBlock ? t('interruptedPathway') : L(state.status)}</p>}
+    </details>
   )
 }

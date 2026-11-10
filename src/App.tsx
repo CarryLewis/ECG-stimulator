@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
+import { HEART_STRUCTURES } from './anatomy/heartStructures'
 import type { HeartStructureId } from './anatomy/types'
 import type { HeartVersion } from './anatomy/heartVersions'
 import type { LeadName } from './ecg/types'
 import AnatomyControlPanel from './components/anatomy/AnatomyControlPanel'
 import CardiacAnatomyViewport from './components/anatomy/CardiacAnatomyViewport'
+import ConductionTimeline from './components/anatomy/ConductionTimeline'
 import EcgGrid from './components/ecg/EcgGrid'
 import PathologyPanel from './components/pathology/PathologyPanel'
 import {
   defaultParamsFor,
-  getDisease,
   physiologicalModelToCyclePlan,
   requireDisease,
   resolveDiseaseSimulation,
@@ -22,7 +23,7 @@ import {
   DEFAULT_TIME_SCALE,
   useSimulationClock,
 } from './sim/useSimulationClock'
-import { useSimulationFrame } from './sim/useSimulationFrame'
+import { conductionAt } from './ecg/conduction'
 import { clearIrregularBeatCache } from './ecg/beats'
 
 const DEFAULT_OPACITY = 0.95
@@ -56,7 +57,7 @@ function resolveScenario(scenarioId: string, params: DiseaseParamValues) {
     params: packParamsMutable,
   })
   const plan = physiologicalModelToCyclePlan(result.model)
-  return { scenario, disease, result, plan, diseaseId }
+  return { disease, result, plan, diseaseId }
 }
 
 export default function App() {
@@ -67,6 +68,7 @@ export default function App() {
   const [myocardiumOpacity, setMyocardiumOpacity] = useState(DEFAULT_OPACITY)
   const [showLabels, setShowLabels] = useState(true)
   const [timeScale, setTimeScale] = useState(DEFAULT_TIME_SCALE)
+  const [playing, setPlaying] = useState(true)
 
   const [scenarioId, setScenarioId] = useState(DEFAULT_SCENARIO)
   const [params, setParams] = useState<DiseaseParamValues>(() => {
@@ -74,19 +76,41 @@ export default function App() {
     return buildParams(DEFAULT_SCENARIO, s.diseaseId)
   })
 
-  const { scenario, disease, result, plan, diseaseId } = useMemo(
+  const { disease, result, plan, diseaseId } = useMemo(
     () => resolveScenario(scenarioId, params),
     [scenarioId, params],
   )
 
-  const rateBpm = plan.ventricularRate
+  const elapsed = useSimulationClock('simulation', timeScale, playing)
+  const conduction = conductionAt(plan, elapsed, { afSeed: plan.rhythmSeed || 23 })
+  const selectedStructure = HEART_STRUCTURES.find((s) => s.id === selectedId)
+  const rate = plan.ventricularFibrillation
+    ? t('rateNotMeasurable')
+    : `${t('ventricularRate')} · ${Math.round(plan.ventricularRate)} bpm`
+  const completeBlock = result.model.avBlock === 'third'
+  const intermittentBlock = result.model.avBlock === 'second_type1'
+    || result.model.avBlock === 'second_type2'
+  const focusLead = disease.ecgManifestations.leadEmphasis?.[0] ?? 'II'
+  const showConductionPath = !plan.ventricularFibrillation && !plan.ventricularFlutter
+    && !plan.fibrillatoryBaseline && !plan.flutterBaseline && !intermittentBlock
 
-  const elapsed = useSimulationClock('sinus', timeScale)
-  const frame = useSimulationFrame(elapsed, plan, rateBpm)
+  function selectStructure(id: HeartStructureId | null) {
+    setSelectedId(id)
+    if (id) {
+      setHeartVersion('anatomy')
+      setSelectedLead(null)
+    }
+  }
+
+  function changeView(view: HeartVersion) {
+    setHeartVersion(view)
+    if (view !== 'anatomy') setSelectedId(null)
+  }
 
   const handleScenarioChange = (id: string) => {
     const s = PATHOLOGY_SCENARIO_BY_ID[id]
-    if (!s) return
+    if (!s || id === scenarioId) return
+    setSelectedLead(null)
     clearIrregularBeatCache()
     setScenarioId(id)
     setParams(buildParams(id, s.diseaseId))
@@ -113,75 +137,77 @@ export default function App() {
         selectedId={selectedId}
         myocardiumOpacity={myocardiumOpacity}
         showLabels={showLabels}
-        onSelect={setSelectedId}
+        onSelect={selectStructure}
         onOpacityChange={setMyocardiumOpacity}
         onToggleLabels={setShowLabels}
-        timeScale={timeScale}
-        onTimeScaleChange={setTimeScale}
-        rateBpm={rateBpm}
-        onRateChange={() => {
-          /* Rate is driven by the disease plan. */
-        }}
+        canAdjustOpacity={heartVersion === 'anatomy'}
         pathologySlot={
           <PathologyPanel
             scenarioId={scenarioId}
             onScenarioChange={handleScenarioChange}
             disease={disease}
-            scenario={scenario}
             params={params}
             onParamChange={handleParamChange}
           />
         }
       />
-      <div className="pathology-workspace">
-        <main className="anatomy-stage">
+      <main className="pathology-workspace">
+        <header className="simulation-toolbar">
+          <div>
+            <h2>{L(disease.name)}</h2>
+            <p>{rate}</p>
+          </div>
+          <div className="simulation-playback" role="group" aria-label={t('playback')}>
+            <label>
+              <span>{t('timeScale')} · ×{timeScale.toFixed(2)}</span>
+              <input type="range" min={0.15} max={1} step={0.05} value={timeScale}
+                onChange={(e) => setTimeScale(Number(e.target.value))} />
+            </label>
+            <button type="button" className="playback-button" onClick={() => setPlaying(!playing)}>
+              {playing ? t('pause') : t('resume')}
+            </button>
+            <span className="playback-state" role="status">{playing ? t('playing') : t('paused')}</span>
+          </div>
+        </header>
+        <div className="anatomy-stage">
           <CardiacAnatomyViewport
             heartVersion={heartVersion}
-            onHeartVersionChange={setHeartVersion}
+            onHeartVersionChange={changeView}
             selectedStructureId={selectedId}
-            onSelectStructure={setSelectedId}
+            onSelectStructure={selectStructure}
             selectedLead={selectedLead}
             onSelectLead={setSelectedLead}
             myocardiumOpacity={myocardiumOpacity}
             showLabels={showLabels}
-            conduction={frame.state}
-            activeEvent={frame.active}
-            phaseMs={frame.phaseMs}
-            elapsed={frame.t}
-            timeScale={timeScale}
-            rateBpm={rateBpm}
+            conduction={conduction}
+            showConductionPath={showConductionPath}
+            completeBlock={completeBlock}
           />
-          <div className="pathology-status-bar" aria-live="polite">
-            <span>{L(disease.name)}</span>
-            <span>·</span>
-            <span>{L(frame.state.status)}</span>
-            <span>·</span>
-            <span>{Math.round(rateBpm)} bpm</span>
-            {result.model.injuryCurrentEnabled && (
-              <>
-                <span>·</span>
-                <span>{t('injuryCurrent')}</span>
-              </>
-            )}
-          </div>
-        </main>
+          {selectedStructure && (
+            <div className="selection-detail" role="status">
+              <strong>{L(selectedStructure.label)} · {selectedStructure.abbr}</strong>
+              <p>{L(selectedStructure.description)}</p>
+            </div>
+          )}
+        </div>
         <section className="ecg-stage" aria-label={t('ecgStage')}>
-          <header className="ecg-stage-header">
-            <h2>{t('ecgTitle')}</h2>
-            <p>
-              {L(disease.ecgManifestations.morphology)} · {t('calibration')}
-            </p>
-          </header>
+          <div className="ecg-stage-header">
+            <h2>{t('observe')}</h2>
+            <p>{L(disease.ecgManifestations.morphology)}</p>
+          </div>
           <EcgGrid
+            key={`${scenarioId}:${diseaseId}:${JSON.stringify(params)}`}
             plan={plan}
-            elapsed={frame.t}
-            afSeed={plan.rhythmSeed || 23}
-            resetKey={`${scenarioId}:${diseaseId}:${JSON.stringify(params)}`}
+            elapsed={elapsed}
+            focusLead={focusLead}
+            conductionDetails={
+              <ConductionTimeline plan={plan} state={conduction} intermittentBlock={intermittentBlock} />
+            }
+            selectedLead={selectedLead}
+            onSelectLead={setSelectedLead}
           />
         </section>
-      </div>
+      </main>
     </div>
   )
 }
-
-void getDisease('normal_sinus_rhythm')
