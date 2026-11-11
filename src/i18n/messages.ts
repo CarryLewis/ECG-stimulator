@@ -38,6 +38,8 @@ export const UI = {
   paused: { en: 'Paused', zh: '已暂停' },
   observe: { en: 'Look for', zh: '观察重点' },
   focusLead: { en: 'Focus lead', zh: '观察导联' },
+  comparisonLead: { en: 'Comparison lead', zh: '对照导联' },
+  learningControls: { en: 'Learning controls and notes', zh: '学习控制与说明' },
   rhythmStrip: { en: 'Lead II rhythm strip · up to 10 s', zh: 'II 导联节律条 · 最长 10 秒' },
   rateNotMeasurable: { en: 'Ventricular rate not measurable', zh: '室率不可测' },
   atria: { en: 'Atrial activation', zh: '心房激动' },

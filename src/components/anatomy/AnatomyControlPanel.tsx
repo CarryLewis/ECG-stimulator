@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import type { HeartStructureId } from '../../anatomy/types'
 import { useLanguage } from '../../i18n'
@@ -13,6 +13,7 @@ interface AnatomyControlPanelProps {
   canAdjustOpacity: boolean
   /** Optional pathology / disease controls rendered after the header. */
   pathologySlot?: ReactNode
+  learningSlot?: ReactNode
 }
 
 export default function AnatomyControlPanel({
@@ -24,8 +25,18 @@ export default function AnatomyControlPanel({
   onToggleLabels,
   canAdjustOpacity,
   pathologySlot,
+  learningSlot,
 }: AnatomyControlPanelProps) {
   const { t, L, locale, setLocale } = useLanguage()
+  const [showLearning, setShowLearning] = useState(() => !window.matchMedia('(max-width: 720px)').matches)
+
+  useEffect(() => {
+    const phone = window.matchMedia('(max-width: 720px)')
+    const update = () => setShowLearning(!phone.matches)
+    phone.addEventListener('change', update)
+    return () => phone.removeEventListener('change', update)
+  }, [])
+
   return (
     <aside className="anatomy-panel">
       <header className="anatomy-panel-header">
@@ -63,6 +74,11 @@ export default function AnatomyControlPanel({
       </header>
 
       {pathologySlot}
+      <details className="learning-details sidebar-learning" open={showLearning}
+        onToggle={(event) => setShowLearning(event.currentTarget.open)}>
+        <summary>{t('learningControls')}</summary>
+        {learningSlot}
+      </details>
 
       <details className="learning-details anatomy-settings">
         <summary>{t('anatomySettings')}</summary>

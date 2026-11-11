@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { voltageSample } from '../../ecg/generator'
 import { LEAD_GRID, LEAD_ORDER } from '../../ecg/leads'
 import type { CyclePlan, LeadName } from '../../ecg/types'
@@ -15,7 +15,6 @@ interface EcgGridProps {
   plan: CyclePlan
   elapsed: number
   focusLead: LeadName
-  conductionDetails: ReactNode
   selectedLead: LeadName | null
   onSelectLead: (lead: LeadName | null) => void
 }
@@ -38,7 +37,6 @@ export default function EcgGrid({
   plan,
   elapsed,
   focusLead,
-  conductionDetails,
   selectedLead,
   onSelectLead,
 }: EcgGridProps) {
@@ -49,7 +47,7 @@ export default function EcgGrid({
   const [strip] = useState(() => makeTrace(STRIP_CAPACITY))
   const nextSample = useRef<number>()
   const [tick, setTick] = useState(0)
-  const [showAllLeads, setShowAllLeads] = useState(() => window.matchMedia('(min-width: 1001px)').matches)
+  const [comparisonLead, setComparisonLead] = useState<LeadName>('V1')
 
   useEffect(() => {
     const end = Math.floor(elapsed * FS)
@@ -74,23 +72,14 @@ export default function EcgGrid({
   }, [elapsed, plan, strip, traces])
 
   const focus = selectedLead ?? focusLead
+  const comparison = comparisonLead === focus
+    ? (focus === 'II' ? 'V1' : 'II')
+    : comparisonLead
 
   return (
     <div className="ecg-grid-wrap">
-      <div className="ecg-overview">
-        <figure className="ecg-focus">
-          <figcaption>
-            <strong>{t('focusLead')} · {focus}</strong>
-            <span>{t('calibration')}</span>
-          </figcaption>
-          <EcgLeadLive lead={focus} samples={traces[focus].samples}
-            filled={traces[focus].count} duration={GRID_DURATION} tick={tick} showScale />
-        </figure>
-        {conductionDetails}
-      </div>
-      <details className="learning-details" open={showAllLeads}
-        onToggle={(event) => setShowAllLeads(event.currentTarget.open)}>
-        <summary>{t('ecgTitle')}</summary>
+      <div className="desktop-ecg">
+        <h3 className="ecg-grid-title">{t('ecgTitle')}</h3>
         <div className="ecg-grid">
           {LEAD_GRID.flat().map((lead) => (
             <button key={lead} className="ecg-cell" type="button"
@@ -107,7 +96,37 @@ export default function EcgGrid({
           <EcgLeadLive lead="II" samples={strip.samples}
             filled={strip.count} duration={STRIP_DURATION} height={120} tick={tick} />
         </figure>
-      </details>
+      </div>
+      <div className="mobile-ecg">
+        <figure className="ecg-focus">
+          <figcaption>
+            <label>
+              {t('focusLead')}
+              <select value={focus} onChange={(event) => onSelectLead(event.target.value as LeadName)}>
+                {LEAD_ORDER.map((lead) => <option key={lead} value={lead}>{lead}</option>)}
+              </select>
+            </label>
+            <span>{t('calibration')}</span>
+          </figcaption>
+          <EcgLeadLive lead={focus} samples={traces[focus].samples}
+            filled={traces[focus].count} duration={GRID_DURATION} tick={tick} showScale />
+        </figure>
+        <figure className="ecg-focus">
+          <figcaption>
+            <label>
+              {t('comparisonLead')}
+              <select value={comparison} onChange={(event) => setComparisonLead(event.target.value as LeadName)}>
+                {LEAD_ORDER.filter((lead) => lead !== focus).map((lead) => (
+                  <option key={lead} value={lead}>{lead}</option>
+                ))}
+              </select>
+            </label>
+            <span>{t('calibration')}</span>
+          </figcaption>
+          <EcgLeadLive lead={comparison} samples={traces[comparison].samples}
+            filled={traces[comparison].count} duration={GRID_DURATION} tick={tick} showScale />
+        </figure>
+      </div>
     </div>
   )
 }

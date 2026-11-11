@@ -6,6 +6,8 @@ import type { LeadName } from './ecg/types'
 import AnatomyControlPanel from './components/anatomy/AnatomyControlPanel'
 import CardiacAnatomyViewport from './components/anatomy/CardiacAnatomyViewport'
 import ConductionTimeline from './components/anatomy/ConductionTimeline'
+import HeartVersionToggle from './components/anatomy/HeartVersionToggle'
+import { OrientationLegend } from './components/OrientationCube'
 import EcgGrid from './components/ecg/EcgGrid'
 import PathologyPanel from './components/pathology/PathologyPanel'
 import {
@@ -150,29 +152,49 @@ export default function App() {
             onParamChange={handleParamChange}
           />
         }
+        learningSlot={
+          <>
+            <header className="simulation-toolbar">
+              <div>
+                <h2>{L(disease.name)}</h2>
+                <p>{rate}</p>
+              </div>
+              <div className="simulation-playback" role="group" aria-label={t('playback')}>
+                <label>
+                  <span>{t('timeScale')} · ×{timeScale.toFixed(2)}</span>
+                  <input type="range" min={0.15} max={1} step={0.05} value={timeScale}
+                    onChange={(e) => setTimeScale(Number(e.target.value))} />
+                </label>
+                <button type="button" className="playback-button" onClick={() => setPlaying(!playing)}>
+                  {playing ? t('pause') : t('resume')}
+                </button>
+                <span className="playback-state" role="status">{playing ? t('playing') : t('paused')}</span>
+              </div>
+            </header>
+            <div className="heart-viewer-toolbar">
+              <HeartVersionToggle heartVersion={heartVersion} onHeartVersionChange={changeView} />
+              <OrientationLegend />
+            </div>
+            <p className="activation-key">{t('activationKey')}</p>
+            <div className="ecg-stage-header">
+              <h2>{t('observe')}</h2>
+              <p>{L(disease.ecgManifestations.morphology)}</p>
+            </div>
+            <p className="sidebar-status">{L(conduction.status)}</p>
+            <ConductionTimeline plan={plan} state={conduction} intermittentBlock={intermittentBlock} />
+            {selectedStructure && (
+              <div className="selection-detail" role="status">
+                <strong>{L(selectedStructure.label)} · {selectedStructure.abbr}</strong>
+                <p>{L(selectedStructure.description)}</p>
+              </div>
+            )}
+          </>
+        }
       />
       <main className="pathology-workspace">
-        <header className="simulation-toolbar">
-          <div>
-            <h2>{L(disease.name)}</h2>
-            <p>{rate}</p>
-          </div>
-          <div className="simulation-playback" role="group" aria-label={t('playback')}>
-            <label>
-              <span>{t('timeScale')} · ×{timeScale.toFixed(2)}</span>
-              <input type="range" min={0.15} max={1} step={0.05} value={timeScale}
-                onChange={(e) => setTimeScale(Number(e.target.value))} />
-            </label>
-            <button type="button" className="playback-button" onClick={() => setPlaying(!playing)}>
-              {playing ? t('pause') : t('resume')}
-            </button>
-            <span className="playback-state" role="status">{playing ? t('playing') : t('paused')}</span>
-          </div>
-        </header>
         <div className="anatomy-stage">
           <CardiacAnatomyViewport
             heartVersion={heartVersion}
-            onHeartVersionChange={changeView}
             selectedStructureId={selectedId}
             onSelectStructure={selectStructure}
             selectedLead={selectedLead}
@@ -183,26 +205,13 @@ export default function App() {
             showConductionPath={showConductionPath}
             completeBlock={completeBlock}
           />
-          {selectedStructure && (
-            <div className="selection-detail" role="status">
-              <strong>{L(selectedStructure.label)} · {selectedStructure.abbr}</strong>
-              <p>{L(selectedStructure.description)}</p>
-            </div>
-          )}
         </div>
         <section className="ecg-stage" aria-label={t('ecgStage')}>
-          <div className="ecg-stage-header">
-            <h2>{t('observe')}</h2>
-            <p>{L(disease.ecgManifestations.morphology)}</p>
-          </div>
           <EcgGrid
             key={`${scenarioId}:${diseaseId}:${JSON.stringify(params)}`}
             plan={plan}
             elapsed={elapsed}
             focusLead={focusLead}
-            conductionDetails={
-              <ConductionTimeline plan={plan} state={conduction} intermittentBlock={intermittentBlock} />
-            }
             selectedLead={selectedLead}
             onSelectLead={setSelectedLead}
           />
