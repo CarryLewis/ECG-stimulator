@@ -281,6 +281,30 @@ input {
   flex: none;
 }
 
+.viewport-top-right {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.45rem;
+  pointer-events: none;
+}
+
+.viewport-top-right > * {
+  pointer-events: auto;
+}
+
+.viewport-controls-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  flex: none;
+}
+
 .heart-version-viewport {
   display: flex;
   flex-direction: column;
@@ -477,6 +501,25 @@ input {
   color: #7dffb0;
 }
 
+@media (max-width: 860px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(55vh, 1fr);
+  }
+
+  .anatomy-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--stroke);
+    max-height: 42vh;
+  }
+
+  .anatomy-viewport-hint {
+    font-size: 0.68rem;
+    white-space: normal;
+    text-align: center;
+    max-width: 90%;
+  }
+}
 .conduction-3d-label {
   display: inline-block;
   padding: 2px 6px;
@@ -852,10 +895,80 @@ input {
   box-shadow: 0 0 10px rgba(125, 255, 176, 0.25);
 }
 
+@media (max-width: 860px) {
+  .viewport-top-right {
+    top: 0.45rem;
+    right: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: calc(100% - 0.9rem);
+  }
+
+  .orientation-cube-overlay {
+    width: 112px;
+  }
+}
+
 .conduction-3d-label--live {
   color: #7dffb0 !important;
   border-color: rgba(125, 255, 176, 0.55);
   box-shadow: 0 0 10px rgba(61, 255, 138, 0.35);
+}
+
+.speed-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.speed-preset {
+  padding: 0.35rem 0.25rem;
+  border-radius: 6px;
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.speed-preset--active {
+  color: var(--text);
+  border-color: rgba(61, 184, 168, 0.45);
+  background: var(--accent-soft);
+}
+
+.conduction-timeline {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.85rem;
+  z-index: 3;
+  width: min(320px, calc(100% - 8.5rem));
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--stroke);
+  background: rgba(8, 14, 22, 0.82);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.conduction-timeline-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.55rem;
+}
+
+.conduction-timeline-head strong {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.conduction-timeline-meta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
 }
 
 .conduction-pathway {
@@ -867,10 +980,54 @@ input {
   gap: 0.2rem;
 }
 
+.conduction-pathway-step {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  gap: 0.35rem 0.55rem;
+  align-items: baseline;
+  padding: 0.22rem 0.35rem;
+  border-radius: 6px;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.conduction-pathway-step--passed {
+  opacity: 0.75;
+}
+
 .conduction-pathway-step--live {
   opacity: 1;
   background: rgba(61, 255, 138, 0.12);
   box-shadow: inset 0 0 0 1px rgba(61, 255, 138, 0.28);
+}
+
+.conduction-pathway-ms {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent);
+}
+
+.conduction-pathway-label {
+  font-size: 0.78rem;
+}
+
+.conduction-pathway-arrow {
+  display: none;
+}
+
+.conduction-timeline-status {
+  margin: 0.55rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 860px) {
+  .conduction-timeline {
+    width: calc(100% - 1.5rem);
+    top: auto;
+    bottom: 3.2rem;
+  }
 }
 
 /* Language toggle */
@@ -918,6 +1075,112 @@ input {
   color: var(--accent);
 }
 
+.app--pathology {
+  grid-template-columns: minmax(280px, 360px) 1fr;
+}
+
+.pathology-workspace {
+  display: grid;
+  grid-template-rows: minmax(280px, 1fr) minmax(280px, 42vh);
+  min-height: 100vh;
+  min-width: 0;
+}
+
+.pathology-workspace .anatomy-stage {
+  position: relative;
+  min-height: 0;
+}
+
+.pathology-status-bar {
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0.75rem;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: rgba(8, 14, 22, 0.82);
+  backdrop-filter: blur(8px);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.pathology-status-bar span:first-child {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pathology-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0.85rem;
+}
+
+.pathology-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pathology-btn:hover {
+  border-color: rgba(61, 184, 168, 0.45);
+}
+
+.pathology-btn--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.pathology-btn-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pathology-btn-short {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.pathology-explain {
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(61, 184, 168, 0.08);
+  border: 1px solid rgba(61, 184, 168, 0.2);
+}
+
+.pathology-explain-summary {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.pathology-explain-findings {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .pathology-select {
   width: 100%;
   margin-top: 0.35rem;
@@ -926,6 +1189,10 @@ input {
   border: 1px solid var(--stroke);
   background: var(--bg);
   color: var(--text);
+}
+
+.pathology-trace {
+  margin-top: 0.5rem;
 }
 
 .ecg-stage {
@@ -963,6 +1230,18 @@ input {
   gap: 0.55rem;
 }
 
+.ecg-live-badge {
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(61, 184, 168, 0.1);
+  border: 1px solid rgba(61, 184, 168, 0.35);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  width: fit-content;
+}
+
 .ecg-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -993,336 +1272,48 @@ input {
   vertical-align: top;
 }
 
+@media (max-width: 1100px) {
+  .app--pathology {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .anatomy-panel {
+    max-height: 42vh;
+    border-right: none;
+    border-bottom: 1px solid var(--stroke);
+  }
+
+  .pathology-workspace {
+    grid-template-rows: minmax(240px, 48vh) minmax(260px, 1fr);
+    min-height: 0;
+  }
+}
+
 @media (max-width: 720px) {
   .ecg-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* ECG 2.0 learning workspace */
-.app--pathology {
-  height: 100dvh;
-  min-height: 100dvh;
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
-  align-items: stretch;
-}
-
-.app--pathology > .anatomy-panel {
-  position: static;
-  min-height: 0;
-  max-height: 100dvh;
-}
-
-.release-label {
-  display: inline-block;
-  vertical-align: middle;
-  padding: 0.18rem 0.38rem;
-  border: 1px solid var(--stroke);
-  border-radius: 4px;
-  font: 0.7rem var(--font-mono);
-  color: var(--accent);
-}
-
-.pathology-workspace {
-  --ecg-panel-height: max(380px, 46vh);
-  width: 100%;
-  height: 100dvh;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: minmax(280px, 1fr) var(--ecg-panel-height);
-  overflow: hidden;
-}
-
-.simulation-toolbar,
-.simulation-playback,
-.heart-viewer-toolbar,
-.heart-viewer-caption,
-.ecg-focus figcaption {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-}
-
-.simulation-toolbar {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--stroke);
-}
-
-.simulation-toolbar h2 {
-  margin: 0;
-  font: 650 1.1rem var(--font-ui);
-}
-
-.simulation-toolbar p,
-.selection-detail p {
-  margin: 0.3rem 0 0;
-  color: var(--text-muted);
-}
-
-.simulation-playback label {
-  display: grid;
-  gap: 0.25rem;
-  font-size: 0.78rem;
-}
-
-.simulation-playback input {
-  width: 8rem;
-  accent-color: var(--accent);
-}
-
-.playback-button {
-  min-height: 44px;
-  padding: 0.35rem 0.75rem;
-  background: var(--accent-soft);
-  color: var(--text);
-  border: 1px solid var(--accent);
-  border-radius: 7px;
-  cursor: pointer;
-}
-
-.playback-state {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.heart-viewer-toolbar {
-  padding: 0.65rem 0;
-}
-
-.heart-viewer-toolbar .heart-version-viewport {
-  width: auto;
+/* Interaction states preserve the 1.0 grid dimensions and spacing. */
+button.ecg-cell {
+  display: block;
   padding: 0;
-  background: transparent;
   border: 0;
-  box-shadow: none;
-}
-
-.heart-viewer-toolbar .heart-version-viewport-label {
-  text-align: left;
-}
-
-.heart-viewer-toolbar .heart-version-btn {
-  min-height: 36px;
-  padding: 0.35rem 0.65rem;
-  font: 0.78rem var(--font-ui);
-}
-
-.heart-viewer { height: 100%; min-height: 0; }
-
-.heart-viewer .anatomy-viewport {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid var(--stroke);
-}
-
-.heart-viewer-caption {
-  position: relative;
-  min-height: 2.1rem;
-  padding-block: 0.45rem;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
-.heart-orientation-cube {
-  position: absolute;
-  right: 0.55rem;
-  bottom: 0.65rem;
-  z-index: 3;
-}
-
-.selection-detail {
-  padding: 0.75rem;
-  margin-bottom: 0.65rem;
-  border: 1px solid var(--accent);
-  border-radius: 7px;
-  font-size: 0.875rem;
-}
-
-.ecg-stage {
-  min-height: 0;
-  overflow: auto;
-  padding: 0.65rem 0.8rem 1rem;
-  background: transparent;
-}
-
-.ecg-stage-header {
-  justify-content: flex-start;
-  align-items: baseline;
-}
-
-.ecg-stage-header h2 { font: 650 0.9rem var(--font-ui); }
-.ecg-stage-header p { font-size: 0.875rem; line-height: 1.45; }
-
-.ecg-focus,
-.ecg-strip {
-  margin: 0;
-}
-
-.ecg-focus figcaption {
-  margin-bottom: 0.35rem;
-  font-size: 0.78rem;
-}
-
-.ecg-grid-title {
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-}
-
-.desktop-ecg .ecg-grid {
-  max-width: min(1280px, calc((var(--ecg-panel-height) - 3.25rem) * 3));
-  margin-inline: auto;
-}
-.mobile-ecg { display: none; }
-.ecg-focus figcaption span { color: var(--text-muted); }
-.ecg-focus .ecg-lead { border-radius: 6px; }
-
-.mobile-ecg label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.mobile-ecg select {
-  min-height: 40px;
-  padding: 0.25rem 0.5rem;
-  border: 1px solid var(--stroke);
-  border-radius: 5px;
-  background: var(--bg-panel);
-  color: var(--text);
-  font: inherit;
-}
-
-@media (max-width: 720px) {
-  .desktop-ecg { display: none; }
-  .mobile-ecg { display: grid; gap: 0.85rem; }
-}
-
-.learning-details {
-  margin-top: 0.65rem;
-  border-top: 1px solid var(--stroke);
-}
-
-.learning-details summary {
-  padding: 0.65rem 0;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.learning-details .anatomy-control { margin-bottom: 0.6rem; }
-.anatomy-settings fieldset { margin: 0; border: 1px solid var(--stroke); min-width: 0; }
-.anatomy-settings legend { font-size: 0.75rem; color: var(--text-muted); }
-.anatomy-settings .anatomy-toggle { margin-block: 0.75rem; }
-
-.ecg-cell {
-  border: 2px solid transparent;
-  background: white;
-  padding: 0;
+  background: #fff;
   cursor: pointer;
 }
 
-.ecg-cell[aria-pressed='true'] {
-  border-color: #08736c;
-}
-
+.ecg-cell[aria-pressed='true'],
 .ecg-cell:focus-visible {
-  outline: 2px solid #111827;
-  outline-offset: -4px;
+  outline: 2px solid #08736c;
+  outline-offset: -2px;
 }
 
-.ecg-strip {
-  margin-top: 0.65rem;
-  color: #111827;
+button.ecg-live-badge {
+  font-family: inherit;
+  line-height: normal;
+  text-align: left;
+  cursor: pointer;
 }
-
-.ecg-strip figcaption { padding: 0.25rem; font-size: 0.75rem; }
-
-.conduction-details p,
-.activation-tracks label { color: var(--text-muted); font-size: 0.875rem; }
-
-.conduction-details .conduction-pathway {
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.conduction-details li {
-  padding: 0.4rem 0.55rem;
-  border: 1px solid var(--stroke);
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-.activation-tracks label {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(7rem, 40%);
-  align-items: center;
-  max-width: 30rem;
-  padding: 0.35rem 0;
-}
-
-.activation-tracks meter { width: 100%; }
-
-@media (max-width: 720px) {
-  .app--pathology {
-    height: auto;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
-  }
-
-  .app--pathology > .anatomy-panel {
-    position: static;
-    min-height: 0;
-    max-height: none;
-    overflow: visible;
-    gap: 0.65rem;
-    padding: 1rem;
-  }
-
-  .anatomy-title { font-size: 1.45rem; }
-  .anatomy-lede { margin-top: 0.35rem; }
-  .pathology-workspace { height: auto; display: block; overflow: visible; }
-  .pathology-workspace .anatomy-stage { height: 320px; }
-  .ecg-stage { overflow: visible; }
-  .heart-orientation-cube { display: none; }
-}
-
-@media (max-width: 560px) {
-  .simulation-toolbar { gap: 0.45rem; }
-  .heart-viewer-toolbar { gap: 0.4rem; }
-  .heart-viewer-toolbar .heart-version-btn { min-height: 42px; }
-  .app--pathology > .anatomy-panel {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .pathology-section { display: contents; }
-
-  .anatomy-panel-header,
-  .pathology-section > .anatomy-control,
-  .anatomy-panel .learning-details[open],
-  .anatomy-panel .sidebar-learning {
-    grid-column: 1 / -1;
-  }
-
-  .anatomy-panel .learning-details { margin-top: 0; }
-  .anatomy-panel .learning-details summary { padding-block: 0.45rem; }
-
-  .simulation-toolbar > div:first-child {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-  }
-
-  .simulation-toolbar p { margin: 0; font-size: 0.8rem; }
-}
-
-.sidebar-learning .heart-viewer-toolbar { gap: 0.7rem; }
-.sidebar-learning .ecg-stage-header { display: block; margin-top: 0.75rem; }
-.sidebar-learning .ecg-stage-header p { margin-top: 0.35rem; }
-.sidebar-learning .selection-detail { margin-top: 0.75rem; }
-.activation-key, .sidebar-status { color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; }

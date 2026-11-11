@@ -32,7 +32,7 @@ interface HeartVersionToggleProps {
   onHeartVersionChange: (v: HeartVersion) => void
 }
 
-/** Named views of the same simulated heart. */
+/** Src / V1 / V2 / V3 switcher — lives on the 3D viewport top-right bar. */
 export default function HeartVersionToggle({
   heartVersion,
   onHeartVersionChange,

@@ -14,7 +14,8 @@ const STRIP_CAPACITY = FS * STRIP_DURATION
 interface EcgGridProps {
   plan: CyclePlan
   elapsed: number
-  focusLead: LeadName
+  playing: boolean
+  onTogglePlayback: () => void
   selectedLead: LeadName | null
   onSelectLead: (lead: LeadName | null) => void
 }
@@ -36,7 +37,8 @@ function append(trace: ReturnType<typeof makeTrace>, value: number) {
 export default function EcgGrid({
   plan,
   elapsed,
-  focusLead,
+  playing,
+  onTogglePlayback,
   selectedLead,
   onSelectLead,
 }: EcgGridProps) {
@@ -47,7 +49,6 @@ export default function EcgGrid({
   const [strip] = useState(() => makeTrace(STRIP_CAPACITY))
   const nextSample = useRef<number>()
   const [tick, setTick] = useState(0)
-  const [comparisonLead, setComparisonLead] = useState<LeadName>('V1')
 
   useEffect(() => {
     const end = Math.floor(elapsed * FS)
@@ -71,61 +72,28 @@ export default function EcgGrid({
     setTick((n) => n + 1)
   }, [elapsed, plan, strip, traces])
 
-  const focus = selectedLead ?? focusLead
-  const comparison = comparisonLead === focus
-    ? (focus === 'II' ? 'V1' : 'II')
-    : comparisonLead
-
   return (
     <div className="ecg-grid-wrap">
-      <div className="desktop-ecg">
-        <h3 className="ecg-grid-title">{t('ecgTitle')}</h3>
-        <div className="ecg-grid">
-          {LEAD_GRID.flat().map((lead) => (
-            <button key={lead} className="ecg-cell" type="button"
-              aria-label={`${t('focusLead')} ${lead}`}
-              aria-pressed={selectedLead === lead}
-              onClick={() => onSelectLead(selectedLead === lead ? null : lead)}>
-              <EcgLeadLive lead={lead} samples={traces[lead].samples}
-                filled={traces[lead].count} duration={GRID_DURATION} tick={tick} />
-            </button>
-          ))}
-        </div>
-        <figure className="ecg-strip">
-          <figcaption>{t('rhythmStrip')}</figcaption>
-          <EcgLeadLive lead="II" samples={strip.samples}
-            filled={strip.count} duration={STRIP_DURATION} height={120} tick={tick} />
-        </figure>
+      <button type="button" className="ecg-live-badge"
+        title={t('playbackInteraction')} aria-label={t('playbackInteraction')}
+        aria-pressed={!playing} onClick={onTogglePlayback}>
+        {playing ? t('ecgLiveBadge') : t('pausedBadge')}
+      </button>
+      <div className="ecg-grid">
+        {LEAD_GRID.flat().map((lead) => (
+          <button key={lead} className="ecg-cell" type="button"
+            title={`${lead} · ${t('leadInteraction')}`}
+            aria-label={`${t('leadInteraction')} ${lead}`}
+            aria-pressed={selectedLead === lead}
+            onClick={() => onSelectLead(selectedLead === lead ? null : lead)}>
+            <EcgLeadLive lead={lead} samples={traces[lead].samples}
+              filled={traces[lead].count} duration={GRID_DURATION} height={130} tick={tick} />
+          </button>
+        ))}
       </div>
-      <div className="mobile-ecg">
-        <figure className="ecg-focus">
-          <figcaption>
-            <label>
-              {t('focusLead')}
-              <select value={focus} onChange={(event) => onSelectLead(event.target.value as LeadName)}>
-                {LEAD_ORDER.map((lead) => <option key={lead} value={lead}>{lead}</option>)}
-              </select>
-            </label>
-            <span>{t('calibration')}</span>
-          </figcaption>
-          <EcgLeadLive lead={focus} samples={traces[focus].samples}
-            filled={traces[focus].count} duration={GRID_DURATION} tick={tick} showScale />
-        </figure>
-        <figure className="ecg-focus">
-          <figcaption>
-            <label>
-              {t('comparisonLead')}
-              <select value={comparison} onChange={(event) => setComparisonLead(event.target.value as LeadName)}>
-                {LEAD_ORDER.filter((lead) => lead !== focus).map((lead) => (
-                  <option key={lead} value={lead}>{lead}</option>
-                ))}
-              </select>
-            </label>
-            <span>{t('calibration')}</span>
-          </figcaption>
-          <EcgLeadLive lead={comparison} samples={traces[comparison].samples}
-            filled={traces[comparison].count} duration={GRID_DURATION} tick={tick} showScale />
-        </figure>
+      <div className="ecg-strip">
+        <EcgLeadLive lead="II" samples={strip.samples}
+          filled={strip.count} duration={STRIP_DURATION} height={120} tick={tick} />
       </div>
     </div>
   )

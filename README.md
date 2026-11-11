@@ -5,7 +5,9 @@ Interactive 3D cardiac anatomy + physiology-driven disease packs that drive both
 ## Versions / 版本
 
 - **1.0** · [Archived source / 归档源码](https://github.com/CarryLewis/ECG-stimulator/tree/release/1.0). Exact source of the original website demo at commit `00dd7e3`.
-- **2.0** · The learning interface on this branch, built directly from 1.0. It adds synchronized pause and resume, linked lead selection, responsive layouts, and scenario-specific rhythm feedback. The 12 leads share one 250 Hz time grid. Desktop follows the 1.0 layout, with the 3D heart above a permanent 12-lead grid on the right and controls and explanations in the left sidebar. Phone layouts up to 720 px show two selectable leads.
+- **2.0** · Built directly from 1.0 with the original settings, controls, defaults, labels, camera framing, and layout. Interaction updates link ECG lead selection to the heart, locate selected chambers, and let the existing live badge pause and resume both views. All leads share one 250 Hz time grid. Pathological rhythm feedback follows the active model.
+
+点击 ECG 上方原有的实时状态标记可同步暂停或继续。点击导联波形可定位到心脏中的对应导联，点击心腔结构或调整透明度会切换到原有的源心腔视图。
 
 The simulator illustrates electrical activity for education. Use the on-screen time and amplitude scale to read the simulated waveform.
 

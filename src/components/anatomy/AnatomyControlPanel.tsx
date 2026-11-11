@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import type { HeartStructureId } from '../../anatomy/types'
 import { useLanguage } from '../../i18n'
@@ -10,11 +10,20 @@ interface AnatomyControlPanelProps {
   onSelect: (id: HeartStructureId | null) => void
   onOpacityChange: (opacity: number) => void
   onToggleLabels: (show: boolean) => void
-  canAdjustOpacity: boolean
+  timeScale: number
+  onTimeScaleChange: (scale: number) => void
+  rateBpm: number | null
+  onRateChange: (bpm: number) => void
   /** Optional pathology / disease controls rendered after the header. */
   pathologySlot?: ReactNode
-  learningSlot?: ReactNode
 }
+
+const SPEED_PRESET_KEYS = [
+  { key: 'speedSlow' as const, value: 0.2 },
+  { key: 'speedLearn' as const, value: 0.35 },
+  { key: 'speedClear' as const, value: 0.5 },
+  { key: 'speedReal' as const, value: 1 },
+]
 
 export default function AnatomyControlPanel({
   selectedId,
@@ -23,19 +32,15 @@ export default function AnatomyControlPanel({
   onSelect,
   onOpacityChange,
   onToggleLabels,
-  canAdjustOpacity,
+  timeScale,
+  onTimeScaleChange,
+  rateBpm,
   pathologySlot,
-  learningSlot,
 }: AnatomyControlPanelProps) {
   const { t, L, locale, setLocale } = useLanguage()
-  const [showLearning, setShowLearning] = useState(() => !window.matchMedia('(max-width: 720px)').matches)
-
-  useEffect(() => {
-    const phone = window.matchMedia('(max-width: 720px)')
-    const update = () => setShowLearning(!phone.matches)
-    phone.addEventListener('change', update)
-    return () => phone.removeEventListener('change', update)
-  }, [])
+  const selected = selectedId
+    ? HEART_STRUCTURES.find((s) => s.id === selectedId)
+    : null
 
   return (
     <aside className="anatomy-panel">
@@ -69,38 +74,78 @@ export default function AnatomyControlPanel({
             </button>
           </div>
         </div>
-        <h1 className="anatomy-title">{t('appTitle')} <small className="release-label">2.0</small></h1>
+        <h1 className="anatomy-title">{t('appTitle')}</h1>
         <p className="anatomy-lede">{t('appLede')}</p>
       </header>
 
       {pathologySlot}
-      <details className="learning-details sidebar-learning" open={showLearning}
-        onToggle={(event) => setShowLearning(event.currentTarget.open)}>
-        <summary>{t('learningControls')}</summary>
-        {learningSlot}
-      </details>
 
-      <details className="learning-details anatomy-settings">
-        <summary>{t('anatomySettings')}</summary>
-        <fieldset className="anatomy-section" disabled={!canAdjustOpacity}>
-          <legend>{t('versionAnatomyShort')}</legend>
-          <label className="anatomy-control">
-            <span className="anatomy-control-row">
-              <span>{t('myocardiumOpacity')}</span>
-              <span className="anatomy-control-value">
-                {Math.round(myocardiumOpacity * 100)}%
-              </span>
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">{t('playback')}</h2>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>{t('timeScale')}</span>
+            <span className="anatomy-control-value">
+              ×{timeScale.toFixed(2)}
             </span>
-            <input
-              type="range"
-              min={0.2}
-              max={1}
-              step={0.05}
-              value={myocardiumOpacity}
-              onChange={(e) => onOpacityChange(Number(e.target.value))}
-            />
-          </label>
-        </fieldset>
+          </span>
+          <input
+            type="range"
+            min={0.15}
+            max={1}
+            step={0.05}
+            value={timeScale}
+            onChange={(e) => onTimeScaleChange(Number(e.target.value))}
+          />
+        </label>
+        <div className="speed-presets" role="group" aria-label={t('pacePresets')}>
+          {SPEED_PRESET_KEYS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              className={
+                'speed-preset' +
+                (Math.abs(timeScale - p.value) < 0.01
+                  ? ' speed-preset--active'
+                  : '')
+              }
+              aria-pressed={Math.abs(timeScale - p.value) < 0.01}
+              onClick={() => onTimeScaleChange(p.value)}
+            >
+              {t(p.key)}
+            </button>
+          ))}
+        </div>
+        <div className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>{t('ventricularRate')}</span>
+            <span className="anatomy-control-value">
+              {rateBpm === null ? t('rateNotMeasurable') : `${Math.round(rateBpm)} bpm`}
+            </span>
+          </span>
+          <p className="anatomy-version-hint">{t('rateHint')}</p>
+        </div>
+      </section>
+
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">{t('display')}</h2>
+        <label className="anatomy-control">
+          <span className="anatomy-control-row">
+            <span>{t('myocardiumOpacity')}</span>
+            <span className="anatomy-control-value">
+              {Math.round(myocardiumOpacity * 100)}%
+            </span>
+          </span>
+          <input
+            type="range"
+            title={t('opacityInteraction')}
+            min={0.2}
+            max={1}
+            step={0.05}
+            value={myocardiumOpacity}
+            onChange={(e) => onOpacityChange(Number(e.target.value))}
+          />
+        </label>
         <label className="anatomy-toggle">
           <input
             type="checkbox"
@@ -109,40 +154,56 @@ export default function AnatomyControlPanel({
           />
           <span>{t('anatomicalLabels')}</span>
         </label>
+      </section>
 
-        <section className="anatomy-section">
-          <h2 className="anatomy-section-title">{t('structures')}</h2>
-          <ul
-            className="structure-list"
-            role="listbox"
-            aria-label={t('structuresList')}
-          >
-            {HEART_STRUCTURES.map((s) => {
-              const active = selectedId === s.id
-              return (
-                <li key={s.id}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={active}
-                    className={
-                      'structure-btn' + (active ? ' structure-btn--active' : '')
-                    }
-                    style={{ ['--swatch' as string]: s.color }}
-                    onClick={() => onSelect(active ? null : s.id)}
-                  >
-                    <span className="structure-swatch" />
-                    <span className="structure-btn-text">
-                      <span className="structure-abbr">{s.abbr}</span>
-                      <span className="structure-name">{L(s.label)}</span>
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      </details>
+      <section className="anatomy-section">
+        <h2 className="anatomy-section-title">{t('structures')}</h2>
+        <ul
+          className="structure-list"
+          role="listbox"
+          aria-label={t('structuresList')}
+        >
+          {HEART_STRUCTURES.map((s) => {
+            const active = selectedId === s.id
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  className={
+                    'structure-btn' + (active ? ' structure-btn--active' : '')
+                  }
+                  style={{ ['--swatch' as string]: s.color }}
+                  onClick={() => onSelect(active ? null : s.id)}
+                >
+                  <span className="structure-swatch" />
+                  <span className="structure-btn-text">
+                    <span className="structure-abbr">{s.abbr}</span>
+                    <span className="structure-name">{L(s.label)}</span>
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+
+      <section className="anatomy-section anatomy-detail" aria-live="polite">
+        <h2 className="anatomy-section-title">
+          {selected ? L(selected.label) : t('selection')}
+        </h2>
+        {selected ? (
+          <>
+            <p className="anatomy-detail-abbr">{selected.abbr}</p>
+            <p className="anatomy-detail-body">{L(selected.description)}</p>
+          </>
+        ) : (
+          <p className="anatomy-detail-body anatomy-detail-body--muted">
+            {t('selectionHint')}
+          </p>
+        )}
+      </section>
     </aside>
   )
 }

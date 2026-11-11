@@ -3,18 +3,23 @@ import { OrbitControls } from '@react-three/drei'
 import { useMemo } from 'react'
 import type { HeartVersion } from '../../anatomy/heartVersions'
 import type { HeartStructureId } from '../../anatomy/types'
-import type { ConductionState, LeadName } from '../../ecg/types'
+import type { ConductionState, CyclePlan, LeadName } from '../../ecg/types'
 import { useLanguage } from '../../i18n'
+import type { PhysiologicalEvent } from '../../sim/events'
 import OrientationCube, {
   CameraSync,
+  OrientationLegend,
 } from '../OrientationCube'
+import HeartVersionToggle from './HeartVersionToggle'
 import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
 import AnatomicalHeart from './AnatomicalHeart'
+import ConductionTimeline from './ConductionTimeline'
 
 interface CardiacAnatomyViewportProps {
   heartVersion: HeartVersion
+  onHeartVersionChange: (v: HeartVersion) => void
   selectedStructureId: HeartStructureId | null
   onSelectStructure: (id: HeartStructureId | null) => void
   selectedLead: LeadName | null
@@ -22,7 +27,12 @@ interface CardiacAnatomyViewportProps {
   myocardiumOpacity: number
   showLabels: boolean
   conduction: ConductionState
-  showConductionPath: boolean
+  activeEvent: PhysiologicalEvent | null
+  phaseMs: number
+  elapsed: number
+  timeScale: number
+  rateBpm: number
+  plan: CyclePlan
   completeBlock: boolean
 }
 
@@ -34,6 +44,7 @@ interface CardiacAnatomyViewportProps {
  */
 export default function CardiacAnatomyViewport({
   heartVersion,
+  onHeartVersionChange,
   selectedStructureId,
   onSelectStructure,
   selectedLead,
@@ -41,7 +52,12 @@ export default function CardiacAnatomyViewport({
   myocardiumOpacity,
   showLabels,
   conduction,
-  showConductionPath,
+  activeEvent,
+  phaseMs,
+  elapsed,
+  timeScale,
+  rateBpm,
+  plan,
   completeBlock,
 }: CardiacAnatomyViewportProps) {
   const { t } = useLanguage()
@@ -62,8 +78,8 @@ export default function CardiacAnatomyViewport({
   const isV3 = heartVersion === 'v3'
   const isSource = heartVersion === 'anatomy'
   const camera = isV3
-    ? { position: [0.12, 0.28, 6.5] as [number, number, number], fov: 40 }
-    : { position: [3.2, 1.1, 4.9] as [number, number, number], fov: 40 }
+    ? { position: [0.12, 0.28, 4.1] as [number, number, number], fov: 40 }
+    : { position: [2.8, 1.2, 3.6] as [number, number, number], fov: 40 }
 
   const clearSelection = () => {
     onSelectLead(null)
@@ -71,116 +87,145 @@ export default function CardiacAnatomyViewport({
   }
 
   return (
-    <div className="heart-viewer">
-      <div className="anatomy-viewport" role="group" aria-label={t('heartVersionGroup')}>
-        <Canvas
-          key={heartVersion}
-          shadows={false}
-          dpr={[1, 1.5]}
-          camera={{ ...camera, near: 0.1, far: 40 }}
-          gl={{
-            antialias: true,
-            alpha: false,
-            powerPreference: 'default',
-            failIfMajorPerformanceCaveat: false,
-          }}
-          onCreated={({ gl }) => {
-            const canvas = gl.domElement
-            const onLost = (e: Event) => {
-              e.preventDefault()
-              console.warn('[ECG] WebGL context lost — will restore')
-            }
-            const onRestored = () => {
-              console.warn('[ECG] WebGL context restored')
-            }
-            canvas.addEventListener('webglcontextlost', onLost, false)
-            canvas.addEventListener('webglcontextrestored', onRestored, false)
-          }}
-          onPointerMissed={clearSelection}
-        >
-          <color
-            attach="background"
-            args={[
-              isV3
-                ? '#0a1018'
-                : heartVersion === 'v2'
-                  ? '#0c121a'
-                  : isSource
-                    ? '#0b1219'
-                    : '#070d14',
-            ]}
-          />
+    <div
+      className="anatomy-viewport"
+      role="img"
+      aria-label={`Interactive 3D cardiac anatomy (${heartVersion})`}
+    >
+      <Canvas
+        key={heartVersion}
+        shadows={false}
+        dpr={[1, 1.5]}
+        camera={{ ...camera, near: 0.1, far: 40 }}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'default',
+          failIfMajorPerformanceCaveat: false,
+        }}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement
+          const onLost = (e: Event) => {
+            e.preventDefault()
+            console.warn('[ECG] WebGL context lost — will restore')
+          }
+          const onRestored = () => {
+            console.warn('[ECG] WebGL context restored')
+          }
+          canvas.addEventListener('webglcontextlost', onLost, false)
+          canvas.addEventListener('webglcontextrestored', onRestored, false)
+        }}
+        onPointerMissed={clearSelection}
+      >
+        <color
+          attach="background"
+          args={[
+            isV3
+              ? '#0a1018'
+              : heartVersion === 'v2'
+                ? '#0c121a'
+                : isSource
+                  ? '#0b1219'
+                  : '#070d14',
+          ]}
+        />
 
-          <ambientLight intensity={0.95} />
-          <directionalLight position={[3.2, 4.5, 2.8]} intensity={1.8} />
-          <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.55} />
-          <directionalLight
-            position={[0.5, 1.5, 3.5]}
-            intensity={0.65}
-            color="#ffe8dc"
-          />
-          <pointLight
-            position={[0.2, 0.8, 1.5]}
-            intensity={0.45 + conduction.sa * 0.7}
-            color="#7dffb0"
-          />
+        <ambientLight intensity={0.95} />
+        <directionalLight position={[3.2, 4.5, 2.8]} intensity={1.8} />
+        <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.55} />
+        <directionalLight
+          position={[0.5, 1.5, 3.5]}
+          intensity={0.65}
+          color="#ffe8dc"
+        />
+        <pointLight
+          position={[0.2, 0.8, 1.5]}
+          intensity={0.45 + conduction.sa * 0.7}
+          color="#7dffb0"
+        />
 
-          {heartVersion === 'anatomy' && (
-            <AnatomicalHeart
-              selectedId={selectedStructureId}
-              myocardiumOpacity={myocardiumOpacity}
-              showLabels={showLabels}
-              onSelect={onSelectStructure}
-              conduction={conduction}
-            />
-          )}
-          {heartVersion === 'v1' && (
-            <group scale={1.08} position={[0, 0.05, 0]}>
-              <HeartConductionV1 state={conduction} showLabels={showLabels}
-                showConductionPath={showConductionPath} completeBlock={completeBlock} />
-            </group>
-          )}
-          {heartVersion === 'v2' && (
-            <group scale={1.05} position={[0, 0.05, 0]}>
-              <HeartAnatomyV2
-                state={conduction}
-                selectedLead={selectedLead}
-                onSelectLead={onSelectLead}
-                layers={anatomyLayers}
-              />
-            </group>
-          )}
-          {heartVersion === 'v3' && (
-            <HeartTorsoV3
+        {heartVersion === 'anatomy' && (
+          <AnatomicalHeart
+            selectedId={selectedStructureId}
+            myocardiumOpacity={myocardiumOpacity}
+            showLabels={showLabels}
+            onSelect={onSelectStructure}
+            conduction={conduction}
+          />
+        )}
+        {heartVersion === 'v1' && (
+          <group scale={1.08} position={[0, 0.05, 0]}>
+            <HeartConductionV1 state={conduction} showLabels={showLabels}
+              showConductionPath={!plan.ventricularFibrillation && !plan.ventricularFlutter
+                && !plan.fibrillatoryBaseline && !plan.flutterBaseline && !plan.irregular}
+              completeBlock={completeBlock} />
+          </group>
+        )}
+        {heartVersion === 'v2' && (
+          <group scale={1.05} position={[0, 0.05, 0]}>
+            <HeartAnatomyV2
               state={conduction}
               selectedLead={selectedLead}
               onSelectLead={onSelectLead}
-              layers={torsoLayers}
+              layers={anatomyLayers}
             />
-          )}
-
-          <mesh
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, isV3 ? -2.16 : -1.86, 0]}
-            onClick={clearSelection}
-          >
-            <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
-            <meshStandardMaterial color="#0a1018" roughness={1} metalness={0} />
-          </mesh>
-
-          <OrbitControls
-            makeDefault
-            enableDamping
-            dampingFactor={0.08}
-            minDistance={isV3 ? 2.6 : 2.0}
-            maxDistance={isV3 ? 10 : 8}
-            target={isV3 ? [0, 0.02, 0] : [0, -0.15, 0]}
-            enablePan={false}
+          </group>
+        )}
+        {heartVersion === 'v3' && (
+          <HeartTorsoV3
+            state={conduction}
+            selectedLead={selectedLead}
+            onSelectLead={onSelectLead}
+            layers={torsoLayers}
           />
+        )}
 
-          <CameraSync />
-        </Canvas>
-        <div className="heart-orientation-cube"><OrientationCube /></div>
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, isV3 ? -2.16 : -1.86, 0]}
+          onClick={clearSelection}
+        >
+          <circleGeometry args={[isV3 ? 3.2 : 2.6, 48]} />
+          <meshStandardMaterial color="#0a1018" roughness={1} metalness={0} />
+        </mesh>
+
+        <OrbitControls
+          makeDefault
+          enableDamping
+          dampingFactor={0.08}
+          minDistance={isV3 ? 2.6 : 2.0}
+          maxDistance={isV3 ? 10 : 8}
+          target={isV3 ? [0, 0.02, 0] : [0, -0.15, 0]}
+          enablePan={false}
+        />
+
+        <CameraSync />
+      </Canvas>
+
+      <div className="viewport-top-right">
+        <div className="viewport-controls-stack">
+          <OrientationLegend />
+          <HeartVersionToggle
+            heartVersion={heartVersion}
+            onHeartVersionChange={onHeartVersionChange}
+          />
+        </div>
+        <OrientationCube />
+      </div>
+
+      <ConductionTimeline
+        phaseMs={phaseMs}
+        active={activeEvent}
+        status={conduction.status}
+        elapsed={elapsed}
+        timeScale={timeScale}
+        rateBpm={rateBpm}
+        plan={plan}
+        state={conduction}
+      />
+
+      <div className="anatomy-viewport-hint" aria-hidden>
+        {isSource ? t('hintSource') : t('hintGlow')}
       </div>
     </div>
   )
