@@ -1,108 +1,70 @@
+import { useEffect, useMemo } from 'react'
+import * as THREE from 'three'
 import { HEART_STRUCTURES } from '../../anatomy/heartStructures'
 import type { HeartStructureId } from '../../anatomy/types'
 import type { ConductionState } from '../../ecg/types'
 import HeartStructureMesh from './HeartStructureMesh'
+import SourceLabels from './SourceLabels'
+import { cameraBridge } from '../OrientationCube'
 
-interface AnatomicalHeartProps {
+interface Props {
   selectedId: HeartStructureId | null
   myocardiumOpacity: number
   showLabels: boolean
   onSelect: (id: HeartStructureId | null) => void
-  /** Optional EP frame — chambers pulse from physiological events. */
   conduction?: ConductionState
 }
 
-function activationFor(
-  id: HeartStructureId,
-  state: ConductionState | undefined,
-): number {
-  if (!state) return 0
+function activationFor(id: HeartStructureId, s: ConductionState | undefined): number {
+  if (!s) return 0
   switch (id) {
-    case 'right_atrium':
-    case 'left_atrium':
-      return Math.max(state.sa, state.atria)
-    case 'septum':
-      return Math.max(state.his, state.bundle, state.ventricle * 0.45)
-    case 'right_ventricle':
-    case 'left_ventricle':
-    case 'apex':
-      return Math.max(state.ventricle, state.repol * 0.55, state.bundle * 0.35)
-    default:
-      return 0
+    case 'right_atrium': case 'left_atrium': return Math.max(s.atrialDepol, s.atria * 0.5)
+    case 'septum': return Math.abs(s.septalDepol)
+    case 'apex': return Math.abs(s.apicalDepol)
+    case 'right_ventricle': case 'left_ventricle':
+      return Math.max(Math.abs(s.apicalDepol), Math.abs(s.basalDepol), s.ventricle * 0.3)
   }
 }
 
-/**
- * Biological source model: macroscopic chambers + septum + apex.
- * Oriented in patient body coordinates for future ECG coupling.
- */
-export default function AnatomicalHeart({
-  selectedId,
-  myocardiumOpacity,
-  showLabels,
-  onSelect,
-  conduction,
-}: AnatomicalHeartProps) {
+export default function AnatomicalHeart({ selectedId, myocardiumOpacity, showLabels, onSelect, conduction }: Props) {
+  const cutaway = selectedId === 'septum'
+  useEffect(() => {
+    if (cutaway) cameraBridge.requestFace('A')
+  }, [cutaway])
   return (
-    <group
-      rotation={[0.22, -0.48, 0.08]}
-      position={[0, 0.15, 0]}
-      onClick={(e) => {
-        e.stopPropagation()
-      }}
-    >
-      <GreatVessels />
-
-      {HEART_STRUCTURES.map((def) => (
-        <HeartStructureMesh
-          key={def.id}
-          def={def}
+    <group>
+      <GreatVessels opacity={myocardiumOpacity} />
+      {HEART_STRUCTURES.map(def => (
+        <HeartStructureMesh key={def.id} def={def}
           selected={selectedId === def.id}
-          dimmed={selectedId !== null && selectedId !== def.id}
+          dimmed={selectedId !== null && selectedId !== def.id && !(cutaway && def.id.includes('ventricle'))}
           myocardiumOpacity={myocardiumOpacity}
-          showLabel={showLabels}
           activation={activationFor(def.id, conduction)}
-          onSelect={(id) => onSelect(selectedId === id ? null : id)}
-        />
+          repolarization={def.id.includes('ventricle') || def.id === 'apex' ? conduction?.repol : 0}
+          cutaway={cutaway}
+          onSelect={id => onSelect(selectedId === id ? null : id)} />
       ))}
+      {showLabels && <SourceLabels selectedId={selectedId} onSelect={onSelect} />}
     </group>
   )
 }
 
-/** Minimal aorta / pulmonary trunk cues — declarative materials (no shared mats). */
-function GreatVessels() {
-  return (
-    <group>
-      <mesh position={[-0.05, 1.05, -0.05]} rotation={[0.28, 0, 0.18]}>
-        <cylinderGeometry args={[0.11, 0.14, 0.55, 16]} />
-        <meshStandardMaterial
-          color="#e85a5a"
-          emissive="#c03030"
-          emissiveIntensity={0.4}
-          roughness={0.35}
-          metalness={0.12}
-        />
-      </mesh>
-      <mesh position={[0.22, 1.32, -0.12]} rotation={[0.05, 0.35, 1.15]}>
-        <torusGeometry args={[0.26, 0.085, 10, 20, Math.PI * 0.85]} />
-        <meshStandardMaterial
-          color="#e85a5a"
-          emissive="#c03030"
-          emissiveIntensity={0.4}
-          roughness={0.35}
-          metalness={0.12}
-        />
-      </mesh>
-      <mesh position={[0.14, 0.92, 0.16]} rotation={[-0.35, 0.15, -0.3]}>
-        <cylinderGeometry args={[0.09, 0.11, 0.4, 14]} />
-        <meshStandardMaterial
-          color="#5a8fc8"
-          emissive="#2a5a90"
-          emissiveIntensity={0.35}
-          roughness={0.38}
-          metalness={0.1}
-        />
-      </mesh>
-    </group>
-  )
+function Vessel({ points, color, radius, opacity }: {
+  points: [number, number, number][]; color: string; radius: number; opacity: number
+}) {
+  const curve = useMemo(() => new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p))), [points])
+  return <mesh>
+    <tubeGeometry args={[curve, 48, radius, 16, false]} />
+    <meshStandardMaterial color={color} roughness={0.7} transparent opacity={opacity} side={THREE.DoubleSide} />
+  </mesh>
+}
+const AORTA: [number, number, number][] = [[0.02, 0.43, -0.09], [0, 0.94, -0.14], [0.17, 1.31, -0.2], [0.44, 1.35, -0.29], [0.65, 1.09, -0.39], [0.64, 0.63, -0.42]]
+const PULMONARY: [number, number, number][] = [[-0.3, 0.36, 0.28], [-0.25, 0.78, 0.31], [-0.13, 1.03, 0.26], [-0.36, 1.16, 0.12]]
+const CAVA: [number, number, number][] = [[-0.55, 0.66, 0], [-0.6, 1.04, -0.02], [-0.62, 1.3, -0.05]]
+function GreatVessels({ opacity }: { opacity: number }) {
+  return <group>
+    <Vessel points={AORTA} color="#c77e77" radius={0.1} opacity={opacity} />
+    <Vessel points={PULMONARY} color="#759ba8" radius={0.115} opacity={opacity} />
+    <Vessel points={CAVA} color="#698b9d" radius={0.105} opacity={opacity} />
+  </group>
 }

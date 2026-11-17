@@ -109,8 +109,8 @@ export const UI = {
   stepRepol: { en: 'Repolarization', zh: '复极' },
 
   hintSource: {
-    en: 'Cube = model aspect you face · top H · bottom B · left L · right R · click to snap',
-    zh: '立方体=当前面对的模型方位 · 上H · 下B · 左L · 右R · 点击对齐',
+    en: 'Drag to rotate · select IVS to reveal the septum',
+    zh: '拖动旋转 · 选择 IVS 查看室间隔剖面',
   },
   hintGlow: {
     en: 'Cube = model aspect you face · top H · bottom B · left L · right R · click to snap',

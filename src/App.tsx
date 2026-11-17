@@ -154,7 +154,7 @@ export default function App() {
           />
         }
       />
-      <div className="pathology-workspace">
+      <div className={'pathology-workspace' + (heartVersion === 'anatomy' ? ' pathology-workspace--source' : '')}>
         <main className="anatomy-stage">
           <CardiacAnatomyViewport
             heartVersion={heartVersion}

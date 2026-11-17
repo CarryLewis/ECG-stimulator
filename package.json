@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "check:disease": "npx --yes tsx src/disease/selfCheck.ts",
-    "check:ecg": "npx --yes tsx src/ecg/validateMorphology.ts"
+    "check:ecg": "npx --yes tsx src/ecg/validateMorphology.ts",
+    "check:anatomy": "node --experimental-strip-types scripts/check-source-geometry.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

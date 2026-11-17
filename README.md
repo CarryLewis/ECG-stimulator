@@ -2,6 +2,10 @@
 
 Interactive 3D cardiac anatomy + physiology-driven disease packs that drive both the **heart activation model** and the **12-lead ECG**.
 
+## Source anatomy design preview / “源”视图设计预览
+
+This design branch adds a continuous ventricular silhouette, fixed-size leader labels, an IVS cutaway and separate visual feedback for selection and electrical activity. Run `npm run dev` and open **Src / 源**. See [the implementation and review notes](docs/source-heart-design.md). The published 2.0 source and the 1.0 archive remain separate.
+
 ## Versions / 版本
 
 - **1.0** · [Archived source / 归档源码](https://github.com/CarryLewis/ECG-stimulator/tree/release/1.0). Exact source of the original website demo at commit `00dd7e3`.

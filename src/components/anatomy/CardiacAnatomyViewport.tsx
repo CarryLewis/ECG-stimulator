@@ -16,6 +16,7 @@ import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
 import AnatomicalHeart from './AnatomicalHeart'
 import ConductionTimeline from './ConductionTimeline'
+import SourceFraming from './SourceFraming'
 
 interface CardiacAnatomyViewportProps {
   heartVersion: HeartVersion
@@ -60,7 +61,7 @@ export default function CardiacAnatomyViewport({
   plan,
   completeBlock,
 }: CardiacAnatomyViewportProps) {
-  const { t } = useLanguage()
+  const { t, L } = useLanguage()
   const anatomyLayers = useMemo(
     () => ({ walls: true as const, pins: showLabels }),
     [showLabels],
@@ -88,7 +89,7 @@ export default function CardiacAnatomyViewport({
 
   return (
     <div
-      className="anatomy-viewport"
+      className={'anatomy-viewport' + (isSource ? ' anatomy-viewport--source' : '')}
       role="img"
       aria-label={`Interactive 3D cardiac anatomy (${heartVersion})`}
     >
@@ -130,8 +131,8 @@ export default function CardiacAnatomyViewport({
           ]}
         />
 
-        <ambientLight intensity={0.95} />
-        <directionalLight position={[3.2, 4.5, 2.8]} intensity={1.8} />
+        <ambientLight intensity={isSource ? 0.65 : 0.95} />
+        <directionalLight position={[3.2, 4.5, 2.8]} intensity={isSource ? 1.4 : 1.8} />
         <directionalLight position={[-2.5, 1.2, -1.8]} intensity={0.55} />
         <directionalLight
           position={[0.5, 1.5, 3.5]}
@@ -140,7 +141,7 @@ export default function CardiacAnatomyViewport({
         />
         <pointLight
           position={[0.2, 0.8, 1.5]}
-          intensity={0.45 + conduction.sa * 0.7}
+          intensity={isSource ? 0 : 0.45 + conduction.sa * 0.7}
           color="#7dffb0"
         />
 
@@ -181,6 +182,7 @@ export default function CardiacAnatomyViewport({
         )}
 
         <mesh
+          visible={!isSource}
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, isV3 ? -2.16 : -1.86, 0]}
           onClick={clearSelection}
@@ -194,13 +196,22 @@ export default function CardiacAnatomyViewport({
           enableDamping
           dampingFactor={0.08}
           minDistance={isV3 ? 2.6 : 2.0}
-          maxDistance={isV3 ? 10 : 8}
+          maxDistance={isSource ? 18 : isV3 ? 10 : 8}
           target={isV3 ? [0, 0.02, 0] : [0, -0.15, 0]}
           enablePan={false}
         />
 
         <CameraSync />
+        {isSource && <SourceFraming />}
       </Canvas>
+
+      {isSource && <div className="source-view-caption">
+        <span>SOURCE / ANATOMY</span>
+        <strong>{L(selectedStructureId === 'septum'
+          ? { en: 'Septal cutaway', zh: '室间隔剖面' }
+          : { en: 'Cardiac anatomy', zh: '心脏解剖' })}</strong>
+        <small>{L({ en: 'Simplified teaching model', zh: '简化教学模型' })}</small>
+      </div>}
 
       <div className="viewport-top-right">
         <div className="viewport-controls-stack">
@@ -224,9 +235,18 @@ export default function CardiacAnatomyViewport({
         state={conduction}
       />
 
-      <div className="anatomy-viewport-hint" aria-hidden>
-        {isSource ? t('hintSource') : t('hintGlow')}
-      </div>
+      {isSource ? <div className="source-view-footer">
+        <div className="source-electrical-legend" aria-label={L({ en: 'Visual key', zh: '视觉图例' })}>
+          <span><i className="source-key--selected" />{L({ en: 'Selected', zh: '选中结构' })}</span>
+          <span><i className="source-key--depol" />{L({ en: 'Depolarization', zh: '除极' })}</span>
+          <span><i className="source-key--repol" />{L({ en: 'Repolarization', zh: '复极' })}</span>
+        </div>
+        {selectedStructureId === 'septum'
+          ? <button type="button" className="source-restore" onClick={() => onSelectStructure(null)}>
+              {L({ en: 'Close cutaway', zh: '关闭剖面，恢复外观' })}
+            </button>
+          : <p>{t('hintSource')}</p>}
+      </div> : <div className="anatomy-viewport-hint" aria-hidden>{t('hintGlow')}</div>}
     </div>
   )
 }
