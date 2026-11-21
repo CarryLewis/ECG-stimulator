@@ -15,6 +15,7 @@ import HeartConductionV1 from '../heart/HeartConductionV1'
 import HeartAnatomyV2 from '../heart/HeartAnatomyV2'
 import HeartTorsoV3 from '../heart/HeartTorsoV3'
 import AnatomicalHeart from './AnatomicalHeart'
+import AnatomicalHeartV1 from './AnatomicalHeartV1'
 import ConductionTimeline from './ConductionTimeline'
 import SourceFraming from './SourceFraming'
 
@@ -125,7 +126,7 @@ export default function CardiacAnatomyViewport({
               ? '#0a1018'
               : heartVersion === 'v2'
                 ? '#0c121a'
-                : isSource
+                : isSource || heartVersion === 'anatomy-v1'
                   ? '#0b1219'
                   : '#070d14',
           ]}
@@ -147,6 +148,15 @@ export default function CardiacAnatomyViewport({
 
         {heartVersion === 'anatomy' && (
           <AnatomicalHeart
+            selectedId={selectedStructureId}
+            myocardiumOpacity={myocardiumOpacity}
+            showLabels={showLabels}
+            onSelect={onSelectStructure}
+            conduction={conduction}
+          />
+        )}
+        {heartVersion === 'anatomy-v1' && (
+          <AnatomicalHeartV1
             selectedId={selectedStructureId}
             myocardiumOpacity={myocardiumOpacity}
             showLabels={showLabels}
@@ -206,11 +216,10 @@ export default function CardiacAnatomyViewport({
       </Canvas>
 
       {isSource && <div className="source-view-caption">
-        <span>SOURCE / ANATOMY</span>
-        <strong>{L(selectedStructureId === 'septum'
-          ? { en: 'Septal cutaway', zh: '室间隔剖面' }
-          : { en: 'Cardiac anatomy', zh: '心脏解剖' })}</strong>
-        <small>{L({ en: 'Simplified teaching model', zh: '简化教学模型' })}</small>
+        <strong>{t('versionAnatomyShort')}</strong>
+        <small>{L(selectedStructureId === 'septum'
+          ? { en: 'Septal cutaway · simplified teaching model', zh: '室间隔剖面 · 简化教学模型' }
+          : { en: 'Cardiac anatomy · simplified teaching model', zh: '心脏解剖 · 简化教学模型' })}</small>
       </div>}
 
       <div className="viewport-top-right">

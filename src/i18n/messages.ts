@@ -52,12 +52,15 @@ export const UI = {
 
   heartVersion: { en: 'Heart version', zh: '心脏视图' },
   heartVersionGroup: { en: 'Heart model version', zh: '心脏模型版本' },
-  versionAnatomyShort: { en: 'Src', zh: '源' },
-  versionAnatomyTitle: { en: 'Source chambers', zh: '源心腔模型' },
+  versionAnatomyShort: { en: 'Source 2.0', zh: '源 2.0' },
+  versionAnatomyTitle: { en: 'Source 2.0 — cardiac anatomy', zh: '源 2.0 — 心脏解剖模型' },
   versionAnatomyHint: {
-    en: 'Selectable RA/LA/RV/LV/septum/apex — biological source model',
-    zh: '可选右房/左房/右室/左室/室间隔/心尖 — 生物学源模型',
+    en: 'Continuous ventricular geometry, readable labels and a septal cutaway',
+    zh: '连续心室轮廓、引线标注与室间隔剖面',
   },
+  versionAnatomyV1Short: { en: 'Source 1.0', zh: '源 1.0' },
+  versionAnatomyV1Title: { en: 'Source 1.0 — original model', zh: '源 1.0 — 原版心腔模型' },
+  versionAnatomyV1Hint: { en: 'Preserved original chamber geometry and interaction', zh: '保留原有心腔形态、标注与交互' },
   versionV1Short: { en: 'V1', zh: 'V1' },
   versionV1Title: { en: 'Conduction schematic', zh: '传导示意图' },
   versionV1Hint: {

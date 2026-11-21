@@ -1327,7 +1327,7 @@ button.ecg-live-badge {
 }
 .source-view-caption > span { font: 9px var(--font-mono); letter-spacing: .2em; color: #73b3ad; }
 .source-view-caption strong { font: 18px var(--font-display); color: #d8dfdf; }
-.source-view-caption small { font-size: 10px; color: #71848e; }
+.source-view-caption small { font-size: 10px; color: #9dafb9; white-space: normal; }
 .source-label-layer { position: relative; width: 100%; height: 100%; pointer-events: none; }
 .source-label-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .source-label-lines path { stroke: #8ca6b0; stroke-opacity: .4; stroke-width: 1; fill: none; }
@@ -1356,7 +1356,7 @@ button.ecg-live-badge {
 .source-key--selected { border: 1px solid #b7f4e9; }
 .source-key--depol { background: #e7b96a; }
 .source-key--repol { background: #739ee8; }
-.source-view-footer p { font-size: 10px; color: #6f8a97; margin: 7px 0 0; }
+.source-view-footer p { font-size: 10px; color: #9dafb9; margin: 7px 0 0; }
 .source-restore { margin-top: 7px; background: transparent; border: 0; border-bottom: 1px solid #51756e; color: #a7e7da; font-size: 11px; cursor: pointer; padding: 1px 3px; }
 
 .anatomy-viewport--source { container-type: inline-size; container-name: source-model; }
@@ -1383,7 +1383,7 @@ button.ecg-live-badge {
   .orientation-cube-scene { height: 56px; }
   .orientation-cube { scale: .52; }
   .orientation-cube-status { font-size: 8px; }
-  .anatomy-viewport--source .conduction-timeline { top: 100px; bottom: auto; left: 12px; width: calc(100% - 24px); padding: 8px 10px; }
+  .anatomy-viewport--source .conduction-timeline { top: 128px; bottom: auto; left: 12px; width: calc(100% - 24px); padding: 8px 10px; }
   .conduction-timeline-head { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 0; }
   .conduction-timeline-head strong { font-size: 10px; }
   .conduction-timeline-meta { font-size: 9px; }
@@ -1391,8 +1391,14 @@ button.ecg-live-badge {
   .conduction-timeline-status { font-size: 10px; margin-top: 4px; }
 }
 @container source-model (max-width: 360px) {
-  .source-view-caption { top: 103px; left: 12px; width: calc(100% - 112px); display: grid; grid-template-columns: max-content 1fr; align-items: center; gap: 3px 7px; }
+  .source-view-caption { top: 131px; left: 12px; width: calc(100% - 112px); align-items: flex-start; gap: 3px; }
   .source-view-caption > span { font-size: 7px; letter-spacing: .08em; }
   .source-view-caption small { font-size: 8px; grid-column: 1 / -1; }
-  .anatomy-viewport--source .conduction-timeline { top: 142px; }
+  .anatomy-viewport--source .conduction-timeline { top: 170px; }
 }
+
+/* Model versions remain readable in the existing corner, including on phones. */
+.heart-version-toggle--sources { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
+.heart-version-toggle--sources .heart-version-btn { grid-column: span 2; white-space: nowrap; }
+.heart-version-toggle--sources [data-heart-version='anatomy'],
+.heart-version-toggle--sources [data-heart-version='anatomy-v1'] { grid-column: span 3; }

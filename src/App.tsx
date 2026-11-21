@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { HeartStructureId } from './anatomy/types'
-import type { HeartVersion } from './anatomy/heartVersions'
+import { heartVersionFromSearch, type HeartVersion } from './anatomy/heartVersions'
 import type { LeadName } from './ecg/types'
 import AnatomyControlPanel from './components/anatomy/AnatomyControlPanel'
 import CardiacAnatomyViewport from './components/anatomy/CardiacAnatomyViewport'
@@ -60,7 +60,7 @@ function resolveScenario(scenarioId: string, params: DiseaseParamValues) {
 
 export default function App() {
   const { t, L, locale } = useLanguage()
-  const [heartVersion, setHeartVersion] = useState<HeartVersion>('v1')
+  const [heartVersion, setHeartVersion] = useState<HeartVersion>(() => heartVersionFromSearch(window.location.search))
   const [selectedId, setSelectedId] = useState<HeartStructureId | null>(null)
   const [selectedLead, setSelectedLead] = useState<LeadName | null>(null)
   const [myocardiumOpacity, setMyocardiumOpacity] = useState(DEFAULT_OPACITY)
@@ -87,7 +87,7 @@ export default function App() {
   function selectStructure(id: HeartStructureId | null) {
     setSelectedId(id)
     if (id) {
-      setHeartVersion('anatomy')
+      if (heartVersion !== 'anatomy-v1') setHeartVersion('anatomy')
       setSelectedLead(null)
     }
   }
@@ -102,7 +102,7 @@ export default function App() {
 
   function changeOpacity(opacity: number) {
     setMyocardiumOpacity(opacity)
-    setHeartVersion('anatomy')
+    if (heartVersion !== 'anatomy-v1') setHeartVersion('anatomy')
   }
 
   const handleScenarioChange = (id: string) => {

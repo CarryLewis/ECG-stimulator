@@ -10,12 +10,12 @@ export default function SourceFraming() {
     if (!(camera instanceof PerspectiveCamera)) return
     const narrow = size.width <= 900
     const leftReserve = size.width >= 1000 ? 320 : 230
-    const usableHeight = Math.max(150, size.height - (size.width <= 360 ? 310 : narrow ? 260 : 124))
+    const usableHeight = Math.max(150, size.height - (size.width <= 360 ? 338 : narrow ? 288 : 124))
     const usableWidth = Math.max(140, size.width - (narrow ? 164 : leftReserve + 360))
     const pixelsPerUnit = Math.min(usableHeight / 2.75, usableWidth / 1.9)
     const distance = size.height / (2 * Math.tan(camera.fov * Math.PI / 360) * pixelsPerUnit)
     const centerX = narrow ? size.width * 0.5 : (leftReserve + size.width - 190) / 2
-    const centerY = narrow ? (size.height + (size.width <= 360 ? 100 : 50)) / 2 : size.height * 0.5
+    const centerY = narrow ? (size.height + (size.width <= 360 ? 128 : 78)) / 2 : size.height * 0.5
     const orbit = controls as OrbitControls | null
     orbit?.target.set(0, 0.1, 0)
     camera.position.set(0.2, 0.3, distance)

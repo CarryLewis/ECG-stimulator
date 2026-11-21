@@ -32,7 +32,7 @@ export default function SourceLabels({ selectedId, onSelect }: Props) {
     const xs = projected.map(v => (1 + v.x) * size.width / 2)
     center.set(0, 0.1, 0).project(camera)
     const cx = (1 + center.x) * size.width / 2
-    const minY = size.width <= 360 ? 200 : size.width <= 900 ? 156 : 94
+    const minY = size.width <= 360 ? 228 : size.width <= 900 ? 184 : 94
     const maxY = size.height - 156
     const span = Math.min(Math.max(160, Math.max(...ys) - Math.min(...ys)), maxY - minY)
     const ty = Math.max(minY, Math.min(maxY - span, (Math.max(...ys) + Math.min(...ys) - span) / 2))

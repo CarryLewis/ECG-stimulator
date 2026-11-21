@@ -2,16 +2,21 @@
 
 Interactive 3D cardiac anatomy + physiology-driven disease packs that drive both the **heart activation model** and the **12-lead ECG**.
 
-## Source anatomy design preview / “源”视图设计预览
+## Source models / 源模型版本
 
-This design branch adds a continuous ventricular silhouette, fixed-size leader labels, an IVS cutaway and separate visual feedback for selection and electrical activity. Run `npm run dev` and open **Src / 源**. See [the implementation and review notes](docs/source-heart-design.md). The published 2.0 source and the 1.0 archive remain separate.
+The simulator remains **2.0**. Its two source-heart models are versioned separately:
+
+- **源 2.0 / Source 2.0**: continuous ventricular geometry, fixed-size leader labels, an IVS cutaway and separate selection/electrical feedback. [Open Source 2.0](https://carrylewis.com/ecg-simulator/?view=source-2).
+- **源 1.0 / Source 1.0**: preserved original chamber geometry, colors, labels and interaction. [Open Source 1.0](https://carrylewis.com/ecg-simulator/?view=source-1).
+
+Both remain available in the original heart-view controls, alongside V1 (conduction schematic), V2 (lead atlas) and V3 (torso). See [the model and verification notes](docs/source-heart-design.md). The simulator 1.0 archive is separate from the Source 1.0 model.
 
 ## Versions / 版本
 
 - **1.0** · [Archived source / 归档源码](https://github.com/CarryLewis/ECG-stimulator/tree/release/1.0). Exact source of the original website demo at commit `00dd7e3`.
-- **2.0** · Built directly from 1.0 with the original settings, controls, defaults, labels, camera framing, and layout. Interaction updates link ECG lead selection to the heart, locate selected chambers, and let the existing live badge pause and resume both views. All leads share one 250 Hz time grid. Pathological rhythm feedback follows the active model.
+- **2.0** · Built directly from 1.0 with the original sidebar settings, controls, defaults and twelve-lead layout, with the new Source 2.0 model and the preserved Source 1.0 model. Interaction updates link ECG lead selection to the heart, locate selected chambers, and let the existing live badge pause and resume both views. All leads share one 250 Hz time grid. Pathological rhythm feedback follows the active model.
 
-点击 ECG 上方原有的实时状态标记可同步暂停或继续。点击导联波形可定位到心脏中的对应导联，点击心腔结构或调整透明度会切换到原有的源心腔视图。
+点击 ECG 上方原有的实时状态标记可同步暂停或继续。点击导联波形可定位到心脏中的对应导联，点击心腔结构或调整透明度会打开源模型；已经选择源 1.0 时会保留在旧模型中。
 
 The simulator illustrates electrical activity for education. Use the on-screen time and amplitude scale to read the simulated waveform.
 
@@ -65,7 +70,7 @@ Diseases **never** hardcode lead millivolts. Packs emit `PhysiologicalEffects` �
 
 ## Website embed auto-sync
 
-The 2.0 branch is separate from the website deployment branches. The site can adopt 2.0 by pinning its ECG embed to the tested commit on `release/2.0`.
+The website pins a tested commit from `release/2.0` in `Carry-website/ecg-embed.ref`. Updating that pin publishes the corresponding app and both source models through the existing GitHub Pages workflow.
 
 Pushes to `main` or `cursor/pathology-ecg-models-fab9` trigger
 `notify-website.yml`, which asks Carry-website to rebuild

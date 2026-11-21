@@ -10,6 +10,11 @@ const VERSION_COPY = {
     title: 'versionAnatomyTitle',
     hint: 'versionAnatomyHint',
   },
+  'anatomy-v1': {
+    short: 'versionAnatomyV1Short',
+    title: 'versionAnatomyV1Title',
+    hint: 'versionAnatomyV1Hint',
+  },
   v1: {
     short: 'versionV1Short',
     title: 'versionV1Title',
@@ -32,7 +37,7 @@ interface HeartVersionToggleProps {
   onHeartVersionChange: (v: HeartVersion) => void
 }
 
-/** Src / V1 / V2 / V3 switcher — lives on the 3D viewport top-right bar. */
+/** Source model versions and existing V1 / V2 / V3 views share the original corner. */
 export default function HeartVersionToggle({
   heartVersion,
   onHeartVersionChange,
@@ -47,13 +52,14 @@ export default function HeartVersionToggle({
     >
       <span className="heart-version-viewport-label">{t('heartVersion')}</span>
       <div
-        className="heart-version-toggle heart-version-toggle--compact"
+        className="heart-version-toggle heart-version-toggle--compact heart-version-toggle--sources"
         role="group"
         aria-label={t('heartVersionGroup')}
       >
         {HEART_VERSIONS.map((v) => (
           <button
             key={v.id}
+            data-heart-version={v.id}
             type="button"
             className={
               'heart-version-btn' +
